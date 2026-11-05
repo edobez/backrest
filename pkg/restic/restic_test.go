@@ -505,6 +505,101 @@ func TestResticForgetMultiGroup(t *testing.T) {
 	}
 }
 
+func TestResticForgetNoGroupingUniqueTags(t *testing.T) {
+	t.Parallel()
+
+	repoDir := t.TempDir()
+	r := NewRepo(helpers.ResticBinary(t), repoDir, WithFlags("--no-cache"), WithEnv("RESTIC_PASSWORD=test"))
+	if err := r.Init(context.Background()); err != nil {
+		t.Fatalf("failed to init repo: %v", err)
+	}
+
+	testData := helpers.CreateTestData(t)
+
+	// Snapshots each carry a unique tag, e.g. as created by an external script.
+	var ids []string
+	for i := 0; i < 5; i++ {
+		output, err := r.Backup(context.Background(), []string{testData}, nil, WithTags(fmt.Sprintf("external-%d", i)))
+		if err != nil {
+			t.Fatalf("failed to backup snapshot %d: %v", i, err)
+		}
+		ids = append(ids, output.SnapshotId)
+	}
+
+	// With --group-by '' all snapshots form one group, so retention applies repo-wide.
+	res, err := r.Forget(context.Background(), &RetentionPolicy{KeepLastN: 2}, WithFlags("--group-by", ""))
+	if err != nil {
+		t.Fatalf("failed to forget snapshots: %v", err)
+	}
+
+	if len(res.Keep) != 2 {
+		t.Errorf("wanted 2 kept snapshots, got: %d", len(res.Keep))
+	}
+	if len(res.Remove) != 3 {
+		t.Errorf("wanted 3 removed snapshots, got: %d", len(res.Remove))
+	}
+	keptIDs := make(map[string]bool)
+	for _, s := range res.Keep {
+		keptIDs[s.Id] = true
+	}
+	for _, id := range ids[3:] {
+		if !keptIDs[id] {
+			t.Errorf("expected snapshot %v to be kept", id)
+		}
+	}
+}
+
+func TestResticForgetUntaggedGroupByHostPaths(t *testing.T) {
+	t.Parallel()
+
+	repoDir := t.TempDir()
+	r := NewRepo(helpers.ResticBinary(t), repoDir, WithFlags("--no-cache"), WithEnv("RESTIC_PASSWORD=test"))
+	if err := r.Init(context.Background()); err != nil {
+		t.Fatalf("failed to init repo: %v", err)
+	}
+
+	pathA := helpers.CreateTestData(t)
+	pathB := helpers.CreateTestData(t)
+
+	// Untagged snapshots of two different paths, e.g. created by a plain `restic backup`.
+	var idsA, idsB []string
+	for i := 0; i < 3; i++ {
+		outA, err := r.Backup(context.Background(), []string{pathA}, nil)
+		if err != nil {
+			t.Fatalf("failed to backup path A snapshot %d: %v", i, err)
+		}
+		idsA = append(idsA, outA.SnapshotId)
+		outB, err := r.Backup(context.Background(), []string{pathB}, nil)
+		if err != nil {
+			t.Fatalf("failed to backup path B snapshot %d: %v", i, err)
+		}
+		idsB = append(idsB, outB.SnapshotId)
+	}
+
+	// restic's default grouping: one group per (host, paths) combination.
+	res, err := r.Forget(context.Background(), &RetentionPolicy{KeepLastN: 1}, WithFlags("--group-by", "host,paths"))
+	if err != nil {
+		t.Fatalf("failed to forget snapshots: %v", err)
+	}
+
+	if len(res.Keep) != 2 {
+		t.Errorf("wanted 2 kept snapshots (1 per path), got: %d", len(res.Keep))
+	}
+	if len(res.Remove) != 4 {
+		t.Errorf("wanted 4 removed snapshots (2 per path), got: %d", len(res.Remove))
+	}
+	keptIDs := make(map[string]bool)
+	for _, s := range res.Keep {
+		keptIDs[s.Id] = true
+	}
+	if !keptIDs[idsA[2]] {
+		t.Errorf("expected latest path A snapshot %v to be kept", idsA[2])
+	}
+	if !keptIDs[idsB[2]] {
+		t.Errorf("expected latest path B snapshot %v to be kept", idsB[2])
+	}
+}
+
 func TestForgetSnapshotId(t *testing.T) {
 	t.Parallel()
 

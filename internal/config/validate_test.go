@@ -198,6 +198,29 @@ func TestValidateRepoForgetPolicy(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "forget policy with group by none",
+			repo: &v1.Repo{
+				Id: "repo1", Uri: "file:///tmp/repo", Guid: validGUID,
+				ForgetPolicy: &v1.ForgetPolicy{
+					Schedule:  &v1.Schedule{Schedule: &v1.Schedule_MaxFrequencyDays{MaxFrequencyDays: 1}},
+					Retention: &v1.RetentionPolicy{Policy: &v1.RetentionPolicy_PolicyKeepLastN{PolicyKeepLastN: 7}},
+					GroupBy:   v1.ForgetPolicy_GROUP_BY_NONE,
+				},
+			},
+		},
+		{
+			name: "forget policy with invalid group by",
+			repo: &v1.Repo{
+				Id: "repo1", Uri: "file:///tmp/repo", Guid: validGUID,
+				ForgetPolicy: &v1.ForgetPolicy{
+					Schedule:  &v1.Schedule{Schedule: &v1.Schedule_MaxFrequencyDays{MaxFrequencyDays: 1}},
+					Retention: &v1.RetentionPolicy{Policy: &v1.RetentionPolicy_PolicyKeepLastN{PolicyKeepLastN: 7}},
+					GroupBy:   v1.ForgetPolicy_GroupBy(99),
+				},
+			},
+			wantErr: true,
+		},
+		{
 			name: "forget policy with empty time bucketed retention",
 			repo: &v1.Repo{
 				Id: "repo1", Uri: "file:///tmp/repo", Guid: validGUID,

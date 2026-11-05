@@ -64,7 +64,8 @@ func NewOneoffForgetTask(repoProto *v1.Repo, planID string, flowID int64, at tim
 }
 
 // ScheduledForgetTask is a repo-level forget task that runs on a schedule.
-// It applies the repo's forget policy retention to all snapshots, grouped by tags.
+// It applies the repo's forget policy retention to all snapshots in the repo, grouped
+// according to the policy's GroupBy setting (tags by default).
 type ScheduledForgetTask struct {
 	BaseTask
 	force  bool
@@ -149,8 +150,9 @@ func (t *ScheduledForgetTask) Run(ctx context.Context, st ScheduledTask, runner 
 		return NotifyError(ctx, runner, t.Name(), fmt.Errorf("get repo %q: %w", t.RepoID(), err), v1.Hook_CONDITION_FORGET_ERROR)
 	}
 
-	err = forgetHelper(ctx, st, runner, repoProto.GetForgetPolicy().GetRetention(),
-		restic.WithFlags("--group-by", "tags"),
+	policy := repoProto.GetForgetPolicy()
+	err = forgetHelper(ctx, st, runner, policy.GetRetention(),
+		restic.WithFlags("--group-by", groupByFlag(policy.GetGroupBy())),
 	)
 	if err != nil {
 		return err
@@ -162,6 +164,22 @@ func (t *ScheduledForgetTask) Run(ctx context.Context, st ScheduledTask, runner 
 	}
 
 	return nil
+}
+
+// groupByFlag returns the value for restic's `forget --group-by` flag for the given policy setting.
+func groupByFlag(groupBy v1.ForgetPolicy_GroupBy) string {
+	switch groupBy {
+	case v1.ForgetPolicy_GROUP_BY_NONE:
+		return ""
+	case v1.ForgetPolicy_GROUP_BY_HOST:
+		return "host"
+	case v1.ForgetPolicy_GROUP_BY_HOST_PATHS:
+		return "host,paths"
+	case v1.ForgetPolicy_GROUP_BY_HOST_TAGS:
+		return "host,tags"
+	default:
+		return "tags"
+	}
 }
 
 // forgetHelper contains the shared logic for running a forget operation.

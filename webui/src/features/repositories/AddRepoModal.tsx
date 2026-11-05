@@ -14,6 +14,7 @@ import { useShowModal } from "../../components/common/ModalManager";
 import {
   CommandPrefix_CPUNiceLevel,
   CommandPrefix_IONiceLevel,
+  ForgetPolicy_GroupBy,
   Repo,
   RepoSchema,
   Schedule_Clock,
@@ -114,6 +115,7 @@ const repoDefaults = create(RepoSchema, {
         },
       },
     },
+    groupBy: ForgetPolicy_GroupBy.TAGS,
   },
   commandPrefix: {
     ioNice: CommandPrefix_IONiceLevel.IO_DEFAULT,
@@ -700,6 +702,34 @@ export const AddRepoModal = ({
     },
   ];
 
+  const forgetGroupByOptions: EnumOption<string>[] = [
+    {
+      label: "Tags",
+      value: "GROUP_BY_TAGS",
+      description: m.add_repo_modal_forget_group_by_tags(),
+    },
+    {
+      label: "None",
+      value: "GROUP_BY_NONE",
+      description: m.add_repo_modal_forget_group_by_none(),
+    },
+    {
+      label: "Host",
+      value: "GROUP_BY_HOST",
+      description: m.add_repo_modal_forget_group_by_host(),
+    },
+    {
+      label: "Host + Paths",
+      value: "GROUP_BY_HOST_PATHS",
+      description: m.add_repo_modal_forget_group_by_host_paths(),
+    },
+    {
+      label: "Host + Tags",
+      value: "GROUP_BY_HOST_TAGS",
+      description: m.add_repo_modal_forget_group_by_host_tags(),
+    },
+  ];
+
   const cpuNiceOptions: EnumOption<string>[] = [
     {
       label: "CPU_DEFAULT",
@@ -1076,17 +1106,39 @@ export const AddRepoModal = ({
                 {(() => {
                   const sched = getField(["forgetPolicy", "schedule"]);
                   return sched && !sched.disabled ? (
-                    <Field
-                      label={m.add_repo_modal_retention_policy_label()}
-                      helperText={m.add_repo_modal_retention_policy_help()}
-                    >
-                      <RetentionPolicyView
-                        retention={getField(["forgetPolicy", "retention"])}
-                        onChange={(v: any) =>
-                          updateField(["forgetPolicy", "retention"], v)
-                        }
-                      />
-                    </Field>
+                    <>
+                      <Field
+                        label={m.add_repo_modal_retention_policy_label()}
+                        helperText={m.add_repo_modal_retention_policy_help()}
+                      >
+                        <RetentionPolicyView
+                          retention={getField(["forgetPolicy", "retention"])}
+                          onChange={(v: any) =>
+                            updateField(["forgetPolicy", "retention"], v)
+                          }
+                        />
+                      </Field>
+                      <Field
+                        label={m.add_repo_modal_field_forget_group_by()}
+                        helperText={m.add_repo_modal_field_forget_group_by_help()}
+                      >
+                        <EnumSelector
+                          options={forgetGroupByOptions}
+                          size="sm"
+                          value={
+                            getField(["forgetPolicy", "groupBy"]) ||
+                            "GROUP_BY_TAGS"
+                          }
+                          onChange={(val) =>
+                            updateField(
+                              ["forgetPolicy", "groupBy"],
+                              val as string,
+                            )
+                          }
+                          ariaLabel={m.add_repo_modal_field_forget_group_by()}
+                        />
+                      </Field>
+                    </>
                   ) : null;
                 })()}
               </Stack>

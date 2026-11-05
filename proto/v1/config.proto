@@ -166,8 +166,19 @@ message RetentionPolicy {
 }
 
 message ForgetPolicy {
+  // GroupBy controls how snapshots are grouped before the retention policy is applied.
+  // Maps to restic's `forget --group-by` flag; retention is applied independently per group.
+  enum GroupBy {
+    GROUP_BY_TAGS = 0; // group by tags (default). Maps to `--group-by tags`.
+    GROUP_BY_NONE = 1; // no grouping, retention applies to all snapshots in the repo. Maps to `--group-by ''`.
+    GROUP_BY_HOST = 2; // group by host. Maps to `--group-by host`.
+    GROUP_BY_HOST_PATHS = 3; // group by host and paths (restic's default). Maps to `--group-by host,paths`.
+    GROUP_BY_HOST_TAGS = 4; // group by host and tags. Maps to `--group-by host,tags`.
+  }
+
   Schedule schedule = 1 [json_name="schedule"];
   RetentionPolicy retention = 2 [json_name="retention"];
+  GroupBy group_by = 3 [json_name="groupBy"]; // how snapshots are grouped when applying retention.
 }
 
 message PrunePolicy {

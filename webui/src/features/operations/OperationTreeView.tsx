@@ -40,6 +40,7 @@ import {
   formatMonth,
   formatTime,
   localISOTime,
+  useDateFormat,
 } from "../../lib/formatting";
 import {
   LuFileQuestion,
@@ -149,7 +150,9 @@ export const OperationTreeView = ({
       logState,
       req,
       (err) => {
-        alerts.error(m.operation_tree_view_api_error_message({ message: err.message }));
+        alerts.error(
+          m.operation_tree_view_api_error_message({ message: err.message }),
+        );
       },
       () => {
         setLoading(false);
@@ -173,7 +176,9 @@ export const OperationTreeView = ({
             <LuInfo />
           </EmptyState.Indicator>
           <VStack textAlign="center">
-            <EmptyState.Title>{m.operation_tree_view_no_operations_found()}</EmptyState.Title>
+            <EmptyState.Title>
+              {m.operation_tree_view_no_operations_found()}
+            </EmptyState.Title>
             <EmptyState.Description>
               {m.operation_tree_view_there_are_no_operations_to_display()}
             </EmptyState.Description>
@@ -294,6 +299,7 @@ const DisplayOperationTree = React.memo(
     isPlanView?: boolean;
     onSelect?: (flow: FlowDisplayInfo | null) => any;
   }) => {
+    const dateFormatVersion = useDateFormat();
     const [treeCollection, setTreeCollection] =
       useState<TreeCollection<OpTreeNode> | null>(null);
     const [expandedValue, setExpandedValue] = useState<string[]>([]);
@@ -450,7 +456,7 @@ const DisplayOperationTree = React.memo(
       expandFirst(nodes[0]);
 
       setExpandedValue(Array.from([...expandedValue, ...toExpand]));
-    }, [operations, isPlanView]);
+    }, [operations, isPlanView, dateFormatVersion]);
 
     const renderNode = useCallback(
       ({ node, nodeState }: { node: OpTreeNode; nodeState: any }) =>
@@ -523,7 +529,7 @@ const DisplayOperationTree = React.memo(
             </TreeViewItemText>
           </TreeViewItem>
         ),
-      [],
+      [dateFormatVersion],
     );
 
     if (!treeCollection) return <></>;
@@ -552,10 +558,13 @@ const DisplayOperationTree = React.memo(
 );
 
 const BackupView = ({ backup }: { backup?: FlowDisplayInfo }) => {
+  useDateFormat();
   if (!backup) {
     return (
       <EmptyState.Root>
-        <EmptyState.Title>{m.operation_tree_view_backup_not_found()}</EmptyState.Title>
+        <EmptyState.Title>
+          {m.operation_tree_view_backup_not_found()}
+        </EmptyState.Title>
       </EmptyState.Root>
     );
   } else {
@@ -570,7 +579,9 @@ const BackupView = ({ backup }: { backup?: FlowDisplayInfo }) => {
         );
         alerts.success(m.operation_tree_view_snapshot_forget_scheduled());
       } catch (e: any) {
-        alerts.error(m.operation_tree_view_failed_to_forget_snapshot_e({ e: e }));
+        alerts.error(
+          m.operation_tree_view_failed_to_forget_snapshot_e({ e: e }),
+        );
       }
     };
 

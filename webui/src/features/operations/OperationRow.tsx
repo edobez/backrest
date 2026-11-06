@@ -41,6 +41,7 @@ import {
   formatBytes,
   formatDuration,
   formatTime,
+  useDateFormat,
   normalizeSnapshotId,
 } from "../../lib/formatting";
 import {
@@ -108,6 +109,7 @@ export const OperationRow = ({
   hookOperations?: Operation[];
   showDelete?: boolean;
 }>) => {
+  useDateFormat();
   const showModal = useShowModal();
   const reposByGuid = useReposByGuid();
   const displayType = getTypeForDisplay(operation);
@@ -777,6 +779,7 @@ const ForgetOperationDetails = ({
 }: {
   forgetOp: OperationForget;
 }) => {
+  useDateFormat();
   const removedSnapshots = forgetOp.forget || [];
 
   if (removedSnapshots.length === 0) {

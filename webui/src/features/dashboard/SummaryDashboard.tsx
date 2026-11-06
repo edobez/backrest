@@ -38,7 +38,12 @@ import {
 } from "../../components/ui/accordion";
 import { DataListItem, DataListRoot } from "../../components/ui/data-list";
 import { EmptyState } from "../../components/ui/empty-state";
-import { formatBytes, formatDuration, formatTime } from "../../lib/formatting";
+import {
+  formatBytes,
+  formatDuration,
+  formatTime,
+  useDateFormat,
+} from "../../lib/formatting";
 import { useConfig } from "../../app/provider";
 import { useSyncStates } from "../../state/peerStates";
 import * as m from "../../paraglide/messages";
@@ -656,6 +661,7 @@ const RecentActivity = ({
 }: {
   summaries: SummaryDashboardResponse_Summary[];
 }) => {
+  useDateFormat();
   const [config] = useConfig();
 
   // planId -> destination repo ID, derived from config.
@@ -1080,6 +1086,7 @@ const TimeSinceLastHeartbeat = ({
 }: {
   lastHeartbeatMillis: number;
 }) => {
+  useDateFormat();
   const [timeSince, setTimeSince] = useState(
     lastHeartbeatMillis ? Date.now() - lastHeartbeatMillis : 0,
   );

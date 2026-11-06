@@ -128,6 +128,9 @@ func validateRepo(repo *v1.Repo) error {
 				err = multierror.Append(err, fmt.Errorf("forget policy: %w", e))
 			}
 		}
+		if _, ok := v1.ForgetPolicy_GroupBy_name[int32(repo.ForgetPolicy.GetGroupBy())]; !ok {
+			err = multierror.Append(err, fmt.Errorf("forget policy: invalid group_by value %d", repo.ForgetPolicy.GetGroupBy()))
+		}
 	}
 
 	for _, env := range repo.Env {

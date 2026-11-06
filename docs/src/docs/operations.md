@@ -113,6 +113,79 @@ Manages snapshot retention using `restic forget --tag plan:{PLAN_ID}`.
 - **By Count**: `--keep-last {COUNT}`
 - **By Time Period**: `--keep-{hourly,daily,weekly,monthly,yearly} {COUNT}`
 
+#### Repo-level Forget Policy
+
+By default, retention is configured per plan and applied right after each backup, scoped to that plan's snapshots (`restic forget --tag plan:{PLAN_ID},created-by:{INSTANCE_ID} --group-by ''`).
+
+Alternatively, a **Forget Policy** can be enabled in the repository settings. It runs `restic forget` on its own schedule with a single retention policy, and it applies to **every snapshot in the repository**: snapshots from all plans, all Backrest instances, and snapshots created outside Backrest (e.g. by your own scripts calling `restic backup`). When it is enabled, per-plan retention is skipped.
+
+Retention is applied separately within each **group** of snapshots. The **Group Snapshots By** option decides how groups are formed and maps directly to restic's [`--group-by`](https://restic.readthedocs.io/en/latest/060_forget.html#removing-snapshots-according-to-a-policy) flag:
+
+| Group By | restic flag | One group per… | Use when |
+|---|---|---|---|
+| **Tags** (default) | `--group-by tags` | unique set of tags | Several Backrest plans share the repo and each should keep its own history. |
+| **None** | `--group-by ''` | — (whole repo is one group) | You want "keep the last N" across the whole repo, e.g. external snapshots carry a unique tag each. |
+| **Host** | `--group-by host` | host | Several machines share the repo; retention per machine, ignoring tags and paths. |
+| **Host + Paths** | `--group-by host,paths` | host and backed-up paths | Matches restic's own default; useful for untagged snapshots of different directories. |
+| **Host + Tags** | `--group-by host,tags` | host and tag set | Several machines run plans with the same tags into one repo. |
+
+::: warning
+With **None**, the retention policy counts every snapshot in the repository, whatever plan, host or tool created it. A `Keep last 7` policy keeps the 7 newest snapshots in the repo and forgets everything else.
+:::
+
+**Example 1 — Tags (default): plans sharing a repo**
+
+Two Backrest plans back up into the same repo, with a Forget Policy of `Keep last 3`:
+
+```
+ID        Time                 Host    Tags                          Paths
+--------------------------------------------------------------------------------
+a1000001  2026-06-01 00:00:00  laptop  plan:docs,created-by:laptop    /home/me/docs
+b2000001  2026-06-01 01:00:00  laptop  plan:photos,created-by:laptop  /home/me/photos
+a1000002  2026-06-02 00:00:00  laptop  plan:docs,created-by:laptop    /home/me/docs
+b2000002  2026-06-02 01:00:00  laptop  plan:photos,created-by:laptop  /home/me/photos
+...       (5 snapshots of each plan)
+```
+
+`plan:docs` and `plan:photos` are separate groups, so each plan keeps its 3 newest snapshots: 6 kept and 4 forgotten.
+
+**Example 2 — None: snapshots created by an external script**
+
+A script backs up ZFS snapshots and tags each restic snapshot with the name of its ZFS snapshot, so every tag is unique:
+
+```
+ID        Time                 Host            Tags                                   Paths
+---------------------------------------------------------------------------------------------------
+62c32030  2026-06-01 00:05:02  assault-pillow  challenger/data@auto-2026-06-01_00-00  /mnt/challenger/data
+3b1027ba  2026-06-02 00:05:25  assault-pillow  challenger/data@auto-2026-06-02_00-00  /mnt/challenger/data
+ad905638  2026-06-03 00:05:24  assault-pillow  challenger/data@auto-2026-06-03_00-00  /mnt/challenger/data
+...       (one snapshot per day)
+```
+
+With the default **Tags** grouping, each snapshot is its own group, so `Keep last 7` keeps all of them. Set **Group Snapshots By** to **None** and the whole repo becomes one group: only the 7 newest snapshots are kept. **Host + Paths** gives the same result here, because all the snapshots share the same host and path.
+
+**Example 3 — Host / Host + Paths: several machines, untagged snapshots**
+
+Two machines run plain `restic backup` (no tags) into a shared repo, and `server` backs up two directories:
+
+```
+ID        Time                 Host    Tags  Paths
+-------------------------------------------------------
+c3000001  2026-06-01 00:00:00  laptop        /home/me
+d4000001  2026-06-01 00:10:00  server        /etc
+e5000001  2026-06-01 00:20:00  server        /var/www
+...       (daily, for each host and path)
+```
+
+With a `Keep last 7` policy:
+- **Host + Paths** keeps the 7 newest snapshots of each `(host, paths)` pair: `laptop:/home/me`, `server:/etc` and `server:/var/www`, so 21 in total.
+- **Host** keeps the 7 newest snapshots per machine: 7 for `laptop` and 7 for `server` across both of its paths.
+- **Tags** treats all untagged snapshots as one group and keeps only 7 in the whole repo.
+
+::: tip
+If you want tag-based grouping for snapshots created by external tools, give them stable tags (e.g. `zfs:challenger/data`) rather than a tag that is unique to each run, such as the source snapshot name.
+:::
+
 ### ✂️ Prune
 [Restic Documentation](https://restic.readthedocs.io/en/latest/060_forget.html#removing-unreferenced-data)
 

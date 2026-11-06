@@ -70,7 +70,7 @@ jobs:
         run: cd webui && pnpm run check
 
   test-e2e-web:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # Playwright 1.60 does not support ubuntu-latest (26.04)
     env:
       # Not RCLONE_*: rclone reads RCLONE_VERSION as its --version flag.
       E2E_RCLONE_VERSION: v1.69.1

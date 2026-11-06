@@ -883,6 +883,37 @@ const Sidebar = () => {
   );
 };
 
+const VersionLabel = () => {
+  const [info, setInfo] = useState<{ version: string; commit: string } | null>(
+    null,
+  );
+  useEffect(() => {
+    backrestService
+      .getVersion({})
+      .then((r) => setInfo({ version: r.version, commit: r.commit }))
+      .catch(() => {});
+  }, []);
+
+  if (!info) {
+    return <>{uiBuildVersion}</>;
+  }
+  const differs = info.version !== uiBuildVersion;
+  return (
+    <Tooltip
+      content={m.app_version_tooltip({
+        version: info.version,
+        commit: info.commit,
+        uiVersion: uiBuildVersion,
+      })}
+    >
+      <span>
+        {info.version}
+        {differs && ` (${m.app_version_ui({ version: uiBuildVersion })})`}
+      </span>
+    </Tooltip>
+  );
+};
+
 export const App: React.FC = () => {
   const navigate = useNavigate();
   const [config, setConfig] = useConfig();
@@ -914,7 +945,7 @@ export const App: React.FC = () => {
             fontSize="xs"
             display={{ base: "none", lg: "block" }}
           >
-            {uiBuildVersion}
+            <VersionLabel />
           </Link>
           <Box fontSize="xs">
             <ActivityBar />

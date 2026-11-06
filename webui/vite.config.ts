@@ -3,10 +3,24 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import viteCompression from 'vite-plugin-compression';
+import { execSync } from 'node:child_process';
 // import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
+
+  // Release builds set BACKREST_BUILD_VERSION; otherwise derive it from git.
+  let buildVersion = env.BACKREST_BUILD_VERSION;
+  if (!buildVersion) {
+    try {
+      buildVersion = execSync('git describe --tags --dirty --always', {
+        stdio: ['ignore', 'pipe', 'ignore'],
+      }).toString().trim();
+    } catch {
+      buildVersion = 'dev-snapshot-build';
+    }
+    buildVersion = buildVersion || 'dev-snapshot-build';
+  }
 
   return {
     plugins: [
@@ -42,7 +56,8 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       'process.env.UI_OS': JSON.stringify(env.UI_OS),
-      'process.env.BACKREST_BUILD_VERSION': JSON.stringify(env.BACKREST_BUILD_VERSION),
+      'process.env.BACKREST_BUILD_VERSION': JSON.stringify(buildVersion),
+      'process.env.BACKREST_BUILD_VERSION_EXPLICIT': JSON.stringify(String(!!env.BACKREST_BUILD_VERSION)),
       'process.env.UI_BACKEND_URL': JSON.stringify(env.UI_BACKEND_URL),
       'process.env.UI_FEATURES': JSON.stringify(env.UI_FEATURES),
     },

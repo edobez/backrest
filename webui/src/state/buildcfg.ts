@@ -3,7 +3,9 @@ export const isWindows = uios === "windows";
 export const uiBuildVersion = (
   process.env.BACKREST_BUILD_VERSION || "dev-snapshot-build"
 ).trim();
-export const isDevBuild = uiBuildVersion === "dev-snapshot-build";
+// True unless BACKREST_BUILD_VERSION was explicitly set (i.e. a release build).
+// uiBuildVersion may still be derived from `git describe` in dev builds.
+export const isDevBuild = !(process.env.BACKREST_BUILD_VERSION_EXPLICIT === "true");
 export const pathSeparator = isWindows ? "\\" : "/";
 export const backendUrl = process.env.UI_BACKEND_URL || "./";
 console.log(

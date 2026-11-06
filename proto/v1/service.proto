@@ -21,6 +21,13 @@ message ScheduleTaskResponse {
   int64 operation_id = 1; // ID of the scheduled operation, or 0 when no operation was created for the task.
 }
 
+// VersionInfo describes the running backend build.
+message VersionInfo {
+  string version = 1; // human readable version, e.g. "1.9.2" or "dev+abc1234"
+  string commit = 2; // git commit hash, or "unknown"
+  bool is_dev_build = 3; // true if the build was not stamped with a release version via ldflags
+}
+
 service Backrest {
   rpc GetConfig (google.protobuf.Empty) returns (Config) {}
 
@@ -71,6 +78,9 @@ service Backrest {
 
   // PathAutocomplete provides path autocompletion options for a given filesystem path.
   rpc PathAutocomplete (types.StringValue) returns (types.StringList) {}
+
+  // GetVersion returns the version and commit of the running backend.
+  rpc GetVersion(google.protobuf.Empty) returns (VersionInfo) {}
 
   // GetSummaryDashboard returns data for the dashboard view.
   rpc GetSummaryDashboard(google.protobuf.Empty) returns (SummaryDashboardResponse) {}

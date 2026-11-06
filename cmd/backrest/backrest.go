@@ -32,6 +32,7 @@ import (
 	"github.com/garethgeorge/backrest/internal/oplog/sqlitestore"
 	"github.com/garethgeorge/backrest/internal/orchestrator"
 	"github.com/garethgeorge/backrest/internal/resticinstaller"
+	versionpkg "github.com/garethgeorge/backrest/internal/version"
 	"github.com/garethgeorge/backrest/webui"
 	"github.com/mattn/go-colorable"
 	"go.uber.org/zap"
@@ -44,10 +45,13 @@ import (
 var installDepsOnly = flag.Bool("install-deps-only", false, "install dependencies and exit")
 var printVersion = flag.Bool("version", false, "print version and exit")
 
+// ldflags-injected values, see .goreleaser.yaml. Use buildInfo for the resolved values.
 var (
 	version = "unknown"
 	commit  = "unknown"
 )
+
+var buildInfo = versionpkg.Init(version, commit)
 
 // onOpLogReady, when set, is invoked with the OpLog once it is constructed.
 // The tray build (-tags tray) uses it to drive a status-reflecting menu bar
@@ -57,10 +61,10 @@ var onOpLogReady func(*oplog.OpLog)
 func runApp() {
 	flag.Parse()
 	if *printVersion {
-		fmt.Printf("backrest version: %s, commit: %s\n", version, commit)
+		fmt.Printf("backrest version: %s, commit: %s\n", buildInfo.Version, buildInfo.Commit)
 		os.Exit(0)
 	}
-	installLoggers(version, commit)
+	installLoggers(buildInfo)
 
 	// Install dependencies if requested
 	resticPath, err := resticinstaller.FindOrInstallResticBinary()
@@ -249,7 +253,7 @@ func newServer(
 	rootMux := newRootMux(apiBackrestHandler, apiAuthenticationHandler, syncHandler, syncStateHandler, downloadHandler, authenticator)
 
 	var handler http.Handler = rootMux
-	if version == "unknown" { // dev build, enable CORS for local development
+	if buildInfo.IsDevBuild { // dev build, enable CORS for local development
 		handler = newCorsMiddleware(rootMux)
 	}
 
@@ -345,14 +349,14 @@ func newForceKillHandler() func() {
 	}
 }
 
-func installLoggers(version, commit string) {
+func installLoggers(info versionpkg.Info) {
 	// Pretty logging for console
 	c := zap.NewDevelopmentEncoderConfig()
 	c.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	c.EncodeTime = zapcore.ISO8601TimeEncoder
 
 	logLevel := zapcore.InfoLevel
-	if version == "unknown" { // dev build
+	if info.IsDevBuild { // dev build
 		logLevel = zapcore.DebugLevel
 	}
 	pretty := zapcore.NewCore(
@@ -384,7 +388,7 @@ func installLoggers(version, commit string) {
 	)
 
 	zap.ReplaceGlobals(zap.New(zapcore.NewTee(pretty, ugly)))
-	zap.L().Info("backrest starting", zap.String("version", version), zap.String("commit", commit), zap.String("log_dir", logsDir))
+	zap.L().Info("backrest starting", zap.String("version", info.Version), zap.String("commit", info.Commit), zap.String("log_dir", logsDir))
 }
 
 func migratePopulateGuids(logstore oplog.OpStore, cfg *v1.Config) {

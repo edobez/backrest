@@ -79,6 +79,8 @@ const (
 	// BackrestPathAutocompleteProcedure is the fully-qualified name of the Backrest's PathAutocomplete
 	// RPC.
 	BackrestPathAutocompleteProcedure = "/v1.Backrest/PathAutocomplete"
+	// BackrestGetVersionProcedure is the fully-qualified name of the Backrest's GetVersion RPC.
+	BackrestGetVersionProcedure = "/v1.Backrest/GetVersion"
 	// BackrestGetSummaryDashboardProcedure is the fully-qualified name of the Backrest's
 	// GetSummaryDashboard RPC.
 	BackrestGetSummaryDashboardProcedure = "/v1.Backrest/GetSummaryDashboard"
@@ -119,6 +121,8 @@ type BackrestClient interface {
 	ClearHistory(context.Context, *connect.Request[v1.ClearHistoryRequest]) (*connect.Response[emptypb.Empty], error)
 	// PathAutocomplete provides path autocompletion options for a given filesystem path.
 	PathAutocomplete(context.Context, *connect.Request[types.StringValue]) (*connect.Response[types.StringList], error)
+	// GetVersion returns the version and commit of the running backend.
+	GetVersion(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.VersionInfo], error)
 	// GetSummaryDashboard returns data for the dashboard view.
 	GetSummaryDashboard(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.SummaryDashboardResponse], error)
 	// GeneratePairingToken creates a new pairing token on the server that can be shared with clients to simplify peering.
@@ -257,6 +261,12 @@ func NewBackrestClient(httpClient connect.HTTPClient, baseURL string, opts ...co
 			connect.WithSchema(backrestMethods.ByName("PathAutocomplete")),
 			connect.WithClientOptions(opts...),
 		),
+		getVersion: connect.NewClient[emptypb.Empty, v1.VersionInfo](
+			httpClient,
+			baseURL+BackrestGetVersionProcedure,
+			connect.WithSchema(backrestMethods.ByName("GetVersion")),
+			connect.WithClientOptions(opts...),
+		),
 		getSummaryDashboard: connect.NewClient[emptypb.Empty, v1.SummaryDashboardResponse](
 			httpClient,
 			baseURL+BackrestGetSummaryDashboardProcedure,
@@ -294,6 +304,7 @@ type backrestClient struct {
 	getDownloadURL       *connect.Client[v1.GetDownloadURLRequest, types.StringValue]
 	clearHistory         *connect.Client[v1.ClearHistoryRequest, emptypb.Empty]
 	pathAutocomplete     *connect.Client[types.StringValue, types.StringList]
+	getVersion           *connect.Client[emptypb.Empty, v1.VersionInfo]
 	getSummaryDashboard  *connect.Client[emptypb.Empty, v1.SummaryDashboardResponse]
 	generatePairingToken *connect.Client[v1.GeneratePairingTokenRequest, v1.GeneratePairingTokenResponse]
 }
@@ -398,6 +409,11 @@ func (c *backrestClient) PathAutocomplete(ctx context.Context, req *connect.Requ
 	return c.pathAutocomplete.CallUnary(ctx, req)
 }
 
+// GetVersion calls v1.Backrest.GetVersion.
+func (c *backrestClient) GetVersion(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[v1.VersionInfo], error) {
+	return c.getVersion.CallUnary(ctx, req)
+}
+
 // GetSummaryDashboard calls v1.Backrest.GetSummaryDashboard.
 func (c *backrestClient) GetSummaryDashboard(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[v1.SummaryDashboardResponse], error) {
 	return c.getSummaryDashboard.CallUnary(ctx, req)
@@ -440,6 +456,8 @@ type BackrestHandler interface {
 	ClearHistory(context.Context, *connect.Request[v1.ClearHistoryRequest]) (*connect.Response[emptypb.Empty], error)
 	// PathAutocomplete provides path autocompletion options for a given filesystem path.
 	PathAutocomplete(context.Context, *connect.Request[types.StringValue]) (*connect.Response[types.StringList], error)
+	// GetVersion returns the version and commit of the running backend.
+	GetVersion(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.VersionInfo], error)
 	// GetSummaryDashboard returns data for the dashboard view.
 	GetSummaryDashboard(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.SummaryDashboardResponse], error)
 	// GeneratePairingToken creates a new pairing token on the server that can be shared with clients to simplify peering.
@@ -574,6 +592,12 @@ func NewBackrestHandler(svc BackrestHandler, opts ...connect.HandlerOption) (str
 		connect.WithSchema(backrestMethods.ByName("PathAutocomplete")),
 		connect.WithHandlerOptions(opts...),
 	)
+	backrestGetVersionHandler := connect.NewUnaryHandler(
+		BackrestGetVersionProcedure,
+		svc.GetVersion,
+		connect.WithSchema(backrestMethods.ByName("GetVersion")),
+		connect.WithHandlerOptions(opts...),
+	)
 	backrestGetSummaryDashboardHandler := connect.NewUnaryHandler(
 		BackrestGetSummaryDashboardProcedure,
 		svc.GetSummaryDashboard,
@@ -628,6 +652,8 @@ func NewBackrestHandler(svc BackrestHandler, opts ...connect.HandlerOption) (str
 			backrestClearHistoryHandler.ServeHTTP(w, r)
 		case BackrestPathAutocompleteProcedure:
 			backrestPathAutocompleteHandler.ServeHTTP(w, r)
+		case BackrestGetVersionProcedure:
+			backrestGetVersionHandler.ServeHTTP(w, r)
 		case BackrestGetSummaryDashboardProcedure:
 			backrestGetSummaryDashboardHandler.ServeHTTP(w, r)
 		case BackrestGeneratePairingTokenProcedure:
@@ -719,6 +745,10 @@ func (UnimplementedBackrestHandler) ClearHistory(context.Context, *connect.Reque
 
 func (UnimplementedBackrestHandler) PathAutocomplete(context.Context, *connect.Request[types.StringValue]) (*connect.Response[types.StringList], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("v1.Backrest.PathAutocomplete is not implemented"))
+}
+
+func (UnimplementedBackrestHandler) GetVersion(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.VersionInfo], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("v1.Backrest.GetVersion is not implemented"))
 }
 
 func (UnimplementedBackrestHandler) GetSummaryDashboard(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.SummaryDashboardResponse], error) {

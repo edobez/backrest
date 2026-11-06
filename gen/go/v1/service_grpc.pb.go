@@ -41,6 +41,7 @@ const (
 	Backrest_GetDownloadURL_FullMethodName       = "/v1.Backrest/GetDownloadURL"
 	Backrest_ClearHistory_FullMethodName         = "/v1.Backrest/ClearHistory"
 	Backrest_PathAutocomplete_FullMethodName     = "/v1.Backrest/PathAutocomplete"
+	Backrest_GetVersion_FullMethodName           = "/v1.Backrest/GetVersion"
 	Backrest_GetSummaryDashboard_FullMethodName  = "/v1.Backrest/GetSummaryDashboard"
 	Backrest_GeneratePairingToken_FullMethodName = "/v1.Backrest/GeneratePairingToken"
 )
@@ -79,6 +80,8 @@ type BackrestClient interface {
 	ClearHistory(ctx context.Context, in *ClearHistoryRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// PathAutocomplete provides path autocompletion options for a given filesystem path.
 	PathAutocomplete(ctx context.Context, in *types.StringValue, opts ...grpc.CallOption) (*types.StringList, error)
+	// GetVersion returns the version and commit of the running backend.
+	GetVersion(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*VersionInfo, error)
 	// GetSummaryDashboard returns data for the dashboard view.
 	GetSummaryDashboard(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SummaryDashboardResponse, error)
 	// GeneratePairingToken creates a new pairing token on the server that can be shared with clients to simplify peering.
@@ -312,6 +315,16 @@ func (c *backrestClient) PathAutocomplete(ctx context.Context, in *types.StringV
 	return out, nil
 }
 
+func (c *backrestClient) GetVersion(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*VersionInfo, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(VersionInfo)
+	err := c.cc.Invoke(ctx, Backrest_GetVersion_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *backrestClient) GetSummaryDashboard(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SummaryDashboardResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(SummaryDashboardResponse)
@@ -366,6 +379,8 @@ type BackrestServer interface {
 	ClearHistory(context.Context, *ClearHistoryRequest) (*emptypb.Empty, error)
 	// PathAutocomplete provides path autocompletion options for a given filesystem path.
 	PathAutocomplete(context.Context, *types.StringValue) (*types.StringList, error)
+	// GetVersion returns the version and commit of the running backend.
+	GetVersion(context.Context, *emptypb.Empty) (*VersionInfo, error)
 	// GetSummaryDashboard returns data for the dashboard view.
 	GetSummaryDashboard(context.Context, *emptypb.Empty) (*SummaryDashboardResponse, error)
 	// GeneratePairingToken creates a new pairing token on the server that can be shared with clients to simplify peering.
@@ -440,6 +455,9 @@ func (UnimplementedBackrestServer) ClearHistory(context.Context, *ClearHistoryRe
 }
 func (UnimplementedBackrestServer) PathAutocomplete(context.Context, *types.StringValue) (*types.StringList, error) {
 	return nil, status.Error(codes.Unimplemented, "method PathAutocomplete not implemented")
+}
+func (UnimplementedBackrestServer) GetVersion(context.Context, *emptypb.Empty) (*VersionInfo, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetVersion not implemented")
 }
 func (UnimplementedBackrestServer) GetSummaryDashboard(context.Context, *emptypb.Empty) (*SummaryDashboardResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetSummaryDashboard not implemented")
@@ -814,6 +832,24 @@ func _Backrest_PathAutocomplete_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Backrest_GetVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BackrestServer).GetVersion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Backrest_GetVersion_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BackrestServer).GetVersion(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Backrest_GetSummaryDashboard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
@@ -928,6 +964,10 @@ var Backrest_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PathAutocomplete",
 			Handler:    _Backrest_PathAutocomplete_Handler,
+		},
+		{
+			MethodName: "GetVersion",
+			Handler:    _Backrest_GetVersion_Handler,
 		},
 		{
 			MethodName: "GetSummaryDashboard",

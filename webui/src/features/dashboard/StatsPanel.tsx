@@ -9,7 +9,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { formatBytes, formatDate } from "../../lib/formatting";
+import { formatBytes, formatDate, useDateFormat } from "../../lib/formatting";
 import { SimpleGrid } from "@chakra-ui/react";
 import { EmptyState } from "../../components/ui/empty-state";
 import { Operation, OperationStats } from "../../../gen/ts/v1/operations_pb";
@@ -23,6 +23,7 @@ import { create } from "@bufbuild/protobuf";
 import * as m from "../../paraglide/messages";
 
 export const StatsPanel = ({ selector }: { selector: OpSelector }) => {
+  useDateFormat();
   const [operations, setOperations] = useState<Operation[]>([]);
 
   useEffect(() => {
@@ -38,7 +39,9 @@ export const StatsPanel = ({ selector }: { selector: OpSelector }) => {
         setOperations(ops);
       })
       .catch((e) => {
-        alerts.error(formatErrorAlert(e, m.stats_panel_failed_to_fetch_operations()));
+        alerts.error(
+          formatErrorAlert(e, m.stats_panel_failed_to_fetch_operations()),
+        );
       });
   }, [JSON.stringify(selector)]);
 

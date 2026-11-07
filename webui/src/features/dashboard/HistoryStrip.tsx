@@ -2,7 +2,7 @@ import { Box, Flex, Stack, Text } from "@chakra-ui/react";
 import { OperationStatus } from "../../../gen/ts/v1/operations_pb";
 import { SummaryDashboardResponse_DayStatusBucket } from "../../../gen/ts/v1/service_pb";
 import { Tooltip } from "../../components/ui/tooltip";
-import { formatBytes } from "../../lib/formatting";
+import { formatBytes, formatDate, useDateFormat } from "../../lib/formatting";
 import * as m from "../../paraglide/messages";
 
 const HISTORY_DAYS = 30;
@@ -118,7 +118,7 @@ function toCells(
     const bucket = byDaysAgo.get(daysAgo);
     return {
       kind: daysAgo > maxDaysAgo ? "beforeStart" : cellKind(bucket),
-      label: date.toLocaleDateString(),
+      label: formatDate(date),
       isToday: daysAgo === 0,
       bucket,
     };
@@ -242,6 +242,7 @@ export const HistoryStrip = ({
 }: {
   buckets: SummaryDashboardResponse_DayStatusBucket[];
 }) => {
+  useDateFormat();
   const cells = toCells(buckets);
 
   return (

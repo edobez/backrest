@@ -66,5 +66,6 @@ Protobuf: after editing `proto/`, regenerate with `cd proto && ./update.sh` (run
 
 - Commit messages follow Conventional Commits (`feat:`, `fix:`, `chore:`), as in the upstream history.
 - User-facing UI strings go through paraglide messages, not hardcoded text. Add new keys to `webui/messages/en.json`.
+- Forms with Save/Discard (`TwoPaneModal`, e.g. `SettingsModal.tsx`) apply nothing until Save. This includes browser-local preferences stored in localStorage: keep edits as a draft in the modal, count them in `dirty`/`dirtyCount`, apply them on Save, reset them on Discard. Exception: the language selector applies immediately (upstream behavior).
 - Format the web UI with `pnpm run format` (prettier) and Go with `gofmt`.
 - Before pushing, run at least `go build ./...`, the Go tests for the packages you touched, and `pnpm run check` for UI changes.

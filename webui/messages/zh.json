@@ -701,5 +701,17 @@
   "app_remote_repo_info": "This is a remote repo from {origin}. Operation history only includes backups run locally and may be incomplete.",
   "add_repo_modal_error_env_format": "环境变量必须是 KEY=VALUE 格式",
   "add_repo_modal_env_vars_placeholder": "KEY=VALUE（每行一个）",
-  "hooks_form_list_webhook_url": "{service} Webhook URL"
+  "hooks_form_list_webhook_url": "{service} Webhook URL",
+  "settings_field_date_format": "Date and time format",
+  "settings_date_format_browser": "Browser default",
+  "settings_date_format_iso": "ISO 8601 (2026-11-06 14:30)",
+  "settings_date_format_locale": "Specific locale",
+  "settings_field_date_locale": "Locale",
+  "settings_field_clock": "Clock",
+  "settings_clock_auto": "Automatic",
+  "settings_clock_12h": "12-hour",
+  "settings_clock_24h": "24-hour",
+  "settings_date_format_preview": "Preview: {time}",
+  "settings_token_expired": "Expired {time}",
+  "settings_token_expires": "Expires {time}"
 }

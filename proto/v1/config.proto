@@ -114,6 +114,7 @@ message Repo {
   bool shared = 13 [json_name="shared"]; // if true, this repo is pushed to all authorized clients with read-config permission
   string origin_instance_id = 14 [json_name="originInstanceId"]; // set when this repo was pushed from a remote instance; marks it as non-editable
   ForgetPolicy forget_policy = 15 [json_name="forgetPolicy"]; // optional repo-level forget policy. If set, overrides per-plan retention policies.
+  IndexPolicy index_policy = 16 [json_name="indexPolicy"]; // optional schedule for re-indexing the repo's snapshots, e.g. to pick up snapshots created by other clients.
 }
 
 message Plan {
@@ -185,6 +186,12 @@ message PrunePolicy {
   Schedule schedule = 2 [json_name="schedule"];
   int64 max_unused_bytes = 3 [json_name="maxUnusedBytes"]; // max unused bytes before running prune.
   double max_unused_percent = 4 [json_name="maxUnusedPercent"]; // max unused percent before running prune.
+}
+
+// IndexPolicy controls periodic re-indexing of a repo's snapshots. Backrest otherwise only indexes
+// after its own backups, so snapshots created by other clients are only picked up with a schedule.
+message IndexPolicy {
+  Schedule schedule = 1 [json_name="schedule"];
 }
 
 message CheckPolicy {

@@ -37,6 +37,7 @@ import { useShowModal } from "../../components/common/ModalManager";
 import { create } from "@bufbuild/protobuf";
 import { RepoProps } from "../../state/peerStates";
 import * as m from "../../paraglide/messages";
+import { SourcesTable } from "./SourcesTable";
 
 const StatsPanel = React.lazy(() => import("../dashboard/StatsPanel"));
 
@@ -205,6 +206,9 @@ export const RepoView = ({
           <TabsTrigger value="stats" data-testid="view-tab-stats">
             {m.op_type_stats()}
           </TabsTrigger>
+          <TabsTrigger value="sources" data-testid="view-tab-sources">
+            {m.repo_tab_sources()}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="tree">
@@ -243,6 +247,10 @@ export const RepoView = ({
               })}
             />
           </Suspense>
+        </TabsContent>
+
+        <TabsContent value="sources">
+          <SourcesTable repoId={repo.id!} repoGuid={repo.guid} />
         </TabsContent>
       </TabsRoot>
     </Box>

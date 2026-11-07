@@ -113,6 +113,12 @@ func validateRepo(repo *v1.Repo) error {
 		}
 	}
 
+	if repo.IndexPolicy.GetSchedule() != nil {
+		if e := protoutil.ValidateSchedule(repo.IndexPolicy.GetSchedule()); e != nil {
+			err = multierror.Append(err, fmt.Errorf("index policy schedule: %w", e))
+		}
+	}
+
 	if repo.ForgetPolicy != nil {
 		schedule := repo.ForgetPolicy.GetSchedule()
 		if schedule != nil {

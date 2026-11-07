@@ -691,5 +691,18 @@
   "app_remote_repo_info": "This is a remote repo from {origin}. Operation history only includes backups run locally and may be incomplete.",
   "add_repo_modal_error_env_format": "Environment variable must be in format KEY=VALUE",
   "add_repo_modal_env_vars_placeholder": "KEY=VALUE (One per line)",
-  "hooks_form_list_webhook_url": "{service} Webhook URL"
+  "hooks_form_list_webhook_url": "{service} Webhook URL",
+  "add_repo_modal_index_policy": "Index Policy",
+  "add_repo_modal_field_index_policy_help": "Re-reads the list of snapshots in the repo on a schedule. Backrest already does this after its own backups; enable it for repos that other machines or tools back up into, so their snapshots show up in Backrest.",
+  "repo_tab_sources": "Sources",
+  "sources_column_host": "Host",
+  "sources_column_paths": "Paths",
+  "sources_column_plans": "Plans",
+  "sources_column_snapshots": "Snapshots",
+  "sources_column_last_snapshot": "Last snapshot",
+  "sources_column_last_size": "Last size",
+  "sources_external": "External",
+  "sources_empty": "No snapshots indexed yet. Use \"Index Snapshots\" to read them from the repo.",
+  "sources_error": "Failed to load sources: ",
+  "sources_refresh": "Refresh"
 }

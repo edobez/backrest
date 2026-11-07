@@ -47,3 +47,17 @@ For details on the structure of operations returned see the [operations.proto](h
 ::: warning
 The structure of the operation history is subject to change over time. Different fields may be added or removed in future versions.
 :::
+
+### Snapshot Sources API
+
+List the sources of a repository, i.e. its indexed snapshots grouped by hostname and backed-up paths:
+
+```
+curl -X POST 'localhost:9898/v1.Backrest/ListSources' --data '{"repoId": "YOUR_REPO_ID"}' -H 'Content-Type: application/json' -u USERNAME:PASSWORD
+```
+
+Each source has an `id`. Pass it to `ListSnapshots` to list only the snapshots of exactly that source:
+
+```
+curl -X POST 'localhost:9898/v1.Backrest/ListSnapshots' --data '{"repoId": "YOUR_REPO_ID", "sourceId": "SOURCE_ID"}' -H 'Content-Type: application/json' -u USERNAME:PASSWORD
+```

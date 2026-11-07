@@ -93,6 +93,17 @@ const repoDefaults = create(RepoSchema, {
       clock: Schedule_Clock.LAST_RUN_TIME,
     },
   },
+  // IndexPolicy defaults to disabled: Backrest already indexes after its own
+  // backups. Enable it for repos that other clients back up into.
+  indexPolicy: {
+    schedule: {
+      schedule: {
+        case: "disabled",
+        value: true,
+      },
+      clock: Schedule_Clock.LAST_RUN_TIME,
+    },
+  },
   // ForgetPolicy defaults to a disabled schedule. Per-plan retention
   // policies handle the common case; the repo-level forget is opt-in.
   // We still seed a clock and a reasonable retention so the UI doesn't
@@ -1088,6 +1099,20 @@ export const AddRepoModal = ({
                   defaults={ScheduleDefaultsInfrequent}
                 />
               </Stack>
+            </SectionCard>
+
+            <SectionCard
+              icon={<FiClock size={16} />}
+              title={m.add_repo_modal_index_policy()}
+              description={m.add_repo_modal_field_index_policy_help()}
+            >
+              <ScheduleFormItem
+                value={getField(["indexPolicy", "schedule"])}
+                onChange={(val: any) =>
+                  updateField(["indexPolicy", "schedule"], val)
+                }
+                defaults={ScheduleDefaultsDaily}
+              />
             </SectionCard>
 
             <SectionCard

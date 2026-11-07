@@ -796,6 +796,7 @@ type ListSnapshotsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RepoId        string                 `protobuf:"bytes,1,opt,name=repo_id,json=repoId,proto3" json:"repo_id,omitempty"`
 	PlanId        string                 `protobuf:"bytes,2,opt,name=plan_id,json=planId,proto3" json:"plan_id,omitempty"`
+	SourceId      string                 `protobuf:"bytes,3,opt,name=source_id,json=sourceId,proto3" json:"source_id,omitempty"` // optional, restricts the result to snapshots of exactly this source (see SnapshotSource.id).
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -844,6 +845,227 @@ func (x *ListSnapshotsRequest) GetPlanId() string {
 	return ""
 }
 
+func (x *ListSnapshotsRequest) GetSourceId() string {
+	if x != nil {
+		return x.SourceId
+	}
+	return ""
+}
+
+type ListSourcesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RepoId        string                 `protobuf:"bytes,1,opt,name=repo_id,json=repoId,proto3" json:"repo_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSourcesRequest) Reset() {
+	*x = ListSourcesRequest{}
+	mi := &file_v1_service_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSourcesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSourcesRequest) ProtoMessage() {}
+
+func (x *ListSourcesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_service_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSourcesRequest.ProtoReflect.Descriptor instead.
+func (*ListSourcesRequest) Descriptor() ([]byte, []int) {
+	return file_v1_service_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ListSourcesRequest) GetRepoId() string {
+	if x != nil {
+		return x.RepoId
+	}
+	return ""
+}
+
+type ListSourcesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sources       []*SnapshotSource      `protobuf:"bytes,1,rep,name=sources,proto3" json:"sources,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSourcesResponse) Reset() {
+	*x = ListSourcesResponse{}
+	mi := &file_v1_service_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSourcesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSourcesResponse) ProtoMessage() {}
+
+func (x *ListSourcesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_service_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSourcesResponse.ProtoReflect.Descriptor instead.
+func (*ListSourcesResponse) Descriptor() ([]byte, []int) {
+	return file_v1_service_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *ListSourcesResponse) GetSources() []*SnapshotSource {
+	if x != nil {
+		return x.Sources
+	}
+	return nil
+}
+
+// SnapshotSource groups snapshots by (hostname, sorted paths), the same key restic uses for `--group-by host,paths`.
+// Tags are not part of the key.
+type SnapshotSource struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	Id                  string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"` // stable ID derived from hostname and sorted paths, independent of the repo.
+	RepoId              string                 `protobuf:"bytes,2,opt,name=repo_id,json=repoId,proto3" json:"repo_id,omitempty"`
+	Hostname            string                 `protobuf:"bytes,3,opt,name=hostname,proto3" json:"hostname,omitempty"`
+	Paths               []string               `protobuf:"bytes,4,rep,name=paths,proto3" json:"paths,omitempty"`                                       // sorted.
+	PlanIds             []string               `protobuf:"bytes,5,rep,name=plan_ids,json=planIds,proto3" json:"plan_ids,omitempty"`                    // distinct plan IDs (from `plan:` tags) of its snapshots, empty for external snapshots.
+	InstanceIds         []string               `protobuf:"bytes,6,rep,name=instance_ids,json=instanceIds,proto3" json:"instance_ids,omitempty"`        // distinct instance IDs (from `created-by:` tags) of its snapshots.
+	SnapshotCount       int64                  `protobuf:"varint,7,opt,name=snapshot_count,json=snapshotCount,proto3" json:"snapshot_count,omitempty"` // number of snapshots not yet forgotten.
+	FirstSnapshotTimeMs int64                  `protobuf:"varint,8,opt,name=first_snapshot_time_ms,json=firstSnapshotTimeMs,proto3" json:"first_snapshot_time_ms,omitempty"`
+	LastSnapshotTimeMs  int64                  `protobuf:"varint,9,opt,name=last_snapshot_time_ms,json=lastSnapshotTimeMs,proto3" json:"last_snapshot_time_ms,omitempty"`
+	LastSnapshotId      string                 `protobuf:"bytes,10,opt,name=last_snapshot_id,json=lastSnapshotId,proto3" json:"last_snapshot_id,omitempty"`
+	LastSnapshotBytes   int64                  `protobuf:"varint,11,opt,name=last_snapshot_bytes,json=lastSnapshotBytes,proto3" json:"last_snapshot_bytes,omitempty"` // logical size (total_bytes_processed) of the latest snapshot, 0 if unknown.
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *SnapshotSource) Reset() {
+	*x = SnapshotSource{}
+	mi := &file_v1_service_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SnapshotSource) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SnapshotSource) ProtoMessage() {}
+
+func (x *SnapshotSource) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_service_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SnapshotSource.ProtoReflect.Descriptor instead.
+func (*SnapshotSource) Descriptor() ([]byte, []int) {
+	return file_v1_service_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *SnapshotSource) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *SnapshotSource) GetRepoId() string {
+	if x != nil {
+		return x.RepoId
+	}
+	return ""
+}
+
+func (x *SnapshotSource) GetHostname() string {
+	if x != nil {
+		return x.Hostname
+	}
+	return ""
+}
+
+func (x *SnapshotSource) GetPaths() []string {
+	if x != nil {
+		return x.Paths
+	}
+	return nil
+}
+
+func (x *SnapshotSource) GetPlanIds() []string {
+	if x != nil {
+		return x.PlanIds
+	}
+	return nil
+}
+
+func (x *SnapshotSource) GetInstanceIds() []string {
+	if x != nil {
+		return x.InstanceIds
+	}
+	return nil
+}
+
+func (x *SnapshotSource) GetSnapshotCount() int64 {
+	if x != nil {
+		return x.SnapshotCount
+	}
+	return 0
+}
+
+func (x *SnapshotSource) GetFirstSnapshotTimeMs() int64 {
+	if x != nil {
+		return x.FirstSnapshotTimeMs
+	}
+	return 0
+}
+
+func (x *SnapshotSource) GetLastSnapshotTimeMs() int64 {
+	if x != nil {
+		return x.LastSnapshotTimeMs
+	}
+	return 0
+}
+
+func (x *SnapshotSource) GetLastSnapshotId() string {
+	if x != nil {
+		return x.LastSnapshotId
+	}
+	return ""
+}
+
+func (x *SnapshotSource) GetLastSnapshotBytes() int64 {
+	if x != nil {
+		return x.LastSnapshotBytes
+	}
+	return 0
+}
+
 type GetOperationsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Selector      *OpSelector            `protobuf:"bytes,1,opt,name=selector,proto3" json:"selector,omitempty"`
@@ -854,7 +1076,7 @@ type GetOperationsRequest struct {
 
 func (x *GetOperationsRequest) Reset() {
 	*x = GetOperationsRequest{}
-	mi := &file_v1_service_proto_msgTypes[13]
+	mi := &file_v1_service_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -866,7 +1088,7 @@ func (x *GetOperationsRequest) String() string {
 func (*GetOperationsRequest) ProtoMessage() {}
 
 func (x *GetOperationsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_service_proto_msgTypes[13]
+	mi := &file_v1_service_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -879,7 +1101,7 @@ func (x *GetOperationsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetOperationsRequest.ProtoReflect.Descriptor instead.
 func (*GetOperationsRequest) Descriptor() ([]byte, []int) {
-	return file_v1_service_proto_rawDescGZIP(), []int{13}
+	return file_v1_service_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *GetOperationsRequest) GetSelector() *OpSelector {
@@ -909,7 +1131,7 @@ type RestoreSnapshotRequest struct {
 
 func (x *RestoreSnapshotRequest) Reset() {
 	*x = RestoreSnapshotRequest{}
-	mi := &file_v1_service_proto_msgTypes[14]
+	mi := &file_v1_service_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -921,7 +1143,7 @@ func (x *RestoreSnapshotRequest) String() string {
 func (*RestoreSnapshotRequest) ProtoMessage() {}
 
 func (x *RestoreSnapshotRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_service_proto_msgTypes[14]
+	mi := &file_v1_service_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -934,7 +1156,7 @@ func (x *RestoreSnapshotRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RestoreSnapshotRequest.ProtoReflect.Descriptor instead.
 func (*RestoreSnapshotRequest) Descriptor() ([]byte, []int) {
-	return file_v1_service_proto_rawDescGZIP(), []int{14}
+	return file_v1_service_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *RestoreSnapshotRequest) GetPlanId() string {
@@ -983,7 +1205,7 @@ type ListSnapshotFilesRequest struct {
 
 func (x *ListSnapshotFilesRequest) Reset() {
 	*x = ListSnapshotFilesRequest{}
-	mi := &file_v1_service_proto_msgTypes[15]
+	mi := &file_v1_service_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -995,7 +1217,7 @@ func (x *ListSnapshotFilesRequest) String() string {
 func (*ListSnapshotFilesRequest) ProtoMessage() {}
 
 func (x *ListSnapshotFilesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_service_proto_msgTypes[15]
+	mi := &file_v1_service_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1008,7 +1230,7 @@ func (x *ListSnapshotFilesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSnapshotFilesRequest.ProtoReflect.Descriptor instead.
 func (*ListSnapshotFilesRequest) Descriptor() ([]byte, []int) {
-	return file_v1_service_proto_rawDescGZIP(), []int{15}
+	return file_v1_service_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *ListSnapshotFilesRequest) GetRepoId() string {
@@ -1042,7 +1264,7 @@ type ListSnapshotFilesResponse struct {
 
 func (x *ListSnapshotFilesResponse) Reset() {
 	*x = ListSnapshotFilesResponse{}
-	mi := &file_v1_service_proto_msgTypes[16]
+	mi := &file_v1_service_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1054,7 +1276,7 @@ func (x *ListSnapshotFilesResponse) String() string {
 func (*ListSnapshotFilesResponse) ProtoMessage() {}
 
 func (x *ListSnapshotFilesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_service_proto_msgTypes[16]
+	mi := &file_v1_service_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1067,7 +1289,7 @@ func (x *ListSnapshotFilesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSnapshotFilesResponse.ProtoReflect.Descriptor instead.
 func (*ListSnapshotFilesResponse) Descriptor() ([]byte, []int) {
-	return file_v1_service_proto_rawDescGZIP(), []int{16}
+	return file_v1_service_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *ListSnapshotFilesResponse) GetPath() string {
@@ -1093,7 +1315,7 @@ type LogDataRequest struct {
 
 func (x *LogDataRequest) Reset() {
 	*x = LogDataRequest{}
-	mi := &file_v1_service_proto_msgTypes[17]
+	mi := &file_v1_service_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1105,7 +1327,7 @@ func (x *LogDataRequest) String() string {
 func (*LogDataRequest) ProtoMessage() {}
 
 func (x *LogDataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_service_proto_msgTypes[17]
+	mi := &file_v1_service_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1118,7 +1340,7 @@ func (x *LogDataRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LogDataRequest.ProtoReflect.Descriptor instead.
 func (*LogDataRequest) Descriptor() ([]byte, []int) {
-	return file_v1_service_proto_rawDescGZIP(), []int{17}
+	return file_v1_service_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *LogDataRequest) GetRef() string {
@@ -1138,7 +1360,7 @@ type GetDownloadURLRequest struct {
 
 func (x *GetDownloadURLRequest) Reset() {
 	*x = GetDownloadURLRequest{}
-	mi := &file_v1_service_proto_msgTypes[18]
+	mi := &file_v1_service_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1150,7 +1372,7 @@ func (x *GetDownloadURLRequest) String() string {
 func (*GetDownloadURLRequest) ProtoMessage() {}
 
 func (x *GetDownloadURLRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_service_proto_msgTypes[18]
+	mi := &file_v1_service_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1163,7 +1385,7 @@ func (x *GetDownloadURLRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDownloadURLRequest.ProtoReflect.Descriptor instead.
 func (*GetDownloadURLRequest) Descriptor() ([]byte, []int) {
-	return file_v1_service_proto_rawDescGZIP(), []int{18}
+	return file_v1_service_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *GetDownloadURLRequest) GetOpId() int64 {
@@ -1198,7 +1420,7 @@ type LsEntry struct {
 
 func (x *LsEntry) Reset() {
 	*x = LsEntry{}
-	mi := &file_v1_service_proto_msgTypes[19]
+	mi := &file_v1_service_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1210,7 +1432,7 @@ func (x *LsEntry) String() string {
 func (*LsEntry) ProtoMessage() {}
 
 func (x *LsEntry) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_service_proto_msgTypes[19]
+	mi := &file_v1_service_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1223,7 +1445,7 @@ func (x *LsEntry) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LsEntry.ProtoReflect.Descriptor instead.
 func (*LsEntry) Descriptor() ([]byte, []int) {
-	return file_v1_service_proto_rawDescGZIP(), []int{19}
+	return file_v1_service_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *LsEntry) GetName() string {
@@ -1306,7 +1528,7 @@ type RunCommandRequest struct {
 
 func (x *RunCommandRequest) Reset() {
 	*x = RunCommandRequest{}
-	mi := &file_v1_service_proto_msgTypes[20]
+	mi := &file_v1_service_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1318,7 +1540,7 @@ func (x *RunCommandRequest) String() string {
 func (*RunCommandRequest) ProtoMessage() {}
 
 func (x *RunCommandRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_service_proto_msgTypes[20]
+	mi := &file_v1_service_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1331,7 +1553,7 @@ func (x *RunCommandRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RunCommandRequest.ProtoReflect.Descriptor instead.
 func (*RunCommandRequest) Descriptor() ([]byte, []int) {
-	return file_v1_service_proto_rawDescGZIP(), []int{20}
+	return file_v1_service_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *RunCommandRequest) GetRepoId() string {
@@ -1357,7 +1579,7 @@ type RunCommandResponse struct {
 
 func (x *RunCommandResponse) Reset() {
 	*x = RunCommandResponse{}
-	mi := &file_v1_service_proto_msgTypes[21]
+	mi := &file_v1_service_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1369,7 +1591,7 @@ func (x *RunCommandResponse) String() string {
 func (*RunCommandResponse) ProtoMessage() {}
 
 func (x *RunCommandResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_service_proto_msgTypes[21]
+	mi := &file_v1_service_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1382,7 +1604,7 @@ func (x *RunCommandResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RunCommandResponse.ProtoReflect.Descriptor instead.
 func (*RunCommandResponse) Descriptor() ([]byte, []int) {
-	return file_v1_service_proto_rawDescGZIP(), []int{21}
+	return file_v1_service_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *RunCommandResponse) GetOperationId() int64 {
@@ -1401,7 +1623,7 @@ type RemoveRepoRequest struct {
 
 func (x *RemoveRepoRequest) Reset() {
 	*x = RemoveRepoRequest{}
-	mi := &file_v1_service_proto_msgTypes[22]
+	mi := &file_v1_service_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1413,7 +1635,7 @@ func (x *RemoveRepoRequest) String() string {
 func (*RemoveRepoRequest) ProtoMessage() {}
 
 func (x *RemoveRepoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_service_proto_msgTypes[22]
+	mi := &file_v1_service_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1426,7 +1648,7 @@ func (x *RemoveRepoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveRepoRequest.ProtoReflect.Descriptor instead.
 func (*RemoveRepoRequest) Descriptor() ([]byte, []int) {
-	return file_v1_service_proto_rawDescGZIP(), []int{22}
+	return file_v1_service_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *RemoveRepoRequest) GetRepoId() string {
@@ -1445,7 +1667,7 @@ type CancelOperationRequest struct {
 
 func (x *CancelOperationRequest) Reset() {
 	*x = CancelOperationRequest{}
-	mi := &file_v1_service_proto_msgTypes[23]
+	mi := &file_v1_service_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1457,7 +1679,7 @@ func (x *CancelOperationRequest) String() string {
 func (*CancelOperationRequest) ProtoMessage() {}
 
 func (x *CancelOperationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_service_proto_msgTypes[23]
+	mi := &file_v1_service_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1470,7 +1692,7 @@ func (x *CancelOperationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelOperationRequest.ProtoReflect.Descriptor instead.
 func (*CancelOperationRequest) Descriptor() ([]byte, []int) {
-	return file_v1_service_proto_rawDescGZIP(), []int{23}
+	return file_v1_service_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *CancelOperationRequest) GetOperationId() int64 {
@@ -1492,7 +1714,7 @@ type SummaryDashboardResponse struct {
 
 func (x *SummaryDashboardResponse) Reset() {
 	*x = SummaryDashboardResponse{}
-	mi := &file_v1_service_proto_msgTypes[24]
+	mi := &file_v1_service_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1504,7 +1726,7 @@ func (x *SummaryDashboardResponse) String() string {
 func (*SummaryDashboardResponse) ProtoMessage() {}
 
 func (x *SummaryDashboardResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_service_proto_msgTypes[24]
+	mi := &file_v1_service_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1517,7 +1739,7 @@ func (x *SummaryDashboardResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SummaryDashboardResponse.ProtoReflect.Descriptor instead.
 func (*SummaryDashboardResponse) Descriptor() ([]byte, []int) {
-	return file_v1_service_proto_rawDescGZIP(), []int{24}
+	return file_v1_service_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *SummaryDashboardResponse) GetRepoSummaries() []*SummaryDashboardResponse_Summary {
@@ -1560,7 +1782,7 @@ type GeneratePairingTokenRequest struct {
 
 func (x *GeneratePairingTokenRequest) Reset() {
 	*x = GeneratePairingTokenRequest{}
-	mi := &file_v1_service_proto_msgTypes[25]
+	mi := &file_v1_service_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1572,7 +1794,7 @@ func (x *GeneratePairingTokenRequest) String() string {
 func (*GeneratePairingTokenRequest) ProtoMessage() {}
 
 func (x *GeneratePairingTokenRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_service_proto_msgTypes[25]
+	mi := &file_v1_service_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1585,7 +1807,7 @@ func (x *GeneratePairingTokenRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GeneratePairingTokenRequest.ProtoReflect.Descriptor instead.
 func (*GeneratePairingTokenRequest) Descriptor() ([]byte, []int) {
-	return file_v1_service_proto_rawDescGZIP(), []int{25}
+	return file_v1_service_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *GeneratePairingTokenRequest) GetLabel() string {
@@ -1625,7 +1847,7 @@ type GeneratePairingTokenResponse struct {
 
 func (x *GeneratePairingTokenResponse) Reset() {
 	*x = GeneratePairingTokenResponse{}
-	mi := &file_v1_service_proto_msgTypes[26]
+	mi := &file_v1_service_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1637,7 +1859,7 @@ func (x *GeneratePairingTokenResponse) String() string {
 func (*GeneratePairingTokenResponse) ProtoMessage() {}
 
 func (x *GeneratePairingTokenResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_service_proto_msgTypes[26]
+	mi := &file_v1_service_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1650,7 +1872,7 @@ func (x *GeneratePairingTokenResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GeneratePairingTokenResponse.ProtoReflect.Descriptor instead.
 func (*GeneratePairingTokenResponse) Descriptor() ([]byte, []int) {
-	return file_v1_service_proto_rawDescGZIP(), []int{26}
+	return file_v1_service_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *GeneratePairingTokenResponse) GetToken() string {
@@ -1682,7 +1904,7 @@ type SummaryDashboardResponse_Summary struct {
 
 func (x *SummaryDashboardResponse_Summary) Reset() {
 	*x = SummaryDashboardResponse_Summary{}
-	mi := &file_v1_service_proto_msgTypes[27]
+	mi := &file_v1_service_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1694,7 +1916,7 @@ func (x *SummaryDashboardResponse_Summary) String() string {
 func (*SummaryDashboardResponse_Summary) ProtoMessage() {}
 
 func (x *SummaryDashboardResponse_Summary) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_service_proto_msgTypes[27]
+	mi := &file_v1_service_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1707,7 +1929,7 @@ func (x *SummaryDashboardResponse_Summary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SummaryDashboardResponse_Summary.ProtoReflect.Descriptor instead.
 func (*SummaryDashboardResponse_Summary) Descriptor() ([]byte, []int) {
-	return file_v1_service_proto_rawDescGZIP(), []int{24, 0}
+	return file_v1_service_proto_rawDescGZIP(), []int{27, 0}
 }
 
 func (x *SummaryDashboardResponse_Summary) GetId() string {
@@ -1814,7 +2036,7 @@ type SummaryDashboardResponse_BackupChart struct {
 
 func (x *SummaryDashboardResponse_BackupChart) Reset() {
 	*x = SummaryDashboardResponse_BackupChart{}
-	mi := &file_v1_service_proto_msgTypes[28]
+	mi := &file_v1_service_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1826,7 +2048,7 @@ func (x *SummaryDashboardResponse_BackupChart) String() string {
 func (*SummaryDashboardResponse_BackupChart) ProtoMessage() {}
 
 func (x *SummaryDashboardResponse_BackupChart) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_service_proto_msgTypes[28]
+	mi := &file_v1_service_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1839,7 +2061,7 @@ func (x *SummaryDashboardResponse_BackupChart) ProtoReflect() protoreflect.Messa
 
 // Deprecated: Use SummaryDashboardResponse_BackupChart.ProtoReflect.Descriptor instead.
 func (*SummaryDashboardResponse_BackupChart) Descriptor() ([]byte, []int) {
-	return file_v1_service_proto_rawDescGZIP(), []int{24, 1}
+	return file_v1_service_proto_rawDescGZIP(), []int{27, 1}
 }
 
 func (x *SummaryDashboardResponse_BackupChart) GetFlowId() []int64 {
@@ -1890,7 +2112,7 @@ type SummaryDashboardResponse_DayStatusBucket struct {
 
 func (x *SummaryDashboardResponse_DayStatusBucket) Reset() {
 	*x = SummaryDashboardResponse_DayStatusBucket{}
-	mi := &file_v1_service_proto_msgTypes[29]
+	mi := &file_v1_service_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1902,7 +2124,7 @@ func (x *SummaryDashboardResponse_DayStatusBucket) String() string {
 func (*SummaryDashboardResponse_DayStatusBucket) ProtoMessage() {}
 
 func (x *SummaryDashboardResponse_DayStatusBucket) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_service_proto_msgTypes[29]
+	mi := &file_v1_service_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1915,7 +2137,7 @@ func (x *SummaryDashboardResponse_DayStatusBucket) ProtoReflect() protoreflect.M
 
 // Deprecated: Use SummaryDashboardResponse_DayStatusBucket.ProtoReflect.Descriptor instead.
 func (*SummaryDashboardResponse_DayStatusBucket) Descriptor() ([]byte, []int) {
-	return file_v1_service_proto_rawDescGZIP(), []int{24, 2}
+	return file_v1_service_proto_rawDescGZIP(), []int{27, 2}
 }
 
 func (x *SummaryDashboardResponse_DayStatusBucket) GetTimestampMs() int64 {
@@ -1963,7 +2185,7 @@ type SummaryDashboardResponse_StatusAndCount struct {
 
 func (x *SummaryDashboardResponse_StatusAndCount) Reset() {
 	*x = SummaryDashboardResponse_StatusAndCount{}
-	mi := &file_v1_service_proto_msgTypes[30]
+	mi := &file_v1_service_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1975,7 +2197,7 @@ func (x *SummaryDashboardResponse_StatusAndCount) String() string {
 func (*SummaryDashboardResponse_StatusAndCount) ProtoMessage() {}
 
 func (x *SummaryDashboardResponse_StatusAndCount) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_service_proto_msgTypes[30]
+	mi := &file_v1_service_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1988,7 +2210,7 @@ func (x *SummaryDashboardResponse_StatusAndCount) ProtoReflect() protoreflect.Me
 
 // Deprecated: Use SummaryDashboardResponse_StatusAndCount.ProtoReflect.Descriptor instead.
 func (*SummaryDashboardResponse_StatusAndCount) Descriptor() ([]byte, []int) {
-	return file_v1_service_proto_rawDescGZIP(), []int{24, 3}
+	return file_v1_service_proto_rawDescGZIP(), []int{27, 3}
 }
 
 func (x *SummaryDashboardResponse_StatusAndCount) GetCount() int64 {
@@ -2085,10 +2307,28 @@ const file_v1_service_proto_rawDesc = "" +
 	"\arepo_id\x18\x01 \x01(\tR\x06repoId\x12\x17\n" +
 	"\aplan_id\x18\x02 \x01(\tR\x06planId\x12\x1f\n" +
 	"\vsnapshot_id\x18\x03 \x01(\tR\n" +
-	"snapshotId\"H\n" +
+	"snapshotId\"e\n" +
 	"\x14ListSnapshotsRequest\x12\x17\n" +
 	"\arepo_id\x18\x01 \x01(\tR\x06repoId\x12\x17\n" +
-	"\aplan_id\x18\x02 \x01(\tR\x06planId\"Y\n" +
+	"\aplan_id\x18\x02 \x01(\tR\x06planId\x12\x1b\n" +
+	"\tsource_id\x18\x03 \x01(\tR\bsourceId\"-\n" +
+	"\x12ListSourcesRequest\x12\x17\n" +
+	"\arepo_id\x18\x01 \x01(\tR\x06repoId\"C\n" +
+	"\x13ListSourcesResponse\x12,\n" +
+	"\asources\x18\x01 \x03(\v2\x12.v1.SnapshotSourceR\asources\"\x92\x03\n" +
+	"\x0eSnapshotSource\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
+	"\arepo_id\x18\x02 \x01(\tR\x06repoId\x12\x1a\n" +
+	"\bhostname\x18\x03 \x01(\tR\bhostname\x12\x14\n" +
+	"\x05paths\x18\x04 \x03(\tR\x05paths\x12\x19\n" +
+	"\bplan_ids\x18\x05 \x03(\tR\aplanIds\x12!\n" +
+	"\finstance_ids\x18\x06 \x03(\tR\vinstanceIds\x12%\n" +
+	"\x0esnapshot_count\x18\a \x01(\x03R\rsnapshotCount\x123\n" +
+	"\x16first_snapshot_time_ms\x18\b \x01(\x03R\x13firstSnapshotTimeMs\x121\n" +
+	"\x15last_snapshot_time_ms\x18\t \x01(\x03R\x12lastSnapshotTimeMs\x12(\n" +
+	"\x10last_snapshot_id\x18\n" +
+	" \x01(\tR\x0elastSnapshotId\x12.\n" +
+	"\x13last_snapshot_bytes\x18\v \x01(\x03R\x11lastSnapshotBytes\"Y\n" +
 	"\x14GetOperationsRequest\x12*\n" +
 	"\bselector\x18\x01 \x01(\v2\x0e.v1.OpSelectorR\bselector\x12\x15\n" +
 	"\x06last_n\x18\x02 \x01(\x03R\x05lastN\"\x97\x01\n" +
@@ -2180,7 +2420,7 @@ const file_v1_service_proto_rawDesc = "" +
 	"\bmax_uses\x18\x03 \x01(\x05R\amaxUses\x12:\n" +
 	"\vpermissions\x18\x04 \x03(\v2\x18.v1.Multihost.PermissionR\vpermissions\"4\n" +
 	"\x1cGeneratePairingTokenResponse\x12\x14\n" +
-	"\x05token\x18\x01 \x01(\tR\x05token2\xbe\v\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token2\x80\f\n" +
 	"\bBackrest\x121\n" +
 	"\tGetConfig\x12\x16.google.protobuf.Empty\x1a\n" +
 	".v1.Config\"\x00\x12%\n" +
@@ -2197,7 +2437,8 @@ const file_v1_service_proto_rawDesc = "" +
 	"\x12GetOperationEvents\x12\x16.google.protobuf.Empty\x1a\x12.v1.OperationEvent\"\x000\x01\x12>\n" +
 	"\rGetOperations\x12\x18.v1.GetOperationsRequest\x1a\x11.v1.OperationList\"\x00\x12C\n" +
 	"\rListSnapshots\x12\x18.v1.ListSnapshotsRequest\x1a\x16.v1.ResticSnapshotList\"\x00\x12R\n" +
-	"\x11ListSnapshotFiles\x12\x1c.v1.ListSnapshotFilesRequest\x1a\x1d.v1.ListSnapshotFilesResponse\"\x00\x125\n" +
+	"\x11ListSnapshotFiles\x12\x1c.v1.ListSnapshotFilesRequest\x1a\x1d.v1.ListSnapshotFilesResponse\"\x00\x12@\n" +
+	"\vListSources\x12\x16.v1.ListSourcesRequest\x1a\x17.v1.ListSourcesResponse\"\x00\x125\n" +
 	"\x06Backup\x12\x11.v1.BackupRequest\x1a\x16.google.protobuf.Empty\"\x00\x12?\n" +
 	"\n" +
 	"DoRepoTask\x12\x15.v1.DoRepoTaskRequest\x1a\x18.v1.ScheduleTaskResponse\"\x00\x127\n" +
@@ -2228,7 +2469,7 @@ func file_v1_service_proto_rawDescGZIP() []byte {
 }
 
 var file_v1_service_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_v1_service_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
+var file_v1_service_proto_msgTypes = make([]protoimpl.MessageInfo, 34)
 var file_v1_service_proto_goTypes = []any{
 	(DoRepoTaskRequest_Task)(0),                      // 0: v1.DoRepoTaskRequest.Task
 	(*BackupRequest)(nil),                            // 1: v1.BackupRequest
@@ -2244,102 +2485,108 @@ var file_v1_service_proto_goTypes = []any{
 	(*ClearHistoryRequest)(nil),                      // 11: v1.ClearHistoryRequest
 	(*ForgetRequest)(nil),                            // 12: v1.ForgetRequest
 	(*ListSnapshotsRequest)(nil),                     // 13: v1.ListSnapshotsRequest
-	(*GetOperationsRequest)(nil),                     // 14: v1.GetOperationsRequest
-	(*RestoreSnapshotRequest)(nil),                   // 15: v1.RestoreSnapshotRequest
-	(*ListSnapshotFilesRequest)(nil),                 // 16: v1.ListSnapshotFilesRequest
-	(*ListSnapshotFilesResponse)(nil),                // 17: v1.ListSnapshotFilesResponse
-	(*LogDataRequest)(nil),                           // 18: v1.LogDataRequest
-	(*GetDownloadURLRequest)(nil),                    // 19: v1.GetDownloadURLRequest
-	(*LsEntry)(nil),                                  // 20: v1.LsEntry
-	(*RunCommandRequest)(nil),                        // 21: v1.RunCommandRequest
-	(*RunCommandResponse)(nil),                       // 22: v1.RunCommandResponse
-	(*RemoveRepoRequest)(nil),                        // 23: v1.RemoveRepoRequest
-	(*CancelOperationRequest)(nil),                   // 24: v1.CancelOperationRequest
-	(*SummaryDashboardResponse)(nil),                 // 25: v1.SummaryDashboardResponse
-	(*GeneratePairingTokenRequest)(nil),              // 26: v1.GeneratePairingTokenRequest
-	(*GeneratePairingTokenResponse)(nil),             // 27: v1.GeneratePairingTokenResponse
-	(*SummaryDashboardResponse_Summary)(nil),         // 28: v1.SummaryDashboardResponse.Summary
-	(*SummaryDashboardResponse_BackupChart)(nil),     // 29: v1.SummaryDashboardResponse.BackupChart
-	(*SummaryDashboardResponse_DayStatusBucket)(nil), // 30: v1.SummaryDashboardResponse.DayStatusBucket
-	(*SummaryDashboardResponse_StatusAndCount)(nil),  // 31: v1.SummaryDashboardResponse.StatusAndCount
-	(*Repo)(nil),                                     // 32: v1.Repo
-	(*Multihost_Permission)(nil),                     // 33: v1.Multihost.Permission
-	(OperationStatus)(0),                             // 34: v1.OperationStatus
-	(*emptypb.Empty)(nil),                            // 35: google.protobuf.Empty
-	(*Config)(nil),                                   // 36: v1.Config
-	(*types.StringValue)(nil),                        // 37: types.StringValue
-	(*OperationEvent)(nil),                           // 38: v1.OperationEvent
-	(*OperationList)(nil),                            // 39: v1.OperationList
-	(*ResticSnapshotList)(nil),                       // 40: v1.ResticSnapshotList
-	(*types.BytesValue)(nil),                         // 41: types.BytesValue
-	(*types.StringList)(nil),                         // 42: types.StringList
+	(*ListSourcesRequest)(nil),                       // 14: v1.ListSourcesRequest
+	(*ListSourcesResponse)(nil),                      // 15: v1.ListSourcesResponse
+	(*SnapshotSource)(nil),                           // 16: v1.SnapshotSource
+	(*GetOperationsRequest)(nil),                     // 17: v1.GetOperationsRequest
+	(*RestoreSnapshotRequest)(nil),                   // 18: v1.RestoreSnapshotRequest
+	(*ListSnapshotFilesRequest)(nil),                 // 19: v1.ListSnapshotFilesRequest
+	(*ListSnapshotFilesResponse)(nil),                // 20: v1.ListSnapshotFilesResponse
+	(*LogDataRequest)(nil),                           // 21: v1.LogDataRequest
+	(*GetDownloadURLRequest)(nil),                    // 22: v1.GetDownloadURLRequest
+	(*LsEntry)(nil),                                  // 23: v1.LsEntry
+	(*RunCommandRequest)(nil),                        // 24: v1.RunCommandRequest
+	(*RunCommandResponse)(nil),                       // 25: v1.RunCommandResponse
+	(*RemoveRepoRequest)(nil),                        // 26: v1.RemoveRepoRequest
+	(*CancelOperationRequest)(nil),                   // 27: v1.CancelOperationRequest
+	(*SummaryDashboardResponse)(nil),                 // 28: v1.SummaryDashboardResponse
+	(*GeneratePairingTokenRequest)(nil),              // 29: v1.GeneratePairingTokenRequest
+	(*GeneratePairingTokenResponse)(nil),             // 30: v1.GeneratePairingTokenResponse
+	(*SummaryDashboardResponse_Summary)(nil),         // 31: v1.SummaryDashboardResponse.Summary
+	(*SummaryDashboardResponse_BackupChart)(nil),     // 32: v1.SummaryDashboardResponse.BackupChart
+	(*SummaryDashboardResponse_DayStatusBucket)(nil), // 33: v1.SummaryDashboardResponse.DayStatusBucket
+	(*SummaryDashboardResponse_StatusAndCount)(nil),  // 34: v1.SummaryDashboardResponse.StatusAndCount
+	(*Repo)(nil),                                     // 35: v1.Repo
+	(*Multihost_Permission)(nil),                     // 36: v1.Multihost.Permission
+	(OperationStatus)(0),                             // 37: v1.OperationStatus
+	(*emptypb.Empty)(nil),                            // 38: google.protobuf.Empty
+	(*Config)(nil),                                   // 39: v1.Config
+	(*types.StringValue)(nil),                        // 40: types.StringValue
+	(*OperationEvent)(nil),                           // 41: v1.OperationEvent
+	(*OperationList)(nil),                            // 42: v1.OperationList
+	(*ResticSnapshotList)(nil),                       // 43: v1.ResticSnapshotList
+	(*types.BytesValue)(nil),                         // 44: types.BytesValue
+	(*types.StringList)(nil),                         // 45: types.StringList
 }
 var file_v1_service_proto_depIdxs = []int32{
-	32, // 0: v1.CheckRepoExistsRequest.repo:type_name -> v1.Repo
-	32, // 1: v1.AddRepoRequest.repo:type_name -> v1.Repo
+	35, // 0: v1.CheckRepoExistsRequest.repo:type_name -> v1.Repo
+	35, // 1: v1.AddRepoRequest.repo:type_name -> v1.Repo
 	0,  // 2: v1.DoRepoTaskRequest.task:type_name -> v1.DoRepoTaskRequest.Task
 	4,  // 3: v1.ClearHistoryRequest.selector:type_name -> v1.OpSelector
-	4,  // 4: v1.GetOperationsRequest.selector:type_name -> v1.OpSelector
-	20, // 5: v1.ListSnapshotFilesResponse.entries:type_name -> v1.LsEntry
-	28, // 6: v1.SummaryDashboardResponse.repo_summaries:type_name -> v1.SummaryDashboardResponse.Summary
-	28, // 7: v1.SummaryDashboardResponse.plan_summaries:type_name -> v1.SummaryDashboardResponse.Summary
-	33, // 8: v1.GeneratePairingTokenRequest.permissions:type_name -> v1.Multihost.Permission
-	29, // 9: v1.SummaryDashboardResponse.Summary.recent_backups:type_name -> v1.SummaryDashboardResponse.BackupChart
-	30, // 10: v1.SummaryDashboardResponse.Summary.history_last_30days:type_name -> v1.SummaryDashboardResponse.DayStatusBucket
-	34, // 11: v1.SummaryDashboardResponse.BackupChart.status:type_name -> v1.OperationStatus
-	31, // 12: v1.SummaryDashboardResponse.DayStatusBucket.status_counts:type_name -> v1.SummaryDashboardResponse.StatusAndCount
-	34, // 13: v1.SummaryDashboardResponse.StatusAndCount.status:type_name -> v1.OperationStatus
-	35, // 14: v1.Backrest.GetConfig:input_type -> google.protobuf.Empty
-	36, // 15: v1.Backrest.SetConfig:input_type -> v1.Config
-	5,  // 16: v1.Backrest.SetupSftp:input_type -> v1.SetupSftpRequest
-	7,  // 17: v1.Backrest.CheckRepoExists:input_type -> v1.CheckRepoExistsRequest
-	9,  // 18: v1.Backrest.AddRepo:input_type -> v1.AddRepoRequest
-	23, // 19: v1.Backrest.RemoveRepo:input_type -> v1.RemoveRepoRequest
-	35, // 20: v1.Backrest.GetOperationEvents:input_type -> google.protobuf.Empty
-	14, // 21: v1.Backrest.GetOperations:input_type -> v1.GetOperationsRequest
-	13, // 22: v1.Backrest.ListSnapshots:input_type -> v1.ListSnapshotsRequest
-	16, // 23: v1.Backrest.ListSnapshotFiles:input_type -> v1.ListSnapshotFilesRequest
-	1,  // 24: v1.Backrest.Backup:input_type -> v1.BackupRequest
-	10, // 25: v1.Backrest.DoRepoTask:input_type -> v1.DoRepoTaskRequest
-	12, // 26: v1.Backrest.Forget:input_type -> v1.ForgetRequest
-	15, // 27: v1.Backrest.Restore:input_type -> v1.RestoreSnapshotRequest
-	24, // 28: v1.Backrest.Cancel:input_type -> v1.CancelOperationRequest
-	18, // 29: v1.Backrest.GetLogs:input_type -> v1.LogDataRequest
-	21, // 30: v1.Backrest.RunCommand:input_type -> v1.RunCommandRequest
-	19, // 31: v1.Backrest.GetDownloadURL:input_type -> v1.GetDownloadURLRequest
-	11, // 32: v1.Backrest.ClearHistory:input_type -> v1.ClearHistoryRequest
-	37, // 33: v1.Backrest.PathAutocomplete:input_type -> types.StringValue
-	35, // 34: v1.Backrest.GetVersion:input_type -> google.protobuf.Empty
-	35, // 35: v1.Backrest.GetSummaryDashboard:input_type -> google.protobuf.Empty
-	26, // 36: v1.Backrest.GeneratePairingToken:input_type -> v1.GeneratePairingTokenRequest
-	36, // 37: v1.Backrest.GetConfig:output_type -> v1.Config
-	36, // 38: v1.Backrest.SetConfig:output_type -> v1.Config
-	6,  // 39: v1.Backrest.SetupSftp:output_type -> v1.SetupSftpResponse
-	8,  // 40: v1.Backrest.CheckRepoExists:output_type -> v1.CheckRepoExistsResponse
-	36, // 41: v1.Backrest.AddRepo:output_type -> v1.Config
-	36, // 42: v1.Backrest.RemoveRepo:output_type -> v1.Config
-	38, // 43: v1.Backrest.GetOperationEvents:output_type -> v1.OperationEvent
-	39, // 44: v1.Backrest.GetOperations:output_type -> v1.OperationList
-	40, // 45: v1.Backrest.ListSnapshots:output_type -> v1.ResticSnapshotList
-	17, // 46: v1.Backrest.ListSnapshotFiles:output_type -> v1.ListSnapshotFilesResponse
-	35, // 47: v1.Backrest.Backup:output_type -> google.protobuf.Empty
-	2,  // 48: v1.Backrest.DoRepoTask:output_type -> v1.ScheduleTaskResponse
-	2,  // 49: v1.Backrest.Forget:output_type -> v1.ScheduleTaskResponse
-	2,  // 50: v1.Backrest.Restore:output_type -> v1.ScheduleTaskResponse
-	35, // 51: v1.Backrest.Cancel:output_type -> google.protobuf.Empty
-	41, // 52: v1.Backrest.GetLogs:output_type -> types.BytesValue
-	22, // 53: v1.Backrest.RunCommand:output_type -> v1.RunCommandResponse
-	37, // 54: v1.Backrest.GetDownloadURL:output_type -> types.StringValue
-	35, // 55: v1.Backrest.ClearHistory:output_type -> google.protobuf.Empty
-	42, // 56: v1.Backrest.PathAutocomplete:output_type -> types.StringList
-	3,  // 57: v1.Backrest.GetVersion:output_type -> v1.VersionInfo
-	25, // 58: v1.Backrest.GetSummaryDashboard:output_type -> v1.SummaryDashboardResponse
-	27, // 59: v1.Backrest.GeneratePairingToken:output_type -> v1.GeneratePairingTokenResponse
-	37, // [37:60] is the sub-list for method output_type
-	14, // [14:37] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	16, // 4: v1.ListSourcesResponse.sources:type_name -> v1.SnapshotSource
+	4,  // 5: v1.GetOperationsRequest.selector:type_name -> v1.OpSelector
+	23, // 6: v1.ListSnapshotFilesResponse.entries:type_name -> v1.LsEntry
+	31, // 7: v1.SummaryDashboardResponse.repo_summaries:type_name -> v1.SummaryDashboardResponse.Summary
+	31, // 8: v1.SummaryDashboardResponse.plan_summaries:type_name -> v1.SummaryDashboardResponse.Summary
+	36, // 9: v1.GeneratePairingTokenRequest.permissions:type_name -> v1.Multihost.Permission
+	32, // 10: v1.SummaryDashboardResponse.Summary.recent_backups:type_name -> v1.SummaryDashboardResponse.BackupChart
+	33, // 11: v1.SummaryDashboardResponse.Summary.history_last_30days:type_name -> v1.SummaryDashboardResponse.DayStatusBucket
+	37, // 12: v1.SummaryDashboardResponse.BackupChart.status:type_name -> v1.OperationStatus
+	34, // 13: v1.SummaryDashboardResponse.DayStatusBucket.status_counts:type_name -> v1.SummaryDashboardResponse.StatusAndCount
+	37, // 14: v1.SummaryDashboardResponse.StatusAndCount.status:type_name -> v1.OperationStatus
+	38, // 15: v1.Backrest.GetConfig:input_type -> google.protobuf.Empty
+	39, // 16: v1.Backrest.SetConfig:input_type -> v1.Config
+	5,  // 17: v1.Backrest.SetupSftp:input_type -> v1.SetupSftpRequest
+	7,  // 18: v1.Backrest.CheckRepoExists:input_type -> v1.CheckRepoExistsRequest
+	9,  // 19: v1.Backrest.AddRepo:input_type -> v1.AddRepoRequest
+	26, // 20: v1.Backrest.RemoveRepo:input_type -> v1.RemoveRepoRequest
+	38, // 21: v1.Backrest.GetOperationEvents:input_type -> google.protobuf.Empty
+	17, // 22: v1.Backrest.GetOperations:input_type -> v1.GetOperationsRequest
+	13, // 23: v1.Backrest.ListSnapshots:input_type -> v1.ListSnapshotsRequest
+	19, // 24: v1.Backrest.ListSnapshotFiles:input_type -> v1.ListSnapshotFilesRequest
+	14, // 25: v1.Backrest.ListSources:input_type -> v1.ListSourcesRequest
+	1,  // 26: v1.Backrest.Backup:input_type -> v1.BackupRequest
+	10, // 27: v1.Backrest.DoRepoTask:input_type -> v1.DoRepoTaskRequest
+	12, // 28: v1.Backrest.Forget:input_type -> v1.ForgetRequest
+	18, // 29: v1.Backrest.Restore:input_type -> v1.RestoreSnapshotRequest
+	27, // 30: v1.Backrest.Cancel:input_type -> v1.CancelOperationRequest
+	21, // 31: v1.Backrest.GetLogs:input_type -> v1.LogDataRequest
+	24, // 32: v1.Backrest.RunCommand:input_type -> v1.RunCommandRequest
+	22, // 33: v1.Backrest.GetDownloadURL:input_type -> v1.GetDownloadURLRequest
+	11, // 34: v1.Backrest.ClearHistory:input_type -> v1.ClearHistoryRequest
+	40, // 35: v1.Backrest.PathAutocomplete:input_type -> types.StringValue
+	38, // 36: v1.Backrest.GetVersion:input_type -> google.protobuf.Empty
+	38, // 37: v1.Backrest.GetSummaryDashboard:input_type -> google.protobuf.Empty
+	29, // 38: v1.Backrest.GeneratePairingToken:input_type -> v1.GeneratePairingTokenRequest
+	39, // 39: v1.Backrest.GetConfig:output_type -> v1.Config
+	39, // 40: v1.Backrest.SetConfig:output_type -> v1.Config
+	6,  // 41: v1.Backrest.SetupSftp:output_type -> v1.SetupSftpResponse
+	8,  // 42: v1.Backrest.CheckRepoExists:output_type -> v1.CheckRepoExistsResponse
+	39, // 43: v1.Backrest.AddRepo:output_type -> v1.Config
+	39, // 44: v1.Backrest.RemoveRepo:output_type -> v1.Config
+	41, // 45: v1.Backrest.GetOperationEvents:output_type -> v1.OperationEvent
+	42, // 46: v1.Backrest.GetOperations:output_type -> v1.OperationList
+	43, // 47: v1.Backrest.ListSnapshots:output_type -> v1.ResticSnapshotList
+	20, // 48: v1.Backrest.ListSnapshotFiles:output_type -> v1.ListSnapshotFilesResponse
+	15, // 49: v1.Backrest.ListSources:output_type -> v1.ListSourcesResponse
+	38, // 50: v1.Backrest.Backup:output_type -> google.protobuf.Empty
+	2,  // 51: v1.Backrest.DoRepoTask:output_type -> v1.ScheduleTaskResponse
+	2,  // 52: v1.Backrest.Forget:output_type -> v1.ScheduleTaskResponse
+	2,  // 53: v1.Backrest.Restore:output_type -> v1.ScheduleTaskResponse
+	38, // 54: v1.Backrest.Cancel:output_type -> google.protobuf.Empty
+	44, // 55: v1.Backrest.GetLogs:output_type -> types.BytesValue
+	25, // 56: v1.Backrest.RunCommand:output_type -> v1.RunCommandResponse
+	40, // 57: v1.Backrest.GetDownloadURL:output_type -> types.StringValue
+	38, // 58: v1.Backrest.ClearHistory:output_type -> google.protobuf.Empty
+	45, // 59: v1.Backrest.PathAutocomplete:output_type -> types.StringList
+	3,  // 60: v1.Backrest.GetVersion:output_type -> v1.VersionInfo
+	28, // 61: v1.Backrest.GetSummaryDashboard:output_type -> v1.SummaryDashboardResponse
+	30, // 62: v1.Backrest.GeneratePairingToken:output_type -> v1.GeneratePairingTokenResponse
+	39, // [39:63] is the sub-list for method output_type
+	15, // [15:39] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_v1_service_proto_init() }
@@ -2358,7 +2605,7 @@ func file_v1_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_service_proto_rawDesc), len(file_v1_service_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   31,
+			NumMessages:   34,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

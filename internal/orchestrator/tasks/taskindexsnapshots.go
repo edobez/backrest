@@ -2,7 +2,9 @@ package tasks
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	v1 "github.com/garethgeorge/backrest/gen/go/v1"
@@ -25,6 +27,71 @@ func NewOneoffIndexSnapshotsTask(repo *v1.Repo, at time.Time) Task {
 			return NotifyError(ctx, taskRunner, st.Task.Name(), indexSnapshotsHelper(ctx, st, taskRunner))
 		},
 	}
+}
+
+// lastIndexRun records when each repo (by GUID) was last indexed successfully. Index runs don't create
+// an operation in the oplog, so this is kept in memory. It survives config changes (which recreate
+// all scheduled tasks) but not restarts, so a scheduled index runs once shortly after startup.
+var lastIndexRun = struct {
+	sync.Mutex
+	byGUID map[string]time.Time
+}{byGUID: make(map[string]time.Time)}
+
+func recordIndexRun(repoGUID string, at time.Time) {
+	lastIndexRun.Lock()
+	defer lastIndexRun.Unlock()
+	lastIndexRun.byGUID[repoGUID] = at
+}
+
+func lastIndexRunFor(repoGUID string) time.Time {
+	lastIndexRun.Lock()
+	defer lastIndexRun.Unlock()
+	return lastIndexRun.byGUID[repoGUID]
+}
+
+// ScheduledIndexSnapshotsTask re-indexes a repo's snapshots according to the repo's index policy, so
+// snapshots created by other clients are picked up even when Backrest runs no backups on the repo.
+type ScheduledIndexSnapshotsTask struct {
+	BaseTask
+}
+
+func NewScheduledIndexSnapshotsTask(repo *v1.Repo) Task {
+	return &ScheduledIndexSnapshotsTask{
+		BaseTask: BaseTask{
+			TaskType:   "scheduled_index_snapshots",
+			TaskName:   fmt.Sprintf("scheduled index snapshots for repo %q", repo.Id),
+			TaskRepo:   repo,
+			TaskPlanID: PlanForSystemTasks,
+		},
+	}
+}
+
+func (t *ScheduledIndexSnapshotsTask) Next(now time.Time, runner TaskRunner) (ScheduledTask, error) {
+	repoProto, err := runner.GetRepo(t.RepoID())
+	if err != nil {
+		return ScheduledTask{}, fmt.Errorf("get repo %v: %w", t.RepoID(), err)
+	}
+
+	schedule := repoProto.GetIndexPolicy().GetSchedule()
+	if !protoutil.ScheduleEnabled(schedule) {
+		return NeverScheduledTask, nil
+	}
+
+	runAt, err := protoutil.ResolveSchedule(schedule, lastIndexRunFor(repoProto.GetGuid()), now)
+	if errors.Is(err, protoutil.ErrScheduleDisabled) {
+		return NeverScheduledTask, nil
+	} else if err != nil {
+		return NeverScheduledTask, fmt.Errorf("resolve schedule: %w", err)
+	}
+	if runAt.Before(now) {
+		runAt = now
+	}
+
+	return ScheduledTask{RunAt: runAt}, nil
+}
+
+func (t *ScheduledIndexSnapshotsTask) Run(ctx context.Context, st ScheduledTask, runner TaskRunner) error {
+	return NotifyError(ctx, runner, t.Name(), indexSnapshotsHelper(ctx, st, runner))
 }
 
 // indexSnapshotsHelper indexes all snapshots for a plan.
@@ -121,7 +188,8 @@ func indexSnapshotsHelper(ctx context.Context, st ScheduledTask, taskRunner Task
 
 	l.Sugar().Debugf("marked %v snapshots as forgotten", len(currentIds)-len(foundIds))
 
-	return err
+	recordIndexRun(t.Repo().GetGuid(), time.Now())
+	return nil
 }
 
 // returns a map of current (e.g. not forgotten) snapshot IDs for the plan.

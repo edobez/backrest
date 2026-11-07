@@ -31,6 +31,7 @@ import (
 	"github.com/garethgeorge/backrest/internal/orchestrator/tasks"
 	"github.com/garethgeorge/backrest/internal/protoutil"
 	"github.com/garethgeorge/backrest/internal/resticinstaller"
+	"github.com/garethgeorge/backrest/internal/sources"
 	"github.com/garethgeorge/backrest/pkg/restic"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
@@ -369,7 +370,13 @@ func (s *BackrestHandler) ListSnapshots(ctx context.Context, req *connect.Reques
 	// Transform the snapshots and return them.
 	var rs []*v1.ResticSnapshot
 	for _, snapshot := range snapshots {
-		rs = append(rs, protoutil.SnapshotToProto(snapshot))
+		sp := protoutil.SnapshotToProto(snapshot)
+		// The source filter is applied here rather than with restic's --host/--path flags, because
+		// --path is a superset match and would also return snapshots of other sources.
+		if query.SourceId != "" && sources.IDForSnapshot(sp) != query.SourceId {
+			continue
+		}
+		rs = append(rs, sp)
 	}
 
 	return connect.NewResponse(&v1.ResticSnapshotList{
@@ -393,6 +400,28 @@ func (s *BackrestHandler) ListSnapshotFiles(ctx context.Context, req *connect.Re
 	return connect.NewResponse(&v1.ListSnapshotFilesResponse{
 		Path:    query.Path,
 		Entries: entries,
+	}), nil
+}
+
+// ListSources returns the snapshot sources of a repo, computed from the indexed (not forgotten) snapshots.
+func (s *BackrestHandler) ListSources(ctx context.Context, req *connect.Request[v1.ListSourcesRequest]) (*connect.Response[v1.ListSourcesResponse], error) {
+	repoCfg, err := s.orchestrator.GetRepo(req.Msg.RepoId)
+	if err != nil {
+		return nil, withLookupCode(fmt.Errorf("failed to get repo: %w", err))
+	}
+
+	var snapshots []*v1.ResticSnapshot
+	if err := s.oplog.Query(oplog.Query{}.SetRepoGUID(repoCfg.GetGuid()), func(op *v1.Operation) error {
+		if idx := op.GetOperationIndexSnapshot(); idx != nil && !idx.GetForgot() && idx.GetSnapshot() != nil {
+			snapshots = append(snapshots, idx.GetSnapshot())
+		}
+		return nil
+	}); err != nil {
+		return nil, fmt.Errorf("query indexed snapshots: %w", err)
+	}
+
+	return connect.NewResponse(&v1.ListSourcesResponse{
+		Sources: sources.Build(repoCfg.GetId(), snapshots),
 	}), nil
 }
 

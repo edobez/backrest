@@ -17,6 +17,7 @@ import (
 	"github.com/garethgeorge/backrest/internal/cryptoutil"
 	"github.com/garethgeorge/backrest/internal/orchestrator/logging"
 	"github.com/garethgeorge/backrest/internal/protoutil"
+	"github.com/garethgeorge/backrest/internal/repomode"
 	"github.com/garethgeorge/backrest/pkg/restic"
 	"github.com/google/shlex"
 	"go.uber.org/zap"
@@ -30,6 +31,9 @@ type RepoOrchestrator struct {
 	config     *v1.Config
 	repoConfig *v1.Repo
 	repo       *restic.Repo
+	// lockingRepo runs commands that must take a repo lock even when repo
+	// adds --no-lock (READ_ONLY mode). Only the manual check uses it.
+	lockingRepo *restic.Repo
 }
 
 // NewRepoOrchestrator accepts a config and a repo that is configured with the properties of that config object.
@@ -81,12 +85,19 @@ func NewRepoOrchestrator(config *v1.Config, repoConfig *v1.Repo, resticPath stri
 		opts = append(opts, restic.WithFlags("-o", "sftp.args=-oBatchMode=yes"))
 	}
 
-	repo := restic.NewRepo(resticPath, ExpandEnv(repoConfig.GetUri()), opts...)
+	uri := ExpandEnv(repoConfig.GetUri())
+	lockingRepo := restic.NewRepo(resticPath, uri, slices.Clone(opts)...)
+	repo := lockingRepo
+	if repomode.NoLock(repoConfig) {
+		// READ_ONLY: Backrest must not write lock files to the repo.
+		repo = restic.NewRepo(resticPath, uri, append(slices.Clone(opts), restic.WithFlags("--no-lock"))...)
+	}
 
 	return &RepoOrchestrator{
-		config:     config,
-		repoConfig: repoConfig,
-		repo:       repo,
+		config:      config,
+		repoConfig:  repoConfig,
+		repo:        repo,
+		lockingRepo: lockingRepo,
 	}, nil
 }
 
@@ -101,6 +112,17 @@ func (r *RepoOrchestrator) Exists(ctx context.Context) error {
 func (r *RepoOrchestrator) Init(ctx context.Context) error {
 	ctx, flush := forwardResticLogs(ctx)
 	defer flush()
+
+	if err := repomode.Check(r.repoConfig, repomode.ActionInit); err != nil {
+		// The repo must already exist, only verify that it does.
+		if existsErr := r.repo.Exists(ctx); existsErr != nil {
+			if errors.Is(existsErr, restic.ErrRepoNotFound) {
+				return fmt.Errorf("repo not found, and %w", err)
+			}
+			return existsErr
+		}
+		return nil
+	}
 
 	return r.repo.Init(ctx)
 }
@@ -137,6 +159,10 @@ func (r *RepoOrchestrator) SnapshotsForPlan(ctx context.Context, plan *v1.Plan) 
 func (r *RepoOrchestrator) Backup(ctx context.Context, plan *v1.Plan, dryRun bool, progressCallback func(event *restic.BackupProgressEntry)) (*restic.BackupProgressEntry, error) {
 	l := r.logger(ctx)
 	l.Debug("repo orchestrator starting backup", zap.String("repo", r.repoConfig.Id))
+
+	if err := repomode.Check(r.repoConfig, repomode.ActionBackup); err != nil {
+		return nil, err
+	}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -214,6 +240,9 @@ func (r *RepoOrchestrator) ListSnapshotFiles(ctx context.Context, snapshotId str
 }
 
 func (r *RepoOrchestrator) Forget(ctx context.Context, policy *v1.RetentionPolicy, opts ...restic.GenericOption) ([]*v1.ResticSnapshot, error) {
+	if err := repomode.Check(r.repoConfig, repomode.ActionForget); err != nil {
+		return nil, err
+	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	ctx, flush := forwardResticLogs(ctx)
@@ -246,6 +275,9 @@ func (r *RepoOrchestrator) Forget(ctx context.Context, policy *v1.RetentionPolic
 }
 
 func (r *RepoOrchestrator) ForgetSnapshot(ctx context.Context, snapshotId string) error {
+	if err := repomode.Check(r.repoConfig, repomode.ActionForget); err != nil {
+		return err
+	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	ctx, flush := forwardResticLogs(ctx)
@@ -256,6 +288,9 @@ func (r *RepoOrchestrator) ForgetSnapshot(ctx context.Context, snapshotId string
 }
 
 func (r *RepoOrchestrator) Prune(ctx context.Context, output io.Writer) error {
+	if err := repomode.Check(r.repoConfig, repomode.ActionPrune); err != nil {
+		return err
+	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	ctx, flush := forwardResticLogs(ctx)
@@ -283,7 +318,12 @@ func (r *RepoOrchestrator) Prune(ctx context.Context, output io.Writer) error {
 	return nil
 }
 
+// Check runs restic check. It always takes a lock, also in READ_ONLY mode:
+// callers are responsible for only running it there on explicit user request.
 func (r *RepoOrchestrator) Check(ctx context.Context, output io.Writer) error {
+	if err := repomode.Check(r.repoConfig, repomode.ActionManualCheck); err != nil {
+		return err
+	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	ctx, flush := forwardResticLogs(ctx)
@@ -302,7 +342,7 @@ func (r *RepoOrchestrator) Check(ctx context.Context, output io.Writer) error {
 	}
 
 	r.logger(ctx).Debug("checking repo")
-	err := r.repo.Check(ctx, output, opts...)
+	err := r.lockingRepo.Check(ctx, output, opts...)
 	if err != nil {
 		return fmt.Errorf("check repo %v: %w", r.repoConfig.Id, err)
 	}
@@ -354,8 +394,9 @@ func (r *RepoOrchestrator) Dump(ctx context.Context, snapshotId string, snapshot
 }
 
 // UnlockIfAutoEnabled unlocks the repo if the auto unlock feature is enabled.
+// It never unlocks a repo whose mode forbids unlocking.
 func (r *RepoOrchestrator) UnlockIfAutoEnabled(ctx context.Context) error {
-	if !r.repoConfig.AutoUnlock {
+	if !r.repoConfig.AutoUnlock || repomode.Check(r.repoConfig, repomode.ActionUnlock) != nil {
 		return nil
 	}
 	r.mu.Lock()
@@ -369,6 +410,9 @@ func (r *RepoOrchestrator) UnlockIfAutoEnabled(ctx context.Context) error {
 }
 
 func (r *RepoOrchestrator) Unlock(ctx context.Context) error {
+	if err := repomode.Check(r.repoConfig, repomode.ActionUnlock); err != nil {
+		return err
+	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -394,6 +438,10 @@ func (r *RepoOrchestrator) Stats(ctx context.Context) (*v1.RepoStats, error) {
 }
 
 func (r *RepoOrchestrator) AddTags(ctx context.Context, snapshotIDs []string, tags []string) error {
+	// restic tag rewrites snapshots and removes the originals.
+	if err := repomode.Check(r.repoConfig, repomode.ActionTag); err != nil {
+		return err
+	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	ctx, flush := forwardResticLogs(ctx)

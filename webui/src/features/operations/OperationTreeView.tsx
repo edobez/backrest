@@ -76,6 +76,7 @@ import { shouldHideOperation } from "../../api/oplog";
 import { StickyPanel } from "../../components/common/StickyPanel";
 import { create, toJsonString } from "@bufbuild/protobuf";
 import { useConfig } from "../../app/provider";
+import { repoModeAllows, repoModeDisallowedReason } from "../../lib/repoMode";
 
 import * as m from "../../paraglide/messages";
 interface OpTreeNode {
@@ -559,6 +560,7 @@ const DisplayOperationTree = React.memo(
 
 const BackupView = ({ backup }: { backup?: FlowDisplayInfo }) => {
   useDateFormat();
+  const [config] = useConfig();
   if (!backup) {
     return (
       <EmptyState.Root>
@@ -589,9 +591,14 @@ const BackupView = ({ backup }: { backup?: FlowDisplayInfo }) => {
       (op) => op.op.case === "operationIndexSnapshot",
     );
 
+    const repoMode = config?.repos?.find((r) => r.id === backup.repoID)?.mode;
+    const canForget = repoModeAllows(repoMode, "forget");
+
     const deleteButton =
       snapshotInFlow && snapshotInFlow.snapshotId ? (
         <ConfirmButton
+          disabled={!canForget}
+          title={canForget ? undefined : repoModeDisallowedReason(repoMode)}
           variant="ghost"
           confirmTitle={m.operation_tree_view_confirm_forget()}
           confirmTimeout={2000}

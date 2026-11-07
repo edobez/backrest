@@ -716,5 +716,20 @@
   "settings_clock_24h": "24-hour",
   "settings_date_format_preview": "Preview: {time}",
   "settings_token_expired": "Expired {time}",
-  "settings_token_expires": "Expires {time}"
+  "settings_token_expires": "Expires {time}",
+  "repo_mode_managed": "Managed",
+  "repo_mode_append_only": "Append-only",
+  "repo_mode_read_only": "Read-only",
+  "repo_mode_action_not_allowed": "Not allowed: the repository is in {mode} mode.",
+  "repo_mode_badge_tooltip_append_only": "Backrest adds backups to this repository but never removes data: no forget, prune or unlock.",
+  "repo_mode_badge_tooltip_read_only": "Backrest writes nothing to this repository. It only browses and restores snapshots, without taking locks.",
+  "add_repo_modal_field_mode": "Mode",
+  "add_repo_modal_field_mode_help": "What Backrest may do with this repository. Use a restricted mode for repositories that another tool or machine manages.",
+  "add_repo_modal_mode_managed_description": "Backrest manages the repository: backups, retention, prune, check and unlock.",
+  "add_repo_modal_mode_append_only_description": "Backrest may add backups but never removes data: no forget, prune or unlock. Matches rest-server's --append-only mode.",
+  "add_repo_modal_mode_read_only_description": "Backrest writes nothing: no backups, forget, prune, unlock or scheduled check. Snapshots are browsed and restored without locks.",
+  "add_repo_modal_mode_restricted_hint": "Disabled in {mode} mode. Plans that back up to this repository must not have a retention policy (append-only) or must be removed (read-only).",
+  "repo_check_lock_title": "Check a read-only repository?",
+  "repo_check_lock_warning": "restic check takes an exclusive lock on the repository while it runs. Other clients, for example their backups, are blocked until it finishes. This is the only operation Backrest writes to a read-only repository.",
+  "repo_check_lock_confirm": "Run check"
 }

@@ -34,6 +34,7 @@ import { useConfig } from "../../app/provider";
 import { OperationListView } from "../operations/OperationListView";
 import { OperationTreeView } from "../operations/OperationTreeView";
 import * as m from "../../paraglide/messages";
+import { repoModeAllows, repoModeDisallowedReason } from "../../lib/repoMode";
 
 export const PlanView = ({ plan }: React.PropsWithChildren<{ plan: Plan }>) => {
   const [config, _] = useConfig();
@@ -142,9 +143,20 @@ export const PlanView = ({ plan }: React.PropsWithChildren<{ plan: Plan }>) => {
               >
                 {m.op_type_run_command()}
               </MenuItem>
-              <MenuItem value="unlock" onClick={handleUnlockNow}>
-                {m.repo_button_unlock()}
-              </MenuItem>
+              {repoModeAllows(repo?.mode, "unlock") ? (
+                <MenuItem value="unlock" onClick={handleUnlockNow}>
+                  {m.repo_button_unlock()}
+                </MenuItem>
+              ) : (
+                <Tooltip
+                  content={repoModeDisallowedReason(repo?.mode)}
+                  showArrow
+                >
+                  <MenuItem value="unlock" disabled>
+                    {m.repo_button_unlock()}
+                  </MenuItem>
+                </Tooltip>
+              )}
               <MenuItem value="clear-history" onClick={handleClearErrorHistory}>
                 {m.plan_button_clear_history()}
               </MenuItem>

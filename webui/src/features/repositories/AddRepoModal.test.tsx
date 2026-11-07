@@ -1,4 +1,5 @@
 import { screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { create } from "@bufbuild/protobuf";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as m from "../../paraglide/messages";
@@ -10,6 +11,7 @@ import { makeConfig, makeRepo, connectError, Code } from "../../test/proto";
 import { CheckRepoExistsResponseSchema } from "../../../gen/ts/v1/service_pb";
 import { ResticSnapshotListSchema } from "../../../gen/ts/v1/restic_pb";
 import { StringListSchema } from "../../../gen/ts/types/value_pb";
+import { RepoMode } from "../../../gen/ts/v1/config_pb";
 
 // The URIAutocomplete combobox is the only <input role="combobox"> in the
 // modal (the Advanced-section EnumSelectors render as <button> triggers).
@@ -260,5 +262,49 @@ describe("AddRepoModal", () => {
     expect(
       screen.getByRole("button", { name: m.add_plan_modal_button_submit() }),
     ).not.toBeDisabled();
+  });
+
+  it("selecting read-only mode saves the mode and disables forbidden schedules", async () => {
+    vi.mocked(backrestService.addRepo).mockResolvedValue(makeConfig());
+
+    const { user } = renderWithProviders(<AddRepoModal template={null} />, {
+      config: makeConfig(),
+    });
+
+    await fillCreateForm(user, {
+      id: "external",
+      uri: "/tmp/external",
+      password: "supersecret",
+    });
+
+    // zag.js's Select trigger needs the pointer-events check disabled in jsdom
+    // (see HooksFormList.test.tsx).
+    const selectUser = userEvent.setup({ pointerEventsCheck: 0 });
+    await selectUser.click(
+      screen.getByRole("combobox", { name: m.add_repo_modal_field_mode() }),
+    );
+    // The options are portalled outside the modal, which the modal marks
+    // aria-hidden, so query with hidden: true and skip the native <option>
+    // of the hidden <select>.
+    const options = await screen.findAllByRole("option", {
+      name: new RegExp("^" + m.repo_mode_read_only()),
+      hidden: true,
+    });
+    await selectUser.click(
+      options.find((o) => o.getAttribute("data-part") === "item")!,
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: m.add_plan_modal_button_submit() }),
+    );
+    await waitFor(() => expect(backrestService.addRepo).toHaveBeenCalled());
+
+    const repo = vi.mocked(backrestService.addRepo).mock.calls[0][0].repo!;
+    expect(repo.mode).toBe(RepoMode.READ_ONLY);
+    expect(repo.autoUnlock).toBe(false);
+    // The defaults schedule prune and check monthly; both must be turned off.
+    expect(repo.prunePolicy?.schedule?.schedule?.case).toBe("disabled");
+    expect(repo.checkPolicy?.schedule?.schedule?.case).toBe("disabled");
+    expect(repo.forgetPolicy?.schedule?.schedule?.case).toBe("disabled");
   });
 });

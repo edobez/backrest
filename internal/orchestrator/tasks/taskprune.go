@@ -9,6 +9,7 @@ import (
 	v1 "github.com/garethgeorge/backrest/gen/go/v1"
 	"github.com/garethgeorge/backrest/internal/oplog"
 	"github.com/garethgeorge/backrest/internal/protoutil"
+	"github.com/garethgeorge/backrest/internal/repomode"
 	"go.uber.org/zap"
 )
 
@@ -49,7 +50,7 @@ func (t *PruneTask) Next(now time.Time, runner TaskRunner) (ScheduledTask, error
 		return ScheduledTask{}, fmt.Errorf("get repo %v: %w", t.RepoID(), err)
 	}
 
-	if repo.PrunePolicy.GetSchedule() == nil {
+	if repo.PrunePolicy.GetSchedule() == nil || !repomode.Allows(repo.GetMode(), repomode.ActionPrune) {
 		return NeverScheduledTask, nil
 	}
 
@@ -97,6 +98,10 @@ func (t *PruneTask) Run(ctx context.Context, st ScheduledTask, runner TaskRunner
 	// Helper to notify of errors during the setup phase
 	notifyError := func(err error) error {
 		return NotifyError(ctx, runner, t.Name(), err, v1.Hook_CONDITION_PRUNE_ERROR)
+	}
+
+	if err := checkRepoMode(runner, t.RepoID(), repomode.ActionPrune); err != nil {
+		return notifyError(err)
 	}
 
 	repo, err := runner.GetRepoOrchestrator(t.RepoID())

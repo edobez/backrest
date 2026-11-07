@@ -16,6 +16,7 @@ import {
   CommandPrefix_IONiceLevel,
   ForgetPolicy_GroupBy,
   Repo,
+  RepoMode,
   RepoSchema,
   Schedule_Clock,
 } from "../../../gen/ts/v1/config_pb";
@@ -65,6 +66,13 @@ import {
 } from "../../components/common/TwoPaneModal";
 import { SectionCard } from "../../components/common/SectionCard";
 import { ToggleField } from "../../components/common/ToggleField";
+import {
+  RepoAction,
+  repoModeAllows,
+  repoModeFromJsonName,
+  repoModeJsonNames,
+  repoModeLabel,
+} from "../../lib/repoMode";
 import { RetentionPolicyView } from "../../components/common/RetentionPolicyView";
 import {
   AccordionRoot,
@@ -483,6 +491,47 @@ export const AddRepoModal = ({
 
   flagsRef.current = (formData.flags as string[]) || [];
 
+  const formMode = repoModeFromJsonName(getField(["mode"]));
+  const modeAllows = (action: RepoAction) => repoModeAllows(formMode, action);
+
+  // Selecting a restricted mode turns off, in the draft, the repo settings that
+  // the mode forbids. Plans that conflict are reported by validation on save.
+  const setMode = (name: string) => {
+    const mode = repoModeFromJsonName(name);
+    updateField(["mode"], name);
+    const disableSchedule = (policy: string) => {
+      const sched = getField([policy, "schedule"]);
+      if (sched && !sched.disabled) {
+        updateField([policy, "schedule"], {
+          disabled: true,
+          clock: sched.clock,
+        });
+      }
+    };
+    if (!repoModeAllows(mode, "prune")) disableSchedule("prunePolicy");
+    if (!repoModeAllows(mode, "forget")) disableSchedule("forgetPolicy");
+    if (!repoModeAllows(mode, "scheduledCheck")) disableSchedule("checkPolicy");
+    if (!repoModeAllows(mode, "unlock")) updateField(["autoUnlock"], false);
+  };
+
+  // Wraps a settings card that the current mode forbids: shown disabled with
+  // an explanation.
+  const restricted = (allowed: boolean, children: React.ReactNode) =>
+    allowed ? (
+      children
+    ) : (
+      <Box>
+        <CText fontSize="sm" color="fg.muted" mb={2}>
+          {m.add_repo_modal_mode_restricted_hint({
+            mode: repoModeLabel(formMode),
+          })}
+        </CText>
+        <Box opacity={0.5} pointerEvents="none" aria-disabled>
+          {children}
+        </Box>
+      </Box>
+    );
+
   useEffect(() => {
     const uri = getField(["uri"]);
     if (!uri?.startsWith("sftp:")) {
@@ -741,6 +790,24 @@ export const AddRepoModal = ({
     },
   ];
 
+  const repoModeOptions: EnumOption<string>[] = [
+    {
+      label: m.repo_mode_managed(),
+      value: repoModeJsonNames[RepoMode.MANAGED],
+      description: m.add_repo_modal_mode_managed_description(),
+    },
+    {
+      label: m.repo_mode_append_only(),
+      value: repoModeJsonNames[RepoMode.APPEND_ONLY],
+      description: m.add_repo_modal_mode_append_only_description(),
+    },
+    {
+      label: m.repo_mode_read_only(),
+      value: repoModeJsonNames[RepoMode.READ_ONLY],
+      description: m.add_repo_modal_mode_read_only_description(),
+    },
+  ];
+
   const cpuNiceOptions: EnumOption<string>[] = [
     {
       label: "CPU_DEFAULT",
@@ -902,11 +969,25 @@ export const AddRepoModal = ({
                   />
                 </Field>
 
+                <Field
+                  label={m.add_repo_modal_field_mode()}
+                  helperText={m.add_repo_modal_field_mode_help()}
+                >
+                  <EnumSelector
+                    options={repoModeOptions}
+                    size="sm"
+                    value={repoModeJsonNames[formMode]}
+                    onChange={(val) => setMode(val as string)}
+                    ariaLabel={m.add_repo_modal_field_mode()}
+                  />
+                </Field>
+
                 <ToggleField
                   checked={getField(["autoUnlock"]) || false}
                   onChange={(v) => updateField(["autoUnlock"], v)}
                   label={m.add_repo_modal_field_auto_unlock()}
                   hint={m.add_repo_modal_field_auto_unlock_tooltip()}
+                  disabled={!modeAllows("unlock")}
                 />
 
                 <ToggleField
@@ -1041,65 +1122,71 @@ export const AddRepoModal = ({
 
           {/* Scheduling Section */}
           <TwoPaneSection id="scheduling">
-            <SectionCard
-              icon={<FiClock size={16} />}
-              title={m.add_repo_modal_prune_policy()}
-              description={m.add_repo_modal_field_prune_policy_help()}
-            >
-              <Stack gap={4}>
-                <NumberInputField
-                  label={m.add_repo_modal_field_max_unused()}
-                  helperText={m.add_repo_modal_field_max_unused_tooltip()}
-                  value={getField(["prunePolicy", "maxUnusedPercent"])}
-                  onValueChange={(e: {
-                    value: string;
-                    valueAsNumber: number;
-                  }) =>
-                    updateField(
-                      ["prunePolicy", "maxUnusedPercent"],
-                      e.valueAsNumber,
-                    )
-                  }
-                />
-                <ScheduleFormItem
-                  value={getField(["prunePolicy", "schedule"])}
-                  onChange={(val: any) =>
-                    updateField(["prunePolicy", "schedule"], val)
-                  }
-                  defaults={ScheduleDefaultsInfrequent}
-                />
-              </Stack>
-            </SectionCard>
+            {restricted(
+              modeAllows("prune"),
+              <SectionCard
+                icon={<FiClock size={16} />}
+                title={m.add_repo_modal_prune_policy()}
+                description={m.add_repo_modal_field_prune_policy_help()}
+              >
+                <Stack gap={4}>
+                  <NumberInputField
+                    label={m.add_repo_modal_field_max_unused()}
+                    helperText={m.add_repo_modal_field_max_unused_tooltip()}
+                    value={getField(["prunePolicy", "maxUnusedPercent"])}
+                    onValueChange={(e: {
+                      value: string;
+                      valueAsNumber: number;
+                    }) =>
+                      updateField(
+                        ["prunePolicy", "maxUnusedPercent"],
+                        e.valueAsNumber,
+                      )
+                    }
+                  />
+                  <ScheduleFormItem
+                    value={getField(["prunePolicy", "schedule"])}
+                    onChange={(val: any) =>
+                      updateField(["prunePolicy", "schedule"], val)
+                    }
+                    defaults={ScheduleDefaultsInfrequent}
+                  />
+                </Stack>
+              </SectionCard>,
+            )}
 
-            <SectionCard
-              icon={<FiClock size={16} />}
-              title={m.add_repo_modal_check_policy()}
-              description={m.add_repo_modal_field_check_policy_help()}
-            >
-              <Stack gap={4}>
-                <NumberInputField
-                  label={m.add_repo_modal_field_read_data()}
-                  helperText={m.add_repo_modal_field_read_data_tooltip()}
-                  value={getField(["checkPolicy", "readDataSubsetPercent"])}
-                  onValueChange={(e: {
-                    value: string;
-                    valueAsNumber: number;
-                  }) =>
-                    updateField(
-                      ["checkPolicy", "readDataSubsetPercent"],
-                      e.valueAsNumber,
-                    )
-                  }
-                />
-                <ScheduleFormItem
-                  value={getField(["checkPolicy", "schedule"])}
-                  onChange={(val: any) =>
-                    updateField(["checkPolicy", "schedule"], val)
-                  }
-                  defaults={ScheduleDefaultsInfrequent}
-                />
-              </Stack>
-            </SectionCard>
+            {restricted(
+              modeAllows("scheduledCheck"),
+              <SectionCard
+                icon={<FiClock size={16} />}
+                title={m.add_repo_modal_check_policy()}
+                description={m.add_repo_modal_field_check_policy_help()}
+              >
+                <Stack gap={4}>
+                  <NumberInputField
+                    label={m.add_repo_modal_field_read_data()}
+                    helperText={m.add_repo_modal_field_read_data_tooltip()}
+                    value={getField(["checkPolicy", "readDataSubsetPercent"])}
+                    onValueChange={(e: {
+                      value: string;
+                      valueAsNumber: number;
+                    }) =>
+                      updateField(
+                        ["checkPolicy", "readDataSubsetPercent"],
+                        e.valueAsNumber,
+                      )
+                    }
+                  />
+                  <ScheduleFormItem
+                    value={getField(["checkPolicy", "schedule"])}
+                    onChange={(val: any) =>
+                      updateField(["checkPolicy", "schedule"], val)
+                    }
+                    defaults={ScheduleDefaultsInfrequent}
+                  />
+                </Stack>
+              </SectionCard>,
+            )}
 
             <SectionCard
               icon={<FiClock size={16} />}
@@ -1115,59 +1202,62 @@ export const AddRepoModal = ({
               />
             </SectionCard>
 
-            <SectionCard
-              icon={<FiClock size={16} />}
-              title={m.add_repo_modal_field_forget_policy()}
-              description={m.add_repo_modal_field_forget_policy_help()}
-            >
-              <Stack gap={4}>
-                <ScheduleFormItem
-                  value={getField(["forgetPolicy", "schedule"])}
-                  onChange={(val: any) =>
-                    updateField(["forgetPolicy", "schedule"], val)
-                  }
-                  defaults={ScheduleDefaultsDaily}
-                />
-                {(() => {
-                  const sched = getField(["forgetPolicy", "schedule"]);
-                  return sched && !sched.disabled ? (
-                    <>
-                      <Field
-                        label={m.add_repo_modal_retention_policy_label()}
-                        helperText={m.add_repo_modal_retention_policy_help()}
-                      >
-                        <RetentionPolicyView
-                          retention={getField(["forgetPolicy", "retention"])}
-                          onChange={(v: any) =>
-                            updateField(["forgetPolicy", "retention"], v)
-                          }
-                        />
-                      </Field>
-                      <Field
-                        label={m.add_repo_modal_field_forget_group_by()}
-                        helperText={m.add_repo_modal_field_forget_group_by_help()}
-                      >
-                        <EnumSelector
-                          options={forgetGroupByOptions}
-                          size="sm"
-                          value={
-                            getField(["forgetPolicy", "groupBy"]) ||
-                            "GROUP_BY_TAGS"
-                          }
-                          onChange={(val) =>
-                            updateField(
-                              ["forgetPolicy", "groupBy"],
-                              val as string,
-                            )
-                          }
-                          ariaLabel={m.add_repo_modal_field_forget_group_by()}
-                        />
-                      </Field>
-                    </>
-                  ) : null;
-                })()}
-              </Stack>
-            </SectionCard>
+            {restricted(
+              modeAllows("forget"),
+              <SectionCard
+                icon={<FiClock size={16} />}
+                title={m.add_repo_modal_field_forget_policy()}
+                description={m.add_repo_modal_field_forget_policy_help()}
+              >
+                <Stack gap={4}>
+                  <ScheduleFormItem
+                    value={getField(["forgetPolicy", "schedule"])}
+                    onChange={(val: any) =>
+                      updateField(["forgetPolicy", "schedule"], val)
+                    }
+                    defaults={ScheduleDefaultsDaily}
+                  />
+                  {(() => {
+                    const sched = getField(["forgetPolicy", "schedule"]);
+                    return sched && !sched.disabled ? (
+                      <>
+                        <Field
+                          label={m.add_repo_modal_retention_policy_label()}
+                          helperText={m.add_repo_modal_retention_policy_help()}
+                        >
+                          <RetentionPolicyView
+                            retention={getField(["forgetPolicy", "retention"])}
+                            onChange={(v: any) =>
+                              updateField(["forgetPolicy", "retention"], v)
+                            }
+                          />
+                        </Field>
+                        <Field
+                          label={m.add_repo_modal_field_forget_group_by()}
+                          helperText={m.add_repo_modal_field_forget_group_by_help()}
+                        >
+                          <EnumSelector
+                            options={forgetGroupByOptions}
+                            size="sm"
+                            value={
+                              getField(["forgetPolicy", "groupBy"]) ||
+                              "GROUP_BY_TAGS"
+                            }
+                            onChange={(val) =>
+                              updateField(
+                                ["forgetPolicy", "groupBy"],
+                                val as string,
+                              )
+                            }
+                            ariaLabel={m.add_repo_modal_field_forget_group_by()}
+                          />
+                        </Field>
+                      </>
+                    ) : null;
+                  })()}
+                </Stack>
+              </SectionCard>,
+            )}
           </TwoPaneSection>
 
           {/* Hooks Section */}

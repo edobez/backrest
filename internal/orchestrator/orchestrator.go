@@ -18,6 +18,7 @@ import (
 	"github.com/garethgeorge/backrest/internal/orchestrator/repo"
 	"github.com/garethgeorge/backrest/internal/orchestrator/tasks"
 	"github.com/garethgeorge/backrest/internal/queue"
+	"github.com/garethgeorge/backrest/internal/repomode"
 	"github.com/google/uuid"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
@@ -135,6 +136,10 @@ func NewOrchestrator(resticBin string, cfgMgr *config.ConfigManager, log *oplog.
 						continue
 					}
 
+					if repomode.Check(repo.Config(), repomode.ActionUnlock) != nil {
+						// The repo is managed elsewhere, its locks are not ours to remove.
+						continue
+					}
 					if err := repo.Unlock(context.Background()); err != nil {
 						zap.L().Error("failed to unlock repo", zap.String("repo", repoId), zap.Error(err))
 					}
@@ -183,6 +188,10 @@ func (o *Orchestrator) autoInitReposIfNeeded(resticBin string) error {
 	var results []initResult
 	for _, r := range cfg.Repos {
 		if !r.AutoInitialize {
+			continue
+		}
+		if err := repomode.Check(r, repomode.ActionInit); err != nil {
+			fullErr = multierr.Append(fullErr, fmt.Errorf("auto-initialize repo %q: %w", r.Id, err))
 			continue
 		}
 		zap.L().Info("auto-initializing repo", zap.String("repo", r.Id))

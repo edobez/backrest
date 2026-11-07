@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -49,6 +50,18 @@ func (r *commandRecorder) commands() []string {
 	return cmds
 }
 
+// snapshotPath returns p as restic stores it in a snapshot. On Windows,
+// C:\data is stored as /C/data.
+func snapshotPath(p string) string {
+	if runtime.GOOS != "windows" {
+		return p
+	}
+	if vol := filepath.VolumeName(p); vol != "" {
+		return "/" + strings.TrimSuffix(vol, ":") + filepath.ToSlash(p[len(vol):])
+	}
+	return filepath.ToSlash(p)
+}
+
 // setupRepoWithSnapshot creates a MANAGED repo with one snapshot and returns
 // its URI and the snapshot ID.
 func setupRepoWithSnapshot(t *testing.T) (uri string, snapshotID string, testData string) {
@@ -85,18 +98,19 @@ func TestReadOnlyRepoCommands(t *testing.T) {
 
 	rec := newCommandRecorder()
 	ctx := rec.ctx()
+	dataPath := snapshotPath(testData)
 
 	// Allowed operations: each must run every restic command with --no-lock.
 	allowed := map[string]func() error{
 		"init (exists check)": func() error { return r.Init(ctx) },
 		"snapshots":           func() error { _, err := r.Snapshots(ctx); return err },
-		"ls":                  func() error { _, err := r.ListSnapshotFiles(ctx, snapshotID, testData); return err },
+		"ls":                  func() error { _, err := r.ListSnapshotFiles(ctx, snapshotID, dataPath); return err },
 		"stats":               func() error { _, err := r.Stats(ctx); return err },
 		"restore": func() error {
-			_, err := r.Restore(ctx, snapshotID, path.Join(testData, "file10"), t.TempDir(), nil)
+			_, err := r.Restore(ctx, snapshotID, path.Join(dataPath, "file10"), t.TempDir(), nil)
 			return err
 		},
-		"dump": func() error { return r.Dump(ctx, snapshotID, path.Join(testData, "file10"), io.Discard) },
+		"dump": func() error { return r.Dump(ctx, snapshotID, path.Join(dataPath, "file10"), io.Discard) },
 	}
 	for name, fn := range allowed {
 		if err := fn(); err != nil {

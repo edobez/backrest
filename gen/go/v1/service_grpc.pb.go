@@ -32,6 +32,7 @@ const (
 	Backrest_ListSnapshots_FullMethodName        = "/v1.Backrest/ListSnapshots"
 	Backrest_ListSnapshotFiles_FullMethodName    = "/v1.Backrest/ListSnapshotFiles"
 	Backrest_ListSources_FullMethodName          = "/v1.Backrest/ListSources"
+	Backrest_PreviewAdoptedSource_FullMethodName = "/v1.Backrest/PreviewAdoptedSource"
 	Backrest_Backup_FullMethodName               = "/v1.Backrest/Backup"
 	Backrest_DoRepoTask_FullMethodName           = "/v1.Backrest/DoRepoTask"
 	Backrest_Forget_FullMethodName               = "/v1.Backrest/Forget"
@@ -64,6 +65,9 @@ type BackrestClient interface {
 	// ListSources returns the snapshot sources (hostname + paths, as restic's `--group-by host,paths`) of a repo,
 	// computed from the indexed snapshots.
 	ListSources(ctx context.Context, in *ListSourcesRequest, opts ...grpc.CallOption) (*ListSourcesResponse, error)
+	// PreviewAdoptedSource resolves an adopted source rule with a lock-free dry run and returns the
+	// matched sources and the snapshots the rule would keep and remove. Nothing is modified.
+	PreviewAdoptedSource(ctx context.Context, in *PreviewAdoptedSourceRequest, opts ...grpc.CallOption) (*PreviewAdoptedSourceResponse, error)
 	// Backup schedules a backup operation. It accepts a plan id and returns empty if the task is enqueued.
 	Backup(ctx context.Context, in *BackupRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// DoRepoTask schedules a repo task. It accepts a repo id and a task type and returns the scheduled operation's ID.
@@ -214,6 +218,16 @@ func (c *backrestClient) ListSources(ctx context.Context, in *ListSourcesRequest
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListSourcesResponse)
 	err := c.cc.Invoke(ctx, Backrest_ListSources_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *backrestClient) PreviewAdoptedSource(ctx context.Context, in *PreviewAdoptedSourceRequest, opts ...grpc.CallOption) (*PreviewAdoptedSourceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PreviewAdoptedSourceResponse)
+	err := c.cc.Invoke(ctx, Backrest_PreviewAdoptedSource_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -376,6 +390,9 @@ type BackrestServer interface {
 	// ListSources returns the snapshot sources (hostname + paths, as restic's `--group-by host,paths`) of a repo,
 	// computed from the indexed snapshots.
 	ListSources(context.Context, *ListSourcesRequest) (*ListSourcesResponse, error)
+	// PreviewAdoptedSource resolves an adopted source rule with a lock-free dry run and returns the
+	// matched sources and the snapshots the rule would keep and remove. Nothing is modified.
+	PreviewAdoptedSource(context.Context, *PreviewAdoptedSourceRequest) (*PreviewAdoptedSourceResponse, error)
 	// Backup schedules a backup operation. It accepts a plan id and returns empty if the task is enqueued.
 	Backup(context.Context, *BackupRequest) (*emptypb.Empty, error)
 	// DoRepoTask schedules a repo task. It accepts a repo id and a task type and returns the scheduled operation's ID.
@@ -445,6 +462,9 @@ func (UnimplementedBackrestServer) ListSnapshotFiles(context.Context, *ListSnaps
 }
 func (UnimplementedBackrestServer) ListSources(context.Context, *ListSourcesRequest) (*ListSourcesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListSources not implemented")
+}
+func (UnimplementedBackrestServer) PreviewAdoptedSource(context.Context, *PreviewAdoptedSourceRequest) (*PreviewAdoptedSourceResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PreviewAdoptedSource not implemented")
 }
 func (UnimplementedBackrestServer) Backup(context.Context, *BackupRequest) (*emptypb.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method Backup not implemented")
@@ -693,6 +713,24 @@ func _Backrest_ListSources_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BackrestServer).ListSources(ctx, req.(*ListSourcesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Backrest_PreviewAdoptedSource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PreviewAdoptedSourceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BackrestServer).PreviewAdoptedSource(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Backrest_PreviewAdoptedSource_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BackrestServer).PreviewAdoptedSource(ctx, req.(*PreviewAdoptedSourceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -970,6 +1008,10 @@ var Backrest_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListSources",
 			Handler:    _Backrest_ListSources_Handler,
+		},
+		{
+			MethodName: "PreviewAdoptedSource",
+			Handler:    _Backrest_PreviewAdoptedSource_Handler,
 		},
 		{
 			MethodName: "Backup",

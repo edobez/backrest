@@ -37,6 +37,9 @@ func validateRepoMode(repo *v1.Repo, plans []*v1.Plan) error {
 	if !repomode.Allows(mode, repomode.ActionForget) && protoutil.ScheduleEnabled(repo.GetForgetPolicy().GetSchedule()) {
 		conflicts = append(conflicts, "forget policy schedule")
 	}
+	if !repomode.Allows(mode, repomode.ActionForget) && len(repo.GetAdoptedSources()) > 0 {
+		conflicts = append(conflicts, "adopted sources")
+	}
 	if !repomode.Allows(mode, repomode.ActionPrune) && protoutil.ScheduleEnabled(repo.GetPrunePolicy().GetSchedule()) {
 		conflicts = append(conflicts, "prune policy schedule")
 	}

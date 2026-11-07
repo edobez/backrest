@@ -331,6 +331,21 @@ func (r *ForgetResult) Validate() error {
 	return nil
 }
 
+// ForgetGroup is one group of restic's `forget --json` output. Host and Paths are set when the
+// grouping includes them (e.g. `--group-by host,paths`).
+type ForgetGroup struct {
+	Host   string     `json:"host"`
+	Paths  []string   `json:"paths"`
+	Tags   []string   `json:"tags"`
+	Keep   []Snapshot `json:"keep"`
+	Remove []Snapshot `json:"remove"`
+}
+
+func (g *ForgetGroup) Validate() error {
+	r := ForgetResult{Keep: g.Keep, Remove: g.Remove}
+	return r.Validate()
+}
+
 func ValidateSnapshotId(id string) error {
 	if len(id) != 64 {
 		return fmt.Errorf("restic may be out of date (check with `restic self-upgrade`): snapshot ID must be 64 chars, got %v chars", len(id))

@@ -60,6 +60,9 @@ const (
 	BackrestListSnapshotFilesProcedure = "/v1.Backrest/ListSnapshotFiles"
 	// BackrestListSourcesProcedure is the fully-qualified name of the Backrest's ListSources RPC.
 	BackrestListSourcesProcedure = "/v1.Backrest/ListSources"
+	// BackrestPreviewAdoptedSourceProcedure is the fully-qualified name of the Backrest's
+	// PreviewAdoptedSource RPC.
+	BackrestPreviewAdoptedSourceProcedure = "/v1.Backrest/PreviewAdoptedSource"
 	// BackrestBackupProcedure is the fully-qualified name of the Backrest's Backup RPC.
 	BackrestBackupProcedure = "/v1.Backrest/Backup"
 	// BackrestDoRepoTaskProcedure is the fully-qualified name of the Backrest's DoRepoTask RPC.
@@ -106,6 +109,9 @@ type BackrestClient interface {
 	// ListSources returns the snapshot sources (hostname + paths, as restic's `--group-by host,paths`) of a repo,
 	// computed from the indexed snapshots.
 	ListSources(context.Context, *connect.Request[v1.ListSourcesRequest]) (*connect.Response[v1.ListSourcesResponse], error)
+	// PreviewAdoptedSource resolves an adopted source rule with a lock-free dry run and returns the
+	// matched sources and the snapshots the rule would keep and remove. Nothing is modified.
+	PreviewAdoptedSource(context.Context, *connect.Request[v1.PreviewAdoptedSourceRequest]) (*connect.Response[v1.PreviewAdoptedSourceResponse], error)
 	// Backup schedules a backup operation. It accepts a plan id and returns empty if the task is enqueued.
 	Backup(context.Context, *connect.Request[v1.BackupRequest]) (*connect.Response[emptypb.Empty], error)
 	// DoRepoTask schedules a repo task. It accepts a repo id and a task type and returns the scheduled operation's ID.
@@ -212,6 +218,12 @@ func NewBackrestClient(httpClient connect.HTTPClient, baseURL string, opts ...co
 			connect.WithSchema(backrestMethods.ByName("ListSources")),
 			connect.WithClientOptions(opts...),
 		),
+		previewAdoptedSource: connect.NewClient[v1.PreviewAdoptedSourceRequest, v1.PreviewAdoptedSourceResponse](
+			httpClient,
+			baseURL+BackrestPreviewAdoptedSourceProcedure,
+			connect.WithSchema(backrestMethods.ByName("PreviewAdoptedSource")),
+			connect.WithClientOptions(opts...),
+		),
 		backup: connect.NewClient[v1.BackupRequest, emptypb.Empty](
 			httpClient,
 			baseURL+BackrestBackupProcedure,
@@ -306,6 +318,7 @@ type backrestClient struct {
 	listSnapshots        *connect.Client[v1.ListSnapshotsRequest, v1.ResticSnapshotList]
 	listSnapshotFiles    *connect.Client[v1.ListSnapshotFilesRequest, v1.ListSnapshotFilesResponse]
 	listSources          *connect.Client[v1.ListSourcesRequest, v1.ListSourcesResponse]
+	previewAdoptedSource *connect.Client[v1.PreviewAdoptedSourceRequest, v1.PreviewAdoptedSourceResponse]
 	backup               *connect.Client[v1.BackupRequest, emptypb.Empty]
 	doRepoTask           *connect.Client[v1.DoRepoTaskRequest, v1.ScheduleTaskResponse]
 	forget               *connect.Client[v1.ForgetRequest, v1.ScheduleTaskResponse]
@@ -374,6 +387,11 @@ func (c *backrestClient) ListSnapshotFiles(ctx context.Context, req *connect.Req
 // ListSources calls v1.Backrest.ListSources.
 func (c *backrestClient) ListSources(ctx context.Context, req *connect.Request[v1.ListSourcesRequest]) (*connect.Response[v1.ListSourcesResponse], error) {
 	return c.listSources.CallUnary(ctx, req)
+}
+
+// PreviewAdoptedSource calls v1.Backrest.PreviewAdoptedSource.
+func (c *backrestClient) PreviewAdoptedSource(ctx context.Context, req *connect.Request[v1.PreviewAdoptedSourceRequest]) (*connect.Response[v1.PreviewAdoptedSourceResponse], error) {
+	return c.previewAdoptedSource.CallUnary(ctx, req)
 }
 
 // Backup calls v1.Backrest.Backup.
@@ -456,6 +474,9 @@ type BackrestHandler interface {
 	// ListSources returns the snapshot sources (hostname + paths, as restic's `--group-by host,paths`) of a repo,
 	// computed from the indexed snapshots.
 	ListSources(context.Context, *connect.Request[v1.ListSourcesRequest]) (*connect.Response[v1.ListSourcesResponse], error)
+	// PreviewAdoptedSource resolves an adopted source rule with a lock-free dry run and returns the
+	// matched sources and the snapshots the rule would keep and remove. Nothing is modified.
+	PreviewAdoptedSource(context.Context, *connect.Request[v1.PreviewAdoptedSourceRequest]) (*connect.Response[v1.PreviewAdoptedSourceResponse], error)
 	// Backup schedules a backup operation. It accepts a plan id and returns empty if the task is enqueued.
 	Backup(context.Context, *connect.Request[v1.BackupRequest]) (*connect.Response[emptypb.Empty], error)
 	// DoRepoTask schedules a repo task. It accepts a repo id and a task type and returns the scheduled operation's ID.
@@ -556,6 +577,12 @@ func NewBackrestHandler(svc BackrestHandler, opts ...connect.HandlerOption) (str
 		BackrestListSourcesProcedure,
 		svc.ListSources,
 		connect.WithSchema(backrestMethods.ByName("ListSources")),
+		connect.WithHandlerOptions(opts...),
+	)
+	backrestPreviewAdoptedSourceHandler := connect.NewUnaryHandler(
+		BackrestPreviewAdoptedSourceProcedure,
+		svc.PreviewAdoptedSource,
+		connect.WithSchema(backrestMethods.ByName("PreviewAdoptedSource")),
 		connect.WithHandlerOptions(opts...),
 	)
 	backrestBackupHandler := connect.NewUnaryHandler(
@@ -660,6 +687,8 @@ func NewBackrestHandler(svc BackrestHandler, opts ...connect.HandlerOption) (str
 			backrestListSnapshotFilesHandler.ServeHTTP(w, r)
 		case BackrestListSourcesProcedure:
 			backrestListSourcesHandler.ServeHTTP(w, r)
+		case BackrestPreviewAdoptedSourceProcedure:
+			backrestPreviewAdoptedSourceHandler.ServeHTTP(w, r)
 		case BackrestBackupProcedure:
 			backrestBackupHandler.ServeHTTP(w, r)
 		case BackrestDoRepoTaskProcedure:
@@ -737,6 +766,10 @@ func (UnimplementedBackrestHandler) ListSnapshotFiles(context.Context, *connect.
 
 func (UnimplementedBackrestHandler) ListSources(context.Context, *connect.Request[v1.ListSourcesRequest]) (*connect.Response[v1.ListSourcesResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("v1.Backrest.ListSources is not implemented"))
+}
+
+func (UnimplementedBackrestHandler) PreviewAdoptedSource(context.Context, *connect.Request[v1.PreviewAdoptedSourceRequest]) (*connect.Response[v1.PreviewAdoptedSourceResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("v1.Backrest.PreviewAdoptedSource is not implemented"))
 }
 
 func (UnimplementedBackrestHandler) Backup(context.Context, *connect.Request[v1.BackupRequest]) (*connect.Response[emptypb.Empty], error) {

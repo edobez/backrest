@@ -13,7 +13,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file v1/config.proto.
  */
 export const file_v1_config: GenFile = /*@__PURE__*/
-  fileDesc("Cg92MS9jb25maWcucHJvdG8SAnYxIqwBCgZDb25maWcSDQoFbW9kbm8YASABKAUSDwoHdmVyc2lvbhgGIAEoBRIQCghpbnN0YW5jZRgCIAEoCRIXCgVyZXBvcxgDIAMoCzIILnYxLlJlcG8SFwoFcGxhbnMYBCADKAsyCC52MS5QbGFuEhYKBGF1dGgYBSABKAsyCC52MS5BdXRoEiYKCW11bHRpaG9zdBgHIAEoCzINLnYxLk11bHRpaG9zdFIEc3luYyL6BQoJTXVsdGlob3N0EiAKCGlkZW50aXR5GAEgASgLMg4udjEuUHJpdmF0ZUtleRInCgtrbm93bl9ob3N0cxgCIAMoCzISLnYxLk11bHRpaG9zdC5QZWVyEi4KEmF1dGhvcml6ZWRfY2xpZW50cxgDIAMoCzISLnYxLk11bHRpaG9zdC5QZWVyEjIKDnBhaXJpbmdfdG9rZW5zGAQgAygLMhoudjEuTXVsdGlob3N0LlBhaXJpbmdUb2tlbhqcAQoEUGVlchITCgtpbnN0YW5jZV9pZBgBIAEoCRIUCgVrZXlpZBgCIAEoCVIFa2V5SWQSLQoLcGVybWlzc2lvbnMYBSADKAsyGC52MS5NdWx0aWhvc3QuUGVybWlzc2lvbhIUCgxpbnN0YW5jZV91cmwYBCABKAkSHgoWaW5pdGlhbF9wYWlyaW5nX3NlY3JldBgGIAEoCUoECAMQBBquAQoMUGFpcmluZ1Rva2VuEg4KBnNlY3JldBgBIAEoCRINCgVsYWJlbBgCIAEoCRIXCg9jcmVhdGVkX2F0X3VuaXgYAyABKAMSFwoPZXhwaXJlc19hdF91bml4GAQgASgDEhAKCG1heF91c2VzGAUgASgFEgwKBHVzZXMYBiABKAUSLQoLcGVybWlzc2lvbnMYByADKAsyGC52MS5NdWx0aWhvc3QuUGVybWlzc2lvbhrtAQoKUGVybWlzc2lvbhIrCgR0eXBlGAEgASgOMh0udjEuTXVsdGlob3N0LlBlcm1pc3Npb24uVHlwZRIOCgZzY29wZXMYAiADKAkioQEKBFR5cGUSFgoSUEVSTUlTU0lPTl9VTktOT1dOEAASHgoaUEVSTUlTU0lPTl9SRUFEX09QRVJBVElPTlMQARIaChZQRVJNSVNTSU9OX1JFQURfQ09ORklHEAISIAocUEVSTUlTU0lPTl9SRUFEX1dSSVRFX0NPTkZJRxADEiMKH1BFUk1JU1NJT05fUkVDRUlWRV9TSEFSRURfUkVQT1MQBCKzAwoEUmVwbxIKCgJpZBgBIAEoCRILCgN1cmkYAiABKAkSDAoEZ3VpZBgLIAEoCRIQCghwYXNzd29yZBgDIAEoCRILCgNlbnYYBCADKAkSDQoFZmxhZ3MYBSADKAkSJQoMcHJ1bmVfcG9saWN5GAYgASgLMg8udjEuUHJ1bmVQb2xpY3kSJQoMY2hlY2tfcG9saWN5GAkgASgLMg8udjEuQ2hlY2tQb2xpY3kSFwoFaG9va3MYByADKAsyCC52MS5Ib29rEhMKC2F1dG9fdW5sb2NrGAggASgIEhcKD2F1dG9faW5pdGlhbGl6ZRgMIAEoCBIpCg5jb21tYW5kX3ByZWZpeBgKIAEoCzIRLnYxLkNvbW1hbmRQcmVmaXgSDgoGc2hhcmVkGA0gASgIEhoKEm9yaWdpbl9pbnN0YW5jZV9pZBgOIAEoCRInCg1mb3JnZXRfcG9saWN5GA8gASgLMhAudjEuRm9yZ2V0UG9saWN5EiUKDGluZGV4X3BvbGljeRgQIAEoCzIPLnYxLkluZGV4UG9saWN5EhoKBG1vZGUYESABKA4yDC52MS5SZXBvTW9kZSKGAgoEUGxhbhIKCgJpZBgBIAEoCRIMCgRyZXBvGAIgASgJEg0KBXBhdGhzGAQgAygJEhAKCGV4Y2x1ZGVzGAUgAygJEhEKCWlleGNsdWRlcxgJIAMoCRIeCghzY2hlZHVsZRgMIAEoCzIMLnYxLlNjaGVkdWxlEiYKCXJldGVudGlvbhgHIAEoCzITLnYxLlJldGVudGlvblBvbGljeRIXCgVob29rcxgIIAMoCzIILnYxLkhvb2sSIgoMYmFja3VwX2ZsYWdzGAogAygJUgxiYWNrdXBfZmxhZ3MSGQoRc2tpcF9pZl91bmNoYW5nZWQYDSABKAhKBAgDEARKBAgGEAdKBAgLEAwiigIKDUNvbW1hbmRQcmVmaXgSLgoHaW9fbmljZRgBIAEoDjIdLnYxLkNvbW1hbmRQcmVmaXguSU9OaWNlTGV2ZWwSMAoIY3B1X25pY2UYAiABKA4yHi52MS5Db21tYW5kUHJlZml4LkNQVU5pY2VMZXZlbCJbCgtJT05pY2VMZXZlbBIOCgpJT19ERUZBVUxUEAASFgoSSU9fQkVTVF9FRkZPUlRfTE9XEAESFwoTSU9fQkVTVF9FRkZPUlRfSElHSBACEgsKB0lPX0lETEUQAyI6CgxDUFVOaWNlTGV2ZWwSDwoLQ1BVX0RFRkFVTFQQABIMCghDUFVfSElHSBABEgsKB0NQVV9MT1cQAiKXAgoPUmV0ZW50aW9uUG9saWN5EhwKEnBvbGljeV9rZWVwX2xhc3RfbhgKIAEoBUgAEkYKFHBvbGljeV90aW1lX2J1Y2tldGVkGAsgASgLMiYudjEuUmV0ZW50aW9uUG9saWN5LlRpbWVCdWNrZXRlZENvdW50c0gAEhkKD3BvbGljeV9rZWVwX2FsbBgMIAEoCEgAGnkKElRpbWVCdWNrZXRlZENvdW50cxIOCgZob3VybHkYASABKAUSDQoFZGFpbHkYAiABKAUSDgoGd2Vla2x5GAMgASgFEg8KB21vbnRobHkYBCABKAUSDgoGeWVhcmx5GAUgASgFEhMKC2tlZXBfbGFzdF9uGAYgASgFQggKBnBvbGljeSL3AQoMRm9yZ2V0UG9saWN5Eh4KCHNjaGVkdWxlGAEgASgLMgwudjEuU2NoZWR1bGUSJgoJcmV0ZW50aW9uGAIgASgLMhMudjEuUmV0ZW50aW9uUG9saWN5EioKCGdyb3VwX2J5GAMgASgOMhgudjEuRm9yZ2V0UG9saWN5Lkdyb3VwQnkicwoHR3JvdXBCeRIRCg1HUk9VUF9CWV9UQUdTEAASEQoNR1JPVVBfQllfTk9ORRABEhEKDUdST1VQX0JZX0hPU1QQAhIXChNHUk9VUF9CWV9IT1NUX1BBVEhTEAMSFgoSR1JPVVBfQllfSE9TVF9UQUdTEAQiYwoLUHJ1bmVQb2xpY3kSHgoIc2NoZWR1bGUYAiABKAsyDC52MS5TY2hlZHVsZRIYChBtYXhfdW51c2VkX2J5dGVzGAMgASgDEhoKEm1heF91bnVzZWRfcGVyY2VudBgEIAEoASItCgtJbmRleFBvbGljeRIeCghzY2hlZHVsZRgBIAEoCzIMLnYxLlNjaGVkdWxlInMKC0NoZWNrUG9saWN5Eh4KCHNjaGVkdWxlGAEgASgLMgwudjEuU2NoZWR1bGUSGAoOc3RydWN0dXJlX29ubHkYZCABKAhIABIiChhyZWFkX2RhdGFfc3Vic2V0X3BlcmNlbnQYZSABKAFIAEIGCgRtb2RlIusBCghTY2hlZHVsZRISCghkaXNhYmxlZBgBIAEoCEgAEg4KBGNyb24YAiABKAlIABIaChBtYXhGcmVxdWVuY3lEYXlzGAMgASgFSAASGwoRbWF4RnJlcXVlbmN5SG91cnMYBCABKAVIABIhCgVjbG9jaxgFIAEoDjISLnYxLlNjaGVkdWxlLkNsb2NrIlMKBUNsb2NrEhEKDUNMT0NLX0RFRkFVTFQQABIPCgtDTE9DS19MT0NBTBABEg0KCUNMT0NLX1VUQxACEhcKE0NMT0NLX0xBU1RfUlVOX1RJTUUQA0IKCghzY2hlZHVsZSKADQoESG9vaxImCgpjb25kaXRpb25zGAEgAygOMhIudjEuSG9vay5Db25kaXRpb24SIgoIb25fZXJyb3IYAiABKA4yEC52MS5Ib29rLk9uRXJyb3ISKgoOYWN0aW9uX2NvbW1hbmQYZCABKAsyEC52MS5Ib29rLkNvbW1hbmRIABIqCg5hY3Rpb25fd2ViaG9vaxhlIAEoCzIQLnYxLkhvb2suV2ViaG9va0gAEioKDmFjdGlvbl9kaXNjb3JkGGYgASgLMhAudjEuSG9vay5EaXNjb3JkSAASKAoNYWN0aW9uX2dvdGlmeRhnIAEoCzIPLnYxLkhvb2suR290aWZ5SAASJgoMYWN0aW9uX3NsYWNrGGggASgLMg4udjEuSG9vay5TbGFja0gAEiwKD2FjdGlvbl9zaG91dHJychhpIAEoCzIRLnYxLkhvb2suU2hvdXRycnJIABI0ChNhY3Rpb25faGVhbHRoY2hlY2tzGGogASgLMhUudjEuSG9vay5IZWFsdGhjaGVja3NIABIsCg9hY3Rpb25fdGVsZWdyYW0YayABKAsyES52MS5Ib29rLlRlbGVncmFtSAAaGgoHQ29tbWFuZBIPCgdjb21tYW5kGAEgASgJGoMBCgdXZWJob29rEhMKC3dlYmhvb2tfdXJsGAEgASgJEicKBm1ldGhvZBgCIAEoDjIXLnYxLkhvb2suV2ViaG9vay5NZXRob2QSEAoIdGVtcGxhdGUYZCABKAkiKAoGTWV0aG9kEgsKB1VOS05PV04QABIHCgNHRVQQARIICgRQT1NUEAIaMAoHRGlzY29yZBITCgt3ZWJob29rX3VybBgBIAEoCRIQCgh0ZW1wbGF0ZRgCIAEoCRplCgZHb3RpZnkSEAoIYmFzZV91cmwYASABKAkSDQoFdG9rZW4YAyABKAkSEAoIdGVtcGxhdGUYZCABKAkSFgoOdGl0bGVfdGVtcGxhdGUYZSABKAkSEAoIcHJpb3JpdHkYZiABKAUaLgoFU2xhY2sSEwoLd2ViaG9va191cmwYASABKAkSEAoIdGVtcGxhdGUYAiABKAkaMgoIU2hvdXRycnISFAoMc2hvdXRycnJfdXJsGAEgASgJEhAKCHRlbXBsYXRlGAIgASgJGjUKDEhlYWx0aGNoZWNrcxITCgt3ZWJob29rX3VybBgBIAEoCRIQCgh0ZW1wbGF0ZRgCIAEoCRpACghUZWxlZ3JhbRIRCglib3RfdG9rZW4YASABKAkSDwoHY2hhdF9pZBgCIAEoCRIQCgh0ZW1wbGF0ZRgDIAEoCSL1AwoJQ29uZGl0aW9uEhUKEUNPTkRJVElPTl9VTktOT1dOEAASFwoTQ09ORElUSU9OX0FOWV9FUlJPUhABEhwKGENPTkRJVElPTl9TTkFQU0hPVF9TVEFSVBACEhoKFkNPTkRJVElPTl9TTkFQU0hPVF9FTkQQAxIcChhDT05ESVRJT05fU05BUFNIT1RfRVJST1IQBBIeChpDT05ESVRJT05fU05BUFNIT1RfV0FSTklORxAFEh4KGkNPTkRJVElPTl9TTkFQU0hPVF9TVUNDRVNTEAYSHgoaQ09ORElUSU9OX1NOQVBTSE9UX1NLSVBQRUQQBxIZChVDT05ESVRJT05fUFJVTkVfU1RBUlQQZBIZChVDT05ESVRJT05fUFJVTkVfRVJST1IQZRIbChdDT05ESVRJT05fUFJVTkVfU1VDQ0VTUxBmEhoKFUNPTkRJVElPTl9DSEVDS19TVEFSVBDIARIaChVDT05ESVRJT05fQ0hFQ0tfRVJST1IQyQESHAoXQ09ORElUSU9OX0NIRUNLX1NVQ0NFU1MQygESGwoWQ09ORElUSU9OX0ZPUkdFVF9TVEFSVBCsAhIbChZDT05ESVRJT05fRk9SR0VUX0VSUk9SEK0CEh0KGENPTkRJVElPTl9GT1JHRVRfU1VDQ0VTUxCuAiKpAQoHT25FcnJvchITCg9PTl9FUlJPUl9JR05PUkUQABITCg9PTl9FUlJPUl9DQU5DRUwQARISCg5PTl9FUlJPUl9GQVRBTBACEhoKFk9OX0VSUk9SX1JFVFJZXzFNSU5VVEUQZBIcChhPTl9FUlJPUl9SRVRSWV8xME1JTlVURVMQZRImCiJPTl9FUlJPUl9SRVRSWV9FWFBPTkVOVElBTF9CQUNLT0ZGEGdCCAoGYWN0aW9uIjEKBEF1dGgSEAoIZGlzYWJsZWQYASABKAgSFwoFdXNlcnMYAiADKAsyCC52MS5Vc2VyIjsKBFVzZXISDAoEbmFtZRgBIAEoCRIZCg9wYXNzd29yZF9iY3J5cHQYAiABKAlIAEIKCghwYXNzd29yZCpVCghSZXBvTW9kZRIVChFSRVBPX01PREVfTUFOQUdFRBAAEhkKFVJFUE9fTU9ERV9BUFBFTkRfT05MWRABEhcKE1JFUE9fTU9ERV9SRUFEX09OTFkQAkIsWipnaXRodWIuY29tL2dhcmV0aGdlb3JnZS9iYWNrcmVzdC9nZW4vZ28vdjFiBnByb3RvMw", [file_google_protobuf_empty, file_v1_crypto]);
+  fileDesc("Cg92MS9jb25maWcucHJvdG8SAnYxIqwBCgZDb25maWcSDQoFbW9kbm8YASABKAUSDwoHdmVyc2lvbhgGIAEoBRIQCghpbnN0YW5jZRgCIAEoCRIXCgVyZXBvcxgDIAMoCzIILnYxLlJlcG8SFwoFcGxhbnMYBCADKAsyCC52MS5QbGFuEhYKBGF1dGgYBSABKAsyCC52MS5BdXRoEiYKCW11bHRpaG9zdBgHIAEoCzINLnYxLk11bHRpaG9zdFIEc3luYyL6BQoJTXVsdGlob3N0EiAKCGlkZW50aXR5GAEgASgLMg4udjEuUHJpdmF0ZUtleRInCgtrbm93bl9ob3N0cxgCIAMoCzISLnYxLk11bHRpaG9zdC5QZWVyEi4KEmF1dGhvcml6ZWRfY2xpZW50cxgDIAMoCzISLnYxLk11bHRpaG9zdC5QZWVyEjIKDnBhaXJpbmdfdG9rZW5zGAQgAygLMhoudjEuTXVsdGlob3N0LlBhaXJpbmdUb2tlbhqcAQoEUGVlchITCgtpbnN0YW5jZV9pZBgBIAEoCRIUCgVrZXlpZBgCIAEoCVIFa2V5SWQSLQoLcGVybWlzc2lvbnMYBSADKAsyGC52MS5NdWx0aWhvc3QuUGVybWlzc2lvbhIUCgxpbnN0YW5jZV91cmwYBCABKAkSHgoWaW5pdGlhbF9wYWlyaW5nX3NlY3JldBgGIAEoCUoECAMQBBquAQoMUGFpcmluZ1Rva2VuEg4KBnNlY3JldBgBIAEoCRINCgVsYWJlbBgCIAEoCRIXCg9jcmVhdGVkX2F0X3VuaXgYAyABKAMSFwoPZXhwaXJlc19hdF91bml4GAQgASgDEhAKCG1heF91c2VzGAUgASgFEgwKBHVzZXMYBiABKAUSLQoLcGVybWlzc2lvbnMYByADKAsyGC52MS5NdWx0aWhvc3QuUGVybWlzc2lvbhrtAQoKUGVybWlzc2lvbhIrCgR0eXBlGAEgASgOMh0udjEuTXVsdGlob3N0LlBlcm1pc3Npb24uVHlwZRIOCgZzY29wZXMYAiADKAkioQEKBFR5cGUSFgoSUEVSTUlTU0lPTl9VTktOT1dOEAASHgoaUEVSTUlTU0lPTl9SRUFEX09QRVJBVElPTlMQARIaChZQRVJNSVNTSU9OX1JFQURfQ09ORklHEAISIAocUEVSTUlTU0lPTl9SRUFEX1dSSVRFX0NPTkZJRxADEiMKH1BFUk1JU1NJT05fUkVDRUlWRV9TSEFSRURfUkVQT1MQBCLfAwoEUmVwbxIKCgJpZBgBIAEoCRILCgN1cmkYAiABKAkSDAoEZ3VpZBgLIAEoCRIQCghwYXNzd29yZBgDIAEoCRILCgNlbnYYBCADKAkSDQoFZmxhZ3MYBSADKAkSJQoMcHJ1bmVfcG9saWN5GAYgASgLMg8udjEuUHJ1bmVQb2xpY3kSJQoMY2hlY2tfcG9saWN5GAkgASgLMg8udjEuQ2hlY2tQb2xpY3kSFwoFaG9va3MYByADKAsyCC52MS5Ib29rEhMKC2F1dG9fdW5sb2NrGAggASgIEhcKD2F1dG9faW5pdGlhbGl6ZRgMIAEoCBIpCg5jb21tYW5kX3ByZWZpeBgKIAEoCzIRLnYxLkNvbW1hbmRQcmVmaXgSDgoGc2hhcmVkGA0gASgIEhoKEm9yaWdpbl9pbnN0YW5jZV9pZBgOIAEoCRInCg1mb3JnZXRfcG9saWN5GA8gASgLMhAudjEuRm9yZ2V0UG9saWN5EiUKDGluZGV4X3BvbGljeRgQIAEoCzIPLnYxLkluZGV4UG9saWN5EhoKBG1vZGUYESABKA4yDC52MS5SZXBvTW9kZRIqCg9hZG9wdGVkX3NvdXJjZXMYEiADKAsyES52MS5BZG9wdGVkU291cmNlIncKDUFkb3B0ZWRTb3VyY2USEAoIaG9zdG5hbWUYASABKAkSDAoEcGF0aBgCIAEoCRImCglyZXRlbnRpb24YAyABKAsyEy52MS5SZXRlbnRpb25Qb2xpY3kSHgoIc2NoZWR1bGUYBCABKAsyDC52MS5TY2hlZHVsZSKGAgoEUGxhbhIKCgJpZBgBIAEoCRIMCgRyZXBvGAIgASgJEg0KBXBhdGhzGAQgAygJEhAKCGV4Y2x1ZGVzGAUgAygJEhEKCWlleGNsdWRlcxgJIAMoCRIeCghzY2hlZHVsZRgMIAEoCzIMLnYxLlNjaGVkdWxlEiYKCXJldGVudGlvbhgHIAEoCzITLnYxLlJldGVudGlvblBvbGljeRIXCgVob29rcxgIIAMoCzIILnYxLkhvb2sSIgoMYmFja3VwX2ZsYWdzGAogAygJUgxiYWNrdXBfZmxhZ3MSGQoRc2tpcF9pZl91bmNoYW5nZWQYDSABKAhKBAgDEARKBAgGEAdKBAgLEAwiigIKDUNvbW1hbmRQcmVmaXgSLgoHaW9fbmljZRgBIAEoDjIdLnYxLkNvbW1hbmRQcmVmaXguSU9OaWNlTGV2ZWwSMAoIY3B1X25pY2UYAiABKA4yHi52MS5Db21tYW5kUHJlZml4LkNQVU5pY2VMZXZlbCJbCgtJT05pY2VMZXZlbBIOCgpJT19ERUZBVUxUEAASFgoSSU9fQkVTVF9FRkZPUlRfTE9XEAESFwoTSU9fQkVTVF9FRkZPUlRfSElHSBACEgsKB0lPX0lETEUQAyI6CgxDUFVOaWNlTGV2ZWwSDwoLQ1BVX0RFRkFVTFQQABIMCghDUFVfSElHSBABEgsKB0NQVV9MT1cQAiKXAgoPUmV0ZW50aW9uUG9saWN5EhwKEnBvbGljeV9rZWVwX2xhc3RfbhgKIAEoBUgAEkYKFHBvbGljeV90aW1lX2J1Y2tldGVkGAsgASgLMiYudjEuUmV0ZW50aW9uUG9saWN5LlRpbWVCdWNrZXRlZENvdW50c0gAEhkKD3BvbGljeV9rZWVwX2FsbBgMIAEoCEgAGnkKElRpbWVCdWNrZXRlZENvdW50cxIOCgZob3VybHkYASABKAUSDQoFZGFpbHkYAiABKAUSDgoGd2Vla2x5GAMgASgFEg8KB21vbnRobHkYBCABKAUSDgoGeWVhcmx5GAUgASgFEhMKC2tlZXBfbGFzdF9uGAYgASgFQggKBnBvbGljeSL3AQoMRm9yZ2V0UG9saWN5Eh4KCHNjaGVkdWxlGAEgASgLMgwudjEuU2NoZWR1bGUSJgoJcmV0ZW50aW9uGAIgASgLMhMudjEuUmV0ZW50aW9uUG9saWN5EioKCGdyb3VwX2J5GAMgASgOMhgudjEuRm9yZ2V0UG9saWN5Lkdyb3VwQnkicwoHR3JvdXBCeRIRCg1HUk9VUF9CWV9UQUdTEAASEQoNR1JPVVBfQllfTk9ORRABEhEKDUdST1VQX0JZX0hPU1QQAhIXChNHUk9VUF9CWV9IT1NUX1BBVEhTEAMSFgoSR1JPVVBfQllfSE9TVF9UQUdTEAQiYwoLUHJ1bmVQb2xpY3kSHgoIc2NoZWR1bGUYAiABKAsyDC52MS5TY2hlZHVsZRIYChBtYXhfdW51c2VkX2J5dGVzGAMgASgDEhoKEm1heF91bnVzZWRfcGVyY2VudBgEIAEoASItCgtJbmRleFBvbGljeRIeCghzY2hlZHVsZRgBIAEoCzIMLnYxLlNjaGVkdWxlInMKC0NoZWNrUG9saWN5Eh4KCHNjaGVkdWxlGAEgASgLMgwudjEuU2NoZWR1bGUSGAoOc3RydWN0dXJlX29ubHkYZCABKAhIABIiChhyZWFkX2RhdGFfc3Vic2V0X3BlcmNlbnQYZSABKAFIAEIGCgRtb2RlIusBCghTY2hlZHVsZRISCghkaXNhYmxlZBgBIAEoCEgAEg4KBGNyb24YAiABKAlIABIaChBtYXhGcmVxdWVuY3lEYXlzGAMgASgFSAASGwoRbWF4RnJlcXVlbmN5SG91cnMYBCABKAVIABIhCgVjbG9jaxgFIAEoDjISLnYxLlNjaGVkdWxlLkNsb2NrIlMKBUNsb2NrEhEKDUNMT0NLX0RFRkFVTFQQABIPCgtDTE9DS19MT0NBTBABEg0KCUNMT0NLX1VUQxACEhcKE0NMT0NLX0xBU1RfUlVOX1RJTUUQA0IKCghzY2hlZHVsZSKjDQoESG9vaxImCgpjb25kaXRpb25zGAEgAygOMhIudjEuSG9vay5Db25kaXRpb24SIgoIb25fZXJyb3IYAiABKA4yEC52MS5Ib29rLk9uRXJyb3ISKgoOYWN0aW9uX2NvbW1hbmQYZCABKAsyEC52MS5Ib29rLkNvbW1hbmRIABIqCg5hY3Rpb25fd2ViaG9vaxhlIAEoCzIQLnYxLkhvb2suV2ViaG9va0gAEioKDmFjdGlvbl9kaXNjb3JkGGYgASgLMhAudjEuSG9vay5EaXNjb3JkSAASKAoNYWN0aW9uX2dvdGlmeRhnIAEoCzIPLnYxLkhvb2suR290aWZ5SAASJgoMYWN0aW9uX3NsYWNrGGggASgLMg4udjEuSG9vay5TbGFja0gAEiwKD2FjdGlvbl9zaG91dHJychhpIAEoCzIRLnYxLkhvb2suU2hvdXRycnJIABI0ChNhY3Rpb25faGVhbHRoY2hlY2tzGGogASgLMhUudjEuSG9vay5IZWFsdGhjaGVja3NIABIsCg9hY3Rpb25fdGVsZWdyYW0YayABKAsyES52MS5Ib29rLlRlbGVncmFtSAAaGgoHQ29tbWFuZBIPCgdjb21tYW5kGAEgASgJGoMBCgdXZWJob29rEhMKC3dlYmhvb2tfdXJsGAEgASgJEicKBm1ldGhvZBgCIAEoDjIXLnYxLkhvb2suV2ViaG9vay5NZXRob2QSEAoIdGVtcGxhdGUYZCABKAkiKAoGTWV0aG9kEgsKB1VOS05PV04QABIHCgNHRVQQARIICgRQT1NUEAIaMAoHRGlzY29yZBITCgt3ZWJob29rX3VybBgBIAEoCRIQCgh0ZW1wbGF0ZRgCIAEoCRplCgZHb3RpZnkSEAoIYmFzZV91cmwYASABKAkSDQoFdG9rZW4YAyABKAkSEAoIdGVtcGxhdGUYZCABKAkSFgoOdGl0bGVfdGVtcGxhdGUYZSABKAkSEAoIcHJpb3JpdHkYZiABKAUaLgoFU2xhY2sSEwoLd2ViaG9va191cmwYASABKAkSEAoIdGVtcGxhdGUYAiABKAkaMgoIU2hvdXRycnISFAoMc2hvdXRycnJfdXJsGAEgASgJEhAKCHRlbXBsYXRlGAIgASgJGjUKDEhlYWx0aGNoZWNrcxITCgt3ZWJob29rX3VybBgBIAEoCRIQCgh0ZW1wbGF0ZRgCIAEoCRpACghUZWxlZ3JhbRIRCglib3RfdG9rZW4YASABKAkSDwoHY2hhdF9pZBgCIAEoCRIQCgh0ZW1wbGF0ZRgDIAEoCSKYBAoJQ29uZGl0aW9uEhUKEUNPTkRJVElPTl9VTktOT1dOEAASFwoTQ09ORElUSU9OX0FOWV9FUlJPUhABEhwKGENPTkRJVElPTl9TTkFQU0hPVF9TVEFSVBACEhoKFkNPTkRJVElPTl9TTkFQU0hPVF9FTkQQAxIcChhDT05ESVRJT05fU05BUFNIT1RfRVJST1IQBBIeChpDT05ESVRJT05fU05BUFNIT1RfV0FSTklORxAFEh4KGkNPTkRJVElPTl9TTkFQU0hPVF9TVUNDRVNTEAYSHgoaQ09ORElUSU9OX1NOQVBTSE9UX1NLSVBQRUQQBxIZChVDT05ESVRJT05fUFJVTkVfU1RBUlQQZBIZChVDT05ESVRJT05fUFJVTkVfRVJST1IQZRIbChdDT05ESVRJT05fUFJVTkVfU1VDQ0VTUxBmEhoKFUNPTkRJVElPTl9DSEVDS19TVEFSVBDIARIaChVDT05ESVRJT05fQ0hFQ0tfRVJST1IQyQESHAoXQ09ORElUSU9OX0NIRUNLX1NVQ0NFU1MQygESGwoWQ09ORElUSU9OX0ZPUkdFVF9TVEFSVBCsAhIbChZDT05ESVRJT05fRk9SR0VUX0VSUk9SEK0CEh0KGENPTkRJVElPTl9GT1JHRVRfU1VDQ0VTUxCuAhIhChxDT05ESVRJT05fQURPUFRFRF9TT1VSQ0VfTkVXEJADIqkBCgdPbkVycm9yEhMKD09OX0VSUk9SX0lHTk9SRRAAEhMKD09OX0VSUk9SX0NBTkNFTBABEhIKDk9OX0VSUk9SX0ZBVEFMEAISGgoWT05fRVJST1JfUkVUUllfMU1JTlVURRBkEhwKGE9OX0VSUk9SX1JFVFJZXzEwTUlOVVRFUxBlEiYKIk9OX0VSUk9SX1JFVFJZX0VYUE9ORU5USUFMX0JBQ0tPRkYQZ0IICgZhY3Rpb24iMQoEQXV0aBIQCghkaXNhYmxlZBgBIAEoCBIXCgV1c2VycxgCIAMoCzIILnYxLlVzZXIiOwoEVXNlchIMCgRuYW1lGAEgASgJEhkKD3Bhc3N3b3JkX2JjcnlwdBgCIAEoCUgAQgoKCHBhc3N3b3JkKlUKCFJlcG9Nb2RlEhUKEVJFUE9fTU9ERV9NQU5BR0VEEAASGQoVUkVQT19NT0RFX0FQUEVORF9PTkxZEAESFwoTUkVQT19NT0RFX1JFQURfT05MWRACQixaKmdpdGh1Yi5jb20vZ2FyZXRoZ2VvcmdlL2JhY2tyZXN0L2dlbi9nby92MWIGcHJvdG8z", [file_google_protobuf_empty, file_v1_crypto]);
 
 /**
  * Config is the top level config object for restic UI.
@@ -430,6 +430,13 @@ export type Repo = Message<"v1.Repo"> & {
    * @generated from field: v1.RepoMode mode = 17;
    */
   mode: RepoMode;
+
+  /**
+   * rules that put external sources (snapshots without a plan: tag) under a retention policy.
+   *
+   * @generated from field: repeated v1.AdoptedSource adopted_sources = 18;
+   */
+  adoptedSources: AdoptedSource[];
 };
 
 /**
@@ -438,6 +445,47 @@ export type Repo = Message<"v1.Repo"> & {
  */
 export const RepoSchema: GenMessage<Repo> = /*@__PURE__*/
   messageDesc(file_v1_config, 2);
+
+/**
+ * AdoptedSource is a rule that applies a retention policy to external snapshot sources, i.e.
+ * snapshots created by other tools that carry no plan: tag. It stores a selector, not a fixed list
+ * of sources: the selector is resolved again on every run. Retention is applied to each matching
+ * source (host + exact set of paths) independently. Sources containing plan snapshots are refused.
+ *
+ * @generated from message v1.AdoptedSource
+ */
+export type AdoptedSource = Message<"v1.AdoptedSource"> & {
+  /**
+   * exact hostname, as restic compares hostnames.
+   *
+   * @generated from field: string hostname = 1;
+   */
+  hostname: string;
+
+  /**
+   * matches every source whose paths contain this path.
+   *
+   * @generated from field: string path = 2;
+   */
+  path: string;
+
+  /**
+   * @generated from field: v1.RetentionPolicy retention = 3;
+   */
+  retention?: RetentionPolicy;
+
+  /**
+   * @generated from field: v1.Schedule schedule = 4;
+   */
+  schedule?: Schedule;
+};
+
+/**
+ * Describes the message v1.AdoptedSource.
+ * Use `create(AdoptedSourceSchema)` to create a new message.
+ */
+export const AdoptedSourceSchema: GenMessage<AdoptedSource> = /*@__PURE__*/
+  messageDesc(file_v1_config, 3);
 
 /**
  * @generated from message v1.Plan
@@ -519,7 +567,7 @@ export type Plan = Message<"v1.Plan"> & {
  * Use `create(PlanSchema)` to create a new message.
  */
 export const PlanSchema: GenMessage<Plan> = /*@__PURE__*/
-  messageDesc(file_v1_config, 3);
+  messageDesc(file_v1_config, 4);
 
 /**
  * @generated from message v1.CommandPrefix
@@ -545,7 +593,7 @@ export type CommandPrefix = Message<"v1.CommandPrefix"> & {
  * Use `create(CommandPrefixSchema)` to create a new message.
  */
 export const CommandPrefixSchema: GenMessage<CommandPrefix> = /*@__PURE__*/
-  messageDesc(file_v1_config, 4);
+  messageDesc(file_v1_config, 5);
 
 /**
  * @generated from enum v1.CommandPrefix.IONiceLevel
@@ -576,7 +624,7 @@ export enum CommandPrefix_IONiceLevel {
  * Describes the enum v1.CommandPrefix.IONiceLevel.
  */
 export const CommandPrefix_IONiceLevelSchema: GenEnum<CommandPrefix_IONiceLevel> = /*@__PURE__*/
-  enumDesc(file_v1_config, 4, 0);
+  enumDesc(file_v1_config, 5, 0);
 
 /**
  * @generated from enum v1.CommandPrefix.CPUNiceLevel
@@ -602,7 +650,7 @@ export enum CommandPrefix_CPUNiceLevel {
  * Describes the enum v1.CommandPrefix.CPUNiceLevel.
  */
 export const CommandPrefix_CPUNiceLevelSchema: GenEnum<CommandPrefix_CPUNiceLevel> = /*@__PURE__*/
-  enumDesc(file_v1_config, 4, 1);
+  enumDesc(file_v1_config, 5, 1);
 
 /**
  * @generated from message v1.RetentionPolicy
@@ -637,7 +685,7 @@ export type RetentionPolicy = Message<"v1.RetentionPolicy"> & {
  * Use `create(RetentionPolicySchema)` to create a new message.
  */
 export const RetentionPolicySchema: GenMessage<RetentionPolicy> = /*@__PURE__*/
-  messageDesc(file_v1_config, 5);
+  messageDesc(file_v1_config, 6);
 
 /**
  * @generated from message v1.RetentionPolicy.TimeBucketedCounts
@@ -691,7 +739,7 @@ export type RetentionPolicy_TimeBucketedCounts = Message<"v1.RetentionPolicy.Tim
  * Use `create(RetentionPolicy_TimeBucketedCountsSchema)` to create a new message.
  */
 export const RetentionPolicy_TimeBucketedCountsSchema: GenMessage<RetentionPolicy_TimeBucketedCounts> = /*@__PURE__*/
-  messageDesc(file_v1_config, 5, 0);
+  messageDesc(file_v1_config, 6, 0);
 
 /**
  * @generated from message v1.ForgetPolicy
@@ -720,7 +768,7 @@ export type ForgetPolicy = Message<"v1.ForgetPolicy"> & {
  * Use `create(ForgetPolicySchema)` to create a new message.
  */
 export const ForgetPolicySchema: GenMessage<ForgetPolicy> = /*@__PURE__*/
-  messageDesc(file_v1_config, 6);
+  messageDesc(file_v1_config, 7);
 
 /**
  * GroupBy controls how snapshots are grouped before the retention policy is applied.
@@ -769,7 +817,7 @@ export enum ForgetPolicy_GroupBy {
  * Describes the enum v1.ForgetPolicy.GroupBy.
  */
 export const ForgetPolicy_GroupBySchema: GenEnum<ForgetPolicy_GroupBy> = /*@__PURE__*/
-  enumDesc(file_v1_config, 6, 0);
+  enumDesc(file_v1_config, 7, 0);
 
 /**
  * @generated from message v1.PrunePolicy
@@ -800,7 +848,7 @@ export type PrunePolicy = Message<"v1.PrunePolicy"> & {
  * Use `create(PrunePolicySchema)` to create a new message.
  */
 export const PrunePolicySchema: GenMessage<PrunePolicy> = /*@__PURE__*/
-  messageDesc(file_v1_config, 7);
+  messageDesc(file_v1_config, 8);
 
 /**
  * IndexPolicy controls periodic re-indexing of a repo's snapshots. Backrest otherwise only indexes
@@ -820,7 +868,7 @@ export type IndexPolicy = Message<"v1.IndexPolicy"> & {
  * Use `create(IndexPolicySchema)` to create a new message.
  */
 export const IndexPolicySchema: GenMessage<IndexPolicy> = /*@__PURE__*/
-  messageDesc(file_v1_config, 8);
+  messageDesc(file_v1_config, 9);
 
 /**
  * @generated from message v1.CheckPolicy
@@ -858,7 +906,7 @@ export type CheckPolicy = Message<"v1.CheckPolicy"> & {
  * Use `create(CheckPolicySchema)` to create a new message.
  */
 export const CheckPolicySchema: GenMessage<CheckPolicy> = /*@__PURE__*/
-  messageDesc(file_v1_config, 9);
+  messageDesc(file_v1_config, 10);
 
 /**
  * @generated from message v1.Schedule
@@ -914,7 +962,7 @@ export type Schedule = Message<"v1.Schedule"> & {
  * Use `create(ScheduleSchema)` to create a new message.
  */
 export const ScheduleSchema: GenMessage<Schedule> = /*@__PURE__*/
-  messageDesc(file_v1_config, 10);
+  messageDesc(file_v1_config, 11);
 
 /**
  * @generated from enum v1.Schedule.Clock
@@ -947,7 +995,7 @@ export enum Schedule_Clock {
  * Describes the enum v1.Schedule.Clock.
  */
 export const Schedule_ClockSchema: GenEnum<Schedule_Clock> = /*@__PURE__*/
-  enumDesc(file_v1_config, 10, 0);
+  enumDesc(file_v1_config, 11, 0);
 
 /**
  * @generated from message v1.Hook
@@ -1022,7 +1070,7 @@ export type Hook = Message<"v1.Hook"> & {
  * Use `create(HookSchema)` to create a new message.
  */
 export const HookSchema: GenMessage<Hook> = /*@__PURE__*/
-  messageDesc(file_v1_config, 11);
+  messageDesc(file_v1_config, 12);
 
 /**
  * @generated from message v1.Hook.Command
@@ -1039,7 +1087,7 @@ export type Hook_Command = Message<"v1.Hook.Command"> & {
  * Use `create(Hook_CommandSchema)` to create a new message.
  */
 export const Hook_CommandSchema: GenMessage<Hook_Command> = /*@__PURE__*/
-  messageDesc(file_v1_config, 11, 0);
+  messageDesc(file_v1_config, 12, 0);
 
 /**
  * @generated from message v1.Hook.Webhook
@@ -1066,7 +1114,7 @@ export type Hook_Webhook = Message<"v1.Hook.Webhook"> & {
  * Use `create(Hook_WebhookSchema)` to create a new message.
  */
 export const Hook_WebhookSchema: GenMessage<Hook_Webhook> = /*@__PURE__*/
-  messageDesc(file_v1_config, 11, 1);
+  messageDesc(file_v1_config, 12, 1);
 
 /**
  * @generated from enum v1.Hook.Webhook.Method
@@ -1092,7 +1140,7 @@ export enum Hook_Webhook_Method {
  * Describes the enum v1.Hook.Webhook.Method.
  */
 export const Hook_Webhook_MethodSchema: GenEnum<Hook_Webhook_Method> = /*@__PURE__*/
-  enumDesc(file_v1_config, 11, 1, 0);
+  enumDesc(file_v1_config, 12, 1, 0);
 
 /**
  * @generated from message v1.Hook.Discord
@@ -1116,7 +1164,7 @@ export type Hook_Discord = Message<"v1.Hook.Discord"> & {
  * Use `create(Hook_DiscordSchema)` to create a new message.
  */
 export const Hook_DiscordSchema: GenMessage<Hook_Discord> = /*@__PURE__*/
-  messageDesc(file_v1_config, 11, 2);
+  messageDesc(file_v1_config, 12, 2);
 
 /**
  * @generated from message v1.Hook.Gotify
@@ -1159,7 +1207,7 @@ export type Hook_Gotify = Message<"v1.Hook.Gotify"> & {
  * Use `create(Hook_GotifySchema)` to create a new message.
  */
 export const Hook_GotifySchema: GenMessage<Hook_Gotify> = /*@__PURE__*/
-  messageDesc(file_v1_config, 11, 3);
+  messageDesc(file_v1_config, 12, 3);
 
 /**
  * @generated from message v1.Hook.Slack
@@ -1183,7 +1231,7 @@ export type Hook_Slack = Message<"v1.Hook.Slack"> & {
  * Use `create(Hook_SlackSchema)` to create a new message.
  */
 export const Hook_SlackSchema: GenMessage<Hook_Slack> = /*@__PURE__*/
-  messageDesc(file_v1_config, 11, 4);
+  messageDesc(file_v1_config, 12, 4);
 
 /**
  * @generated from message v1.Hook.Shoutrrr
@@ -1205,7 +1253,7 @@ export type Hook_Shoutrrr = Message<"v1.Hook.Shoutrrr"> & {
  * Use `create(Hook_ShoutrrrSchema)` to create a new message.
  */
 export const Hook_ShoutrrrSchema: GenMessage<Hook_Shoutrrr> = /*@__PURE__*/
-  messageDesc(file_v1_config, 11, 5);
+  messageDesc(file_v1_config, 12, 5);
 
 /**
  * @generated from message v1.Hook.Healthchecks
@@ -1227,7 +1275,7 @@ export type Hook_Healthchecks = Message<"v1.Hook.Healthchecks"> & {
  * Use `create(Hook_HealthchecksSchema)` to create a new message.
  */
 export const Hook_HealthchecksSchema: GenMessage<Hook_Healthchecks> = /*@__PURE__*/
-  messageDesc(file_v1_config, 11, 6);
+  messageDesc(file_v1_config, 12, 6);
 
 /**
  * @generated from message v1.Hook.Telegram
@@ -1256,7 +1304,7 @@ export type Hook_Telegram = Message<"v1.Hook.Telegram"> & {
  * Use `create(Hook_TelegramSchema)` to create a new message.
  */
 export const Hook_TelegramSchema: GenMessage<Hook_Telegram> = /*@__PURE__*/
-  messageDesc(file_v1_config, 11, 7);
+  messageDesc(file_v1_config, 12, 7);
 
 /**
  * @generated from enum v1.Hook.Condition
@@ -1384,13 +1432,22 @@ export enum Hook_Condition {
    * @generated from enum value: CONDITION_FORGET_SUCCESS = 302;
    */
   FORGET_SUCCESS = 302,
+
+  /**
+   * adoption conditions
+   *
+   * an adopted source rule matches a source it did not match before.
+   *
+   * @generated from enum value: CONDITION_ADOPTED_SOURCE_NEW = 400;
+   */
+  ADOPTED_SOURCE_NEW = 400,
 }
 
 /**
  * Describes the enum v1.Hook.Condition.
  */
 export const Hook_ConditionSchema: GenEnum<Hook_Condition> = /*@__PURE__*/
-  enumDesc(file_v1_config, 11, 0);
+  enumDesc(file_v1_config, 12, 0);
 
 /**
  * @generated from enum v1.Hook.OnError
@@ -1441,7 +1498,7 @@ export enum Hook_OnError {
  * Describes the enum v1.Hook.OnError.
  */
 export const Hook_OnErrorSchema: GenEnum<Hook_OnError> = /*@__PURE__*/
-  enumDesc(file_v1_config, 11, 1);
+  enumDesc(file_v1_config, 12, 1);
 
 /**
  * @generated from message v1.Auth
@@ -1467,7 +1524,7 @@ export type Auth = Message<"v1.Auth"> & {
  * Use `create(AuthSchema)` to create a new message.
  */
 export const AuthSchema: GenMessage<Auth> = /*@__PURE__*/
-  messageDesc(file_v1_config, 12);
+  messageDesc(file_v1_config, 13);
 
 /**
  * @generated from message v1.User
@@ -1495,7 +1552,7 @@ export type User = Message<"v1.User"> & {
  * Use `create(UserSchema)` to create a new message.
  */
 export const UserSchema: GenMessage<User> = /*@__PURE__*/
-  messageDesc(file_v1_config, 13);
+  messageDesc(file_v1_config, 14);
 
 /**
  * RepoMode restricts the operations Backrest performs on a repo. restic has no

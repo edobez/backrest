@@ -116,6 +116,18 @@ message Repo {
   ForgetPolicy forget_policy = 15 [json_name="forgetPolicy"]; // optional repo-level forget policy. If set, overrides per-plan retention policies.
   IndexPolicy index_policy = 16 [json_name="indexPolicy"]; // optional schedule for re-indexing the repo's snapshots, e.g. to pick up snapshots created by other clients.
   RepoMode mode = 17 [json_name="mode"]; // what Backrest is allowed to do with the repo. Defaults to MANAGED.
+  repeated AdoptedSource adopted_sources = 18 [json_name="adoptedSources"]; // rules that put external sources (snapshots without a plan: tag) under a retention policy.
+}
+
+// AdoptedSource is a rule that applies a retention policy to external snapshot sources, i.e.
+// snapshots created by other tools that carry no plan: tag. It stores a selector, not a fixed list
+// of sources: the selector is resolved again on every run. Retention is applied to each matching
+// source (host + exact set of paths) independently. Sources containing plan snapshots are refused.
+message AdoptedSource {
+  string hostname = 1 [json_name="hostname"]; // exact hostname, as restic compares hostnames.
+  string path = 2 [json_name="path"]; // matches every source whose paths contain this path.
+  RetentionPolicy retention = 3 [json_name="retention"];
+  Schedule schedule = 4 [json_name="schedule"];
 }
 
 // RepoMode restricts the operations Backrest performs on a repo. restic has no
@@ -263,6 +275,9 @@ message Hook {
     CONDITION_FORGET_START = 300; // forget started.
     CONDITION_FORGET_ERROR = 301; // forget failed.
     CONDITION_FORGET_SUCCESS = 302; // forget succeeded.
+
+    // adoption conditions
+    CONDITION_ADOPTED_SOURCE_NEW = 400; // an adopted source rule matches a source it did not match before.
   }
 
   enum OnError {

@@ -330,7 +330,7 @@ export const RepoView = ({
         </TabsContent>
 
         <TabsContent value="sources">
-          <SourcesTable repoId={repo.id!} repoGuid={repo.guid} />
+          <SourcesTable repo={repoInConfig} />
         </TabsContent>
       </TabsRoot>
     </Box>

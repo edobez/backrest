@@ -16,7 +16,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file v1/operations.proto.
  */
 export const file_v1_operations: GenFile = /*@__PURE__*/
-  fileDesc("ChN2MS9vcGVyYXRpb25zLnByb3RvEgJ2MSIyCg1PcGVyYXRpb25MaXN0EiEKCm9wZXJhdGlvbnMYASADKAsyDS52MS5PcGVyYXRpb24iwAYKCU9wZXJhdGlvbhIKCgJpZBgBIAEoAxITCgtvcmlnaW5hbF9pZBgNIAEoAxINCgVtb2RubxgMIAEoAxIPCgdmbG93X2lkGAogASgDEhgKEG9yaWdpbmFsX2Zsb3dfaWQYDiABKAMSDwoHcmVwb19pZBgCIAEoCRIRCglyZXBvX2d1aWQYDyABKAkSDwoHcGxhbl9pZBgDIAEoCRITCgtpbnN0YW5jZV9pZBgLIAEoCRIfChdvcmlnaW5hbF9pbnN0YW5jZV9rZXlpZBgQIAEoCRITCgtzbmFwc2hvdF9pZBgIIAEoCRIjCgZzdGF0dXMYBCABKA4yEy52MS5PcGVyYXRpb25TdGF0dXMSGgoSdW5peF90aW1lX3N0YXJ0X21zGAUgASgDEhgKEHVuaXhfdGltZV9lbmRfbXMYBiABKAMSFwoPZGlzcGxheV9tZXNzYWdlGAcgASgJEg4KBmxvZ3JlZhgJIAEoCRIvChBvcGVyYXRpb25fYmFja3VwGGQgASgLMhMudjEuT3BlcmF0aW9uQmFja3VwSAASPgoYb3BlcmF0aW9uX2luZGV4X3NuYXBzaG90GGUgASgLMhoudjEuT3BlcmF0aW9uSW5kZXhTbmFwc2hvdEgAEi8KEG9wZXJhdGlvbl9mb3JnZXQYZiABKAsyEy52MS5PcGVyYXRpb25Gb3JnZXRIABItCg9vcGVyYXRpb25fcHJ1bmUYZyABKAsyEi52MS5PcGVyYXRpb25QcnVuZUgAEjEKEW9wZXJhdGlvbl9yZXN0b3JlGGggASgLMhQudjEuT3BlcmF0aW9uUmVzdG9yZUgAEi0KD29wZXJhdGlvbl9zdGF0cxhpIAEoCzISLnYxLk9wZXJhdGlvblN0YXRzSAASMgoSb3BlcmF0aW9uX3J1bl9ob29rGGogASgLMhQudjEuT3BlcmF0aW9uUnVuSG9va0gAEi0KD29wZXJhdGlvbl9jaGVjaxhrIAEoCzISLnYxLk9wZXJhdGlvbkNoZWNrSAASOAoVb3BlcmF0aW9uX3J1bl9jb21tYW5kGGwgASgLMhcudjEuT3BlcmF0aW9uUnVuQ29tbWFuZEgAQgQKAm9wIs8BCg5PcGVyYXRpb25FdmVudBIiCgprZWVwX2FsaXZlGAEgASgLMgwudHlwZXMuRW1wdHlIABIvChJjcmVhdGVkX29wZXJhdGlvbnMYAiABKAsyES52MS5PcGVyYXRpb25MaXN0SAASLwoSdXBkYXRlZF9vcGVyYXRpb25zGAMgASgLMhEudjEuT3BlcmF0aW9uTGlzdEgAEi4KEmRlbGV0ZWRfb3BlcmF0aW9ucxgEIAEoCzIQLnR5cGVzLkludDY0TGlzdEgAQgcKBWV2ZW50InkKD09wZXJhdGlvbkJhY2t1cBIsCgtsYXN0X3N0YXR1cxgDIAEoCzIXLnYxLkJhY2t1cFByb2dyZXNzRW50cnkSJwoGZXJyb3JzGAQgAygLMhcudjEuQmFja3VwUHJvZ3Jlc3NFcnJvchIPCgdkcnlfcnVuGAUgASgIIk4KFk9wZXJhdGlvbkluZGV4U25hcHNob3QSJAoIc25hcHNob3QYAiABKAsyEi52MS5SZXN0aWNTbmFwc2hvdBIOCgZmb3Jnb3QYAyABKAgiWgoPT3BlcmF0aW9uRm9yZ2V0EiIKBmZvcmdldBgBIAMoCzISLnYxLlJlc3RpY1NuYXBzaG90EiMKBnBvbGljeRgCIAEoCzITLnYxLlJldGVudGlvblBvbGljeSI7Cg5PcGVyYXRpb25QcnVuZRISCgZvdXRwdXQYASABKAlCAhgBEhUKDW91dHB1dF9sb2dyZWYYAiABKAkiOwoOT3BlcmF0aW9uQ2hlY2sSEgoGb3V0cHV0GAEgASgJQgIYARIVCg1vdXRwdXRfbG9ncmVmGAIgASgJIlgKE09wZXJhdGlvblJ1bkNvbW1hbmQSDwoHY29tbWFuZBgBIAEoCRIVCg1vdXRwdXRfbG9ncmVmGAIgASgJEhkKEW91dHB1dF9zaXplX2J5dGVzGAMgASgDIl8KEE9wZXJhdGlvblJlc3RvcmUSDAoEcGF0aBgBIAEoCRIOCgZ0YXJnZXQYAiABKAkSLQoLbGFzdF9zdGF0dXMYAyABKAsyGC52MS5SZXN0b3JlUHJvZ3Jlc3NFbnRyeSIuCg5PcGVyYXRpb25TdGF0cxIcCgVzdGF0cxgBIAEoCzINLnYxLlJlcG9TdGF0cyJxChBPcGVyYXRpb25SdW5Ib29rEhEKCXBhcmVudF9vcBgEIAEoAxIMCgRuYW1lGAEgASgJEhUKDW91dHB1dF9sb2dyZWYYAiABKAkSJQoJY29uZGl0aW9uGAMgASgOMhIudjEuSG9vay5Db25kaXRpb24qYAoST3BlcmF0aW9uRXZlbnRUeXBlEhEKDUVWRU5UX1VOS05PV04QABIRCg1FVkVOVF9DUkVBVEVEEAESEQoNRVZFTlRfVVBEQVRFRBACEhEKDUVWRU5UX0RFTEVURUQQAyrCAQoPT3BlcmF0aW9uU3RhdHVzEhIKDlNUQVRVU19VTktOT1dOEAASEgoOU1RBVFVTX1BFTkRJTkcQARIVChFTVEFUVVNfSU5QUk9HUkVTUxACEhIKDlNUQVRVU19TVUNDRVNTEAMSEgoOU1RBVFVTX1dBUk5JTkcQBxIQCgxTVEFUVVNfRVJST1IQBBIbChdTVEFUVVNfU1lTVEVNX0NBTkNFTExFRBAFEhkKFVNUQVRVU19VU0VSX0NBTkNFTExFRBAGQixaKmdpdGh1Yi5jb20vZ2FyZXRoZ2VvcmdlL2JhY2tyZXN0L2dlbi9nby92MWIGcHJvdG8z", [file_v1_restic, file_v1_config, file_types_value]);
+  fileDesc("ChN2MS9vcGVyYXRpb25zLnByb3RvEgJ2MSIyCg1PcGVyYXRpb25MaXN0EiEKCm9wZXJhdGlvbnMYASADKAsyDS52MS5PcGVyYXRpb24iwAYKCU9wZXJhdGlvbhIKCgJpZBgBIAEoAxITCgtvcmlnaW5hbF9pZBgNIAEoAxINCgVtb2RubxgMIAEoAxIPCgdmbG93X2lkGAogASgDEhgKEG9yaWdpbmFsX2Zsb3dfaWQYDiABKAMSDwoHcmVwb19pZBgCIAEoCRIRCglyZXBvX2d1aWQYDyABKAkSDwoHcGxhbl9pZBgDIAEoCRITCgtpbnN0YW5jZV9pZBgLIAEoCRIfChdvcmlnaW5hbF9pbnN0YW5jZV9rZXlpZBgQIAEoCRITCgtzbmFwc2hvdF9pZBgIIAEoCRIjCgZzdGF0dXMYBCABKA4yEy52MS5PcGVyYXRpb25TdGF0dXMSGgoSdW5peF90aW1lX3N0YXJ0X21zGAUgASgDEhgKEHVuaXhfdGltZV9lbmRfbXMYBiABKAMSFwoPZGlzcGxheV9tZXNzYWdlGAcgASgJEg4KBmxvZ3JlZhgJIAEoCRIvChBvcGVyYXRpb25fYmFja3VwGGQgASgLMhMudjEuT3BlcmF0aW9uQmFja3VwSAASPgoYb3BlcmF0aW9uX2luZGV4X3NuYXBzaG90GGUgASgLMhoudjEuT3BlcmF0aW9uSW5kZXhTbmFwc2hvdEgAEi8KEG9wZXJhdGlvbl9mb3JnZXQYZiABKAsyEy52MS5PcGVyYXRpb25Gb3JnZXRIABItCg9vcGVyYXRpb25fcHJ1bmUYZyABKAsyEi52MS5PcGVyYXRpb25QcnVuZUgAEjEKEW9wZXJhdGlvbl9yZXN0b3JlGGggASgLMhQudjEuT3BlcmF0aW9uUmVzdG9yZUgAEi0KD29wZXJhdGlvbl9zdGF0cxhpIAEoCzISLnYxLk9wZXJhdGlvblN0YXRzSAASMgoSb3BlcmF0aW9uX3J1bl9ob29rGGogASgLMhQudjEuT3BlcmF0aW9uUnVuSG9va0gAEi0KD29wZXJhdGlvbl9jaGVjaxhrIAEoCzISLnYxLk9wZXJhdGlvbkNoZWNrSAASOAoVb3BlcmF0aW9uX3J1bl9jb21tYW5kGGwgASgLMhcudjEuT3BlcmF0aW9uUnVuQ29tbWFuZEgAQgQKAm9wIs8BCg5PcGVyYXRpb25FdmVudBIiCgprZWVwX2FsaXZlGAEgASgLMgwudHlwZXMuRW1wdHlIABIvChJjcmVhdGVkX29wZXJhdGlvbnMYAiABKAsyES52MS5PcGVyYXRpb25MaXN0SAASLwoSdXBkYXRlZF9vcGVyYXRpb25zGAMgASgLMhEudjEuT3BlcmF0aW9uTGlzdEgAEi4KEmRlbGV0ZWRfb3BlcmF0aW9ucxgEIAEoCzIQLnR5cGVzLkludDY0TGlzdEgAQgcKBWV2ZW50InkKD09wZXJhdGlvbkJhY2t1cBIsCgtsYXN0X3N0YXR1cxgDIAEoCzIXLnYxLkJhY2t1cFByb2dyZXNzRW50cnkSJwoGZXJyb3JzGAQgAygLMhcudjEuQmFja3VwUHJvZ3Jlc3NFcnJvchIPCgdkcnlfcnVuGAUgASgIIk4KFk9wZXJhdGlvbkluZGV4U25hcHNob3QSJAoIc25hcHNob3QYAiABKAsyEi52MS5SZXN0aWNTbmFwc2hvdBIOCgZmb3Jnb3QYAyABKAgifgoPT3BlcmF0aW9uRm9yZ2V0EiIKBmZvcmdldBgBIAMoCzISLnYxLlJlc3RpY1NuYXBzaG90EiMKBnBvbGljeRgCIAEoCzITLnYxLlJldGVudGlvblBvbGljeRIiCgdhZG9wdGVkGAMgASgLMhEudjEuQWRvcHRlZEZvcmdldCJxCg1BZG9wdGVkRm9yZ2V0EhAKCGhvc3RuYW1lGAEgASgJEgwKBHBhdGgYAiABKAkSEAoIcmVzb2x2ZWQYAyABKAgSEgoKc291cmNlX2lkcxgEIAMoCRIaChJyZWZ1c2VkX3NvdXJjZV9pZHMYBSADKAkiOwoOT3BlcmF0aW9uUHJ1bmUSEgoGb3V0cHV0GAEgASgJQgIYARIVCg1vdXRwdXRfbG9ncmVmGAIgASgJIjsKDk9wZXJhdGlvbkNoZWNrEhIKBm91dHB1dBgBIAEoCUICGAESFQoNb3V0cHV0X2xvZ3JlZhgCIAEoCSJYChNPcGVyYXRpb25SdW5Db21tYW5kEg8KB2NvbW1hbmQYASABKAkSFQoNb3V0cHV0X2xvZ3JlZhgCIAEoCRIZChFvdXRwdXRfc2l6ZV9ieXRlcxgDIAEoAyJfChBPcGVyYXRpb25SZXN0b3JlEgwKBHBhdGgYASABKAkSDgoGdGFyZ2V0GAIgASgJEi0KC2xhc3Rfc3RhdHVzGAMgASgLMhgudjEuUmVzdG9yZVByb2dyZXNzRW50cnkiLgoOT3BlcmF0aW9uU3RhdHMSHAoFc3RhdHMYASABKAsyDS52MS5SZXBvU3RhdHMicQoQT3BlcmF0aW9uUnVuSG9vaxIRCglwYXJlbnRfb3AYBCABKAMSDAoEbmFtZRgBIAEoCRIVCg1vdXRwdXRfbG9ncmVmGAIgASgJEiUKCWNvbmRpdGlvbhgDIAEoDjISLnYxLkhvb2suQ29uZGl0aW9uKmAKEk9wZXJhdGlvbkV2ZW50VHlwZRIRCg1FVkVOVF9VTktOT1dOEAASEQoNRVZFTlRfQ1JFQVRFRBABEhEKDUVWRU5UX1VQREFURUQQAhIRCg1FVkVOVF9ERUxFVEVEEAMqwgEKD09wZXJhdGlvblN0YXR1cxISCg5TVEFUVVNfVU5LTk9XThAAEhIKDlNUQVRVU19QRU5ESU5HEAESFQoRU1RBVFVTX0lOUFJPR1JFU1MQAhISCg5TVEFUVVNfU1VDQ0VTUxADEhIKDlNUQVRVU19XQVJOSU5HEAcSEAoMU1RBVFVTX0VSUk9SEAQSGwoXU1RBVFVTX1NZU1RFTV9DQU5DRUxMRUQQBRIZChVTVEFUVVNfVVNFUl9DQU5DRUxMRUQQBkIsWipnaXRodWIuY29tL2dhcmV0aGdlb3JnZS9iYWNrcmVzdC9nZW4vZ28vdjFiBnByb3RvMw", [file_v1_restic, file_v1_config, file_types_value]);
 
 /**
  * @generated from message v1.OperationList
@@ -328,6 +328,13 @@ export type OperationForget = Message<"v1.OperationForget"> & {
    * @generated from field: v1.RetentionPolicy policy = 2;
    */
   policy?: RetentionPolicy;
+
+  /**
+   * set when the forget applied an adopted source rule.
+   *
+   * @generated from field: v1.AdoptedForget adopted = 3;
+   */
+  adopted?: AdoptedForget;
 };
 
 /**
@@ -336,6 +343,55 @@ export type OperationForget = Message<"v1.OperationForget"> & {
  */
 export const OperationForgetSchema: GenMessage<OperationForget> = /*@__PURE__*/
   messageDesc(file_v1_operations, 5);
+
+/**
+ * AdoptedForget records which adopted source rule a forget applied and what it matched.
+ *
+ * @generated from message v1.AdoptedForget
+ */
+export type AdoptedForget = Message<"v1.AdoptedForget"> & {
+  /**
+   * the rule's hostname selector.
+   *
+   * @generated from field: string hostname = 1;
+   */
+  hostname: string;
+
+  /**
+   * the rule's path selector.
+   *
+   * @generated from field: string path = 2;
+   */
+  path: string;
+
+  /**
+   * true once the selector was resolved; source_ids are only meaningful then.
+   *
+   * @generated from field: bool resolved = 3;
+   */
+  resolved: boolean;
+
+  /**
+   * IDs of the sources the selector matched, refused ones included and plan-only ones excluded.
+   *
+   * @generated from field: repeated string source_ids = 4;
+   */
+  sourceIds: string[];
+
+  /**
+   * IDs of matched sources that were refused (e.g. they contain plan snapshots).
+   *
+   * @generated from field: repeated string refused_source_ids = 5;
+   */
+  refusedSourceIds: string[];
+};
+
+/**
+ * Describes the message v1.AdoptedForget.
+ * Use `create(AdoptedForgetSchema)` to create a new message.
+ */
+export const AdoptedForgetSchema: GenMessage<AdoptedForget> = /*@__PURE__*/
+  messageDesc(file_v1_operations, 6);
 
 /**
  * OperationPrune tracks a prune operation.
@@ -364,7 +420,7 @@ export type OperationPrune = Message<"v1.OperationPrune"> & {
  * Use `create(OperationPruneSchema)` to create a new message.
  */
 export const OperationPruneSchema: GenMessage<OperationPrune> = /*@__PURE__*/
-  messageDesc(file_v1_operations, 6);
+  messageDesc(file_v1_operations, 7);
 
 /**
  * OperationCheck tracks a check operation.
@@ -393,7 +449,7 @@ export type OperationCheck = Message<"v1.OperationCheck"> & {
  * Use `create(OperationCheckSchema)` to create a new message.
  */
 export const OperationCheckSchema: GenMessage<OperationCheck> = /*@__PURE__*/
-  messageDesc(file_v1_operations, 7);
+  messageDesc(file_v1_operations, 8);
 
 /**
  * OperationRunCommand tracks a long running command. Commands are grouped into a flow ID for each session.
@@ -424,7 +480,7 @@ export type OperationRunCommand = Message<"v1.OperationRunCommand"> & {
  * Use `create(OperationRunCommandSchema)` to create a new message.
  */
 export const OperationRunCommandSchema: GenMessage<OperationRunCommand> = /*@__PURE__*/
-  messageDesc(file_v1_operations, 8);
+  messageDesc(file_v1_operations, 9);
 
 /**
  * OperationRestore tracks a restore operation.
@@ -459,7 +515,7 @@ export type OperationRestore = Message<"v1.OperationRestore"> & {
  * Use `create(OperationRestoreSchema)` to create a new message.
  */
 export const OperationRestoreSchema: GenMessage<OperationRestore> = /*@__PURE__*/
-  messageDesc(file_v1_operations, 9);
+  messageDesc(file_v1_operations, 10);
 
 /**
  * OperationStats tracks a stats operation.
@@ -478,7 +534,7 @@ export type OperationStats = Message<"v1.OperationStats"> & {
  * Use `create(OperationStatsSchema)` to create a new message.
  */
 export const OperationStatsSchema: GenMessage<OperationStats> = /*@__PURE__*/
-  messageDesc(file_v1_operations, 10);
+  messageDesc(file_v1_operations, 11);
 
 /**
  * OperationRunHook tracks a hook that was run.
@@ -520,7 +576,7 @@ export type OperationRunHook = Message<"v1.OperationRunHook"> & {
  * Use `create(OperationRunHookSchema)` to create a new message.
  */
 export const OperationRunHookSchema: GenMessage<OperationRunHook> = /*@__PURE__*/
-  messageDesc(file_v1_operations, 11);
+  messageDesc(file_v1_operations, 12);
 
 /**
  * OperationEventType indicates whether the operation was created or updated

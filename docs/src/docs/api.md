@@ -61,3 +61,9 @@ Each source has an `id`. Pass it to `ListSnapshots` to list only the snapshots o
 ```
 curl -X POST 'localhost:9898/v1.Backrest/ListSnapshots' --data '{"repoId": "YOUR_REPO_ID", "sourceId": "SOURCE_ID"}' -H 'Content-Type: application/json' -u USERNAME:PASSWORD
 ```
+
+`PreviewAdoptedSource` shows what an adoption rule would do, without modifying the repository or taking a lock. It returns each matched source with the snapshots restic would keep and remove, and the reason when a source is ignored or refused:
+
+```
+curl -X POST 'localhost:9898/v1.Backrest/PreviewAdoptedSource' --data '{"repoId": "YOUR_REPO_ID", "rule": {"hostname": "nas", "path": "/data", "retention": {"policyKeepLastN": 10}}}' -H 'Content-Type: application/json' -u USERNAME:PASSWORD
+```

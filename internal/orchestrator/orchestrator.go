@@ -327,6 +327,14 @@ func (o *Orchestrator) ScheduleDefaultTasks(config *v1.Config) error {
 			return fmt.Errorf("schedule scheduled forget task for repo %q: %w", repo.GetId(), err)
 		}
 
+		// Schedule one forget task per adopted source rule of the repo
+		for _, rule := range repo.GetAdoptedSources() {
+			t = tasks.NewAdoptedForgetTask(repo, rule, false)
+			if _, err := o.ScheduleTask(t, tasks.TaskPriorityForget); err != nil {
+				return fmt.Errorf("schedule adopted forget task for repo %q: %w", repo.GetId(), err)
+			}
+		}
+
 		// Schedule periodic snapshot indexing for the repo
 		t = tasks.NewScheduledIndexSnapshotsTask(repo)
 		if _, err := o.ScheduleTask(t, tasks.TaskPriorityIndexSnapshots); err != nil {

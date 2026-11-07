@@ -287,6 +287,45 @@ func (r *RepoOrchestrator) ForgetSnapshot(ctx context.Context, snapshotId string
 	return r.repo.ForgetSnapshot(ctx, snapshotId)
 }
 
+// ForgetDryRunBySource computes, without modifying the repo or taking a lock, which snapshots the
+// policy would keep and remove for each source (host + paths) of the given host whose paths contain
+// the given path. Groups are returned as restic computed them; callers must still select the groups
+// they manage, since restic's --path is a superset match.
+func (r *RepoOrchestrator) ForgetDryRunBySource(ctx context.Context, policy *v1.RetentionPolicy, hostname, path string) ([]restic.ForgetGroup, error) {
+	ctx, flush := forwardResticLogs(ctx)
+	defer flush()
+
+	groups, err := r.repo.ForgetDryRun(ctx, protoutil.RetentionPolicyFromProto(policy),
+		restic.WithFlags("--group-by", "host,paths"),
+		restic.WithFlags("--host", hostname),
+		restic.WithFlags("--path", path),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("forget dry run for repo %v: %w", r.repoConfig.Id, err)
+	}
+	return groups, nil
+}
+
+// ForgetSnapshots forgets exactly the given snapshot IDs.
+func (r *RepoOrchestrator) ForgetSnapshots(ctx context.Context, snapshotIDs []string) error {
+	if err := repomode.Check(r.repoConfig, repomode.ActionForget); err != nil {
+		return err
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	ctx, flush := forwardResticLogs(ctx)
+	defer flush()
+
+	// Keep the command line short; restic takes one lock per invocation.
+	for _, chunk := range chunkBy(snapshotIDs, 100) {
+		if err := r.repo.ForgetSnapshots(ctx, chunk); err != nil {
+			return fmt.Errorf("forget snapshots in repo %v: %w", r.repoConfig.Id, err)
+		}
+	}
+	r.logger(ctx).Debug("forgot snapshots by ID", zap.Int("count", len(snapshotIDs)), zap.String("repo", r.repoConfig.Id))
+	return nil
+}
+
 func (r *RepoOrchestrator) Prune(ctx context.Context, output io.Writer) error {
 	if err := repomode.Check(r.repoConfig, repomode.ActionPrune); err != nil {
 		return err

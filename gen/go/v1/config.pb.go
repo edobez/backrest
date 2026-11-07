@@ -311,7 +311,7 @@ func (x Schedule_Clock) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Schedule_Clock.Descriptor instead.
 func (Schedule_Clock) EnumDescriptor() ([]byte, []int) {
-	return file_v1_config_proto_rawDescGZIP(), []int{9, 0}
+	return file_v1_config_proto_rawDescGZIP(), []int{10, 0}
 }
 
 type Hook_Condition int32
@@ -405,7 +405,7 @@ func (x Hook_Condition) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Hook_Condition.Descriptor instead.
 func (Hook_Condition) EnumDescriptor() ([]byte, []int) {
-	return file_v1_config_proto_rawDescGZIP(), []int{10, 0}
+	return file_v1_config_proto_rawDescGZIP(), []int{11, 0}
 }
 
 type Hook_OnError int32
@@ -463,7 +463,7 @@ func (x Hook_OnError) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Hook_OnError.Descriptor instead.
 func (Hook_OnError) EnumDescriptor() ([]byte, []int) {
-	return file_v1_config_proto_rawDescGZIP(), []int{10, 1}
+	return file_v1_config_proto_rawDescGZIP(), []int{11, 1}
 }
 
 type Hook_Webhook_Method int32
@@ -512,7 +512,7 @@ func (x Hook_Webhook_Method) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Hook_Webhook_Method.Descriptor instead.
 func (Hook_Webhook_Method) EnumDescriptor() ([]byte, []int) {
-	return file_v1_config_proto_rawDescGZIP(), []int{10, 1, 0}
+	return file_v1_config_proto_rawDescGZIP(), []int{11, 1, 0}
 }
 
 // Config is the top level config object for restic UI.
@@ -696,6 +696,7 @@ type Repo struct {
 	Shared           bool                   `protobuf:"varint,13,opt,name=shared,proto3" json:"shared,omitempty"`                                              // if true, this repo is pushed to all authorized clients with read-config permission
 	OriginInstanceId string                 `protobuf:"bytes,14,opt,name=origin_instance_id,json=originInstanceId,proto3" json:"origin_instance_id,omitempty"` // set when this repo was pushed from a remote instance; marks it as non-editable
 	ForgetPolicy     *ForgetPolicy          `protobuf:"bytes,15,opt,name=forget_policy,json=forgetPolicy,proto3" json:"forget_policy,omitempty"`               // optional repo-level forget policy. If set, overrides per-plan retention policies.
+	IndexPolicy      *IndexPolicy           `protobuf:"bytes,16,opt,name=index_policy,json=indexPolicy,proto3" json:"index_policy,omitempty"`                  // optional schedule for re-indexing the repo's snapshots, e.g. to pick up snapshots created by other clients.
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -831,6 +832,13 @@ func (x *Repo) GetOriginInstanceId() string {
 func (x *Repo) GetForgetPolicy() *ForgetPolicy {
 	if x != nil {
 		return x.ForgetPolicy
+	}
+	return nil
+}
+
+func (x *Repo) GetIndexPolicy() *IndexPolicy {
+	if x != nil {
+		return x.IndexPolicy
 	}
 	return nil
 }
@@ -1221,6 +1229,52 @@ func (x *PrunePolicy) GetMaxUnusedPercent() float64 {
 	return 0
 }
 
+// IndexPolicy controls periodic re-indexing of a repo's snapshots. Backrest otherwise only indexes
+// after its own backups, so snapshots created by other clients are only picked up with a schedule.
+type IndexPolicy struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Schedule      *Schedule              `protobuf:"bytes,1,opt,name=schedule,proto3" json:"schedule,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IndexPolicy) Reset() {
+	*x = IndexPolicy{}
+	mi := &file_v1_config_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IndexPolicy) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IndexPolicy) ProtoMessage() {}
+
+func (x *IndexPolicy) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_config_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IndexPolicy.ProtoReflect.Descriptor instead.
+func (*IndexPolicy) Descriptor() ([]byte, []int) {
+	return file_v1_config_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *IndexPolicy) GetSchedule() *Schedule {
+	if x != nil {
+		return x.Schedule
+	}
+	return nil
+}
+
 type CheckPolicy struct {
 	state    protoimpl.MessageState `protogen:"open.v1"`
 	Schedule *Schedule              `protobuf:"bytes,1,opt,name=schedule,proto3" json:"schedule,omitempty"`
@@ -1235,7 +1289,7 @@ type CheckPolicy struct {
 
 func (x *CheckPolicy) Reset() {
 	*x = CheckPolicy{}
-	mi := &file_v1_config_proto_msgTypes[8]
+	mi := &file_v1_config_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1247,7 +1301,7 @@ func (x *CheckPolicy) String() string {
 func (*CheckPolicy) ProtoMessage() {}
 
 func (x *CheckPolicy) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_config_proto_msgTypes[8]
+	mi := &file_v1_config_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1260,7 +1314,7 @@ func (x *CheckPolicy) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckPolicy.ProtoReflect.Descriptor instead.
 func (*CheckPolicy) Descriptor() ([]byte, []int) {
-	return file_v1_config_proto_rawDescGZIP(), []int{8}
+	return file_v1_config_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *CheckPolicy) GetSchedule() *Schedule {
@@ -1327,7 +1381,7 @@ type Schedule struct {
 
 func (x *Schedule) Reset() {
 	*x = Schedule{}
-	mi := &file_v1_config_proto_msgTypes[9]
+	mi := &file_v1_config_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1339,7 +1393,7 @@ func (x *Schedule) String() string {
 func (*Schedule) ProtoMessage() {}
 
 func (x *Schedule) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_config_proto_msgTypes[9]
+	mi := &file_v1_config_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1352,7 +1406,7 @@ func (x *Schedule) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Schedule.ProtoReflect.Descriptor instead.
 func (*Schedule) Descriptor() ([]byte, []int) {
-	return file_v1_config_proto_rawDescGZIP(), []int{9}
+	return file_v1_config_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *Schedule) GetSchedule() isSchedule_Schedule {
@@ -1454,7 +1508,7 @@ type Hook struct {
 
 func (x *Hook) Reset() {
 	*x = Hook{}
-	mi := &file_v1_config_proto_msgTypes[10]
+	mi := &file_v1_config_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1466,7 +1520,7 @@ func (x *Hook) String() string {
 func (*Hook) ProtoMessage() {}
 
 func (x *Hook) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_config_proto_msgTypes[10]
+	mi := &file_v1_config_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1479,7 +1533,7 @@ func (x *Hook) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Hook.ProtoReflect.Descriptor instead.
 func (*Hook) Descriptor() ([]byte, []int) {
-	return file_v1_config_proto_rawDescGZIP(), []int{10}
+	return file_v1_config_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *Hook) GetConditions() []Hook_Condition {
@@ -1637,7 +1691,7 @@ type Auth struct {
 
 func (x *Auth) Reset() {
 	*x = Auth{}
-	mi := &file_v1_config_proto_msgTypes[11]
+	mi := &file_v1_config_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1649,7 +1703,7 @@ func (x *Auth) String() string {
 func (*Auth) ProtoMessage() {}
 
 func (x *Auth) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_config_proto_msgTypes[11]
+	mi := &file_v1_config_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1662,7 +1716,7 @@ func (x *Auth) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Auth.ProtoReflect.Descriptor instead.
 func (*Auth) Descriptor() ([]byte, []int) {
-	return file_v1_config_proto_rawDescGZIP(), []int{11}
+	return file_v1_config_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *Auth) GetDisabled() bool {
@@ -1692,7 +1746,7 @@ type User struct {
 
 func (x *User) Reset() {
 	*x = User{}
-	mi := &file_v1_config_proto_msgTypes[12]
+	mi := &file_v1_config_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1704,7 +1758,7 @@ func (x *User) String() string {
 func (*User) ProtoMessage() {}
 
 func (x *User) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_config_proto_msgTypes[12]
+	mi := &file_v1_config_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1717,7 +1771,7 @@ func (x *User) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use User.ProtoReflect.Descriptor instead.
 func (*User) Descriptor() ([]byte, []int) {
-	return file_v1_config_proto_rawDescGZIP(), []int{12}
+	return file_v1_config_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *User) GetName() string {
@@ -1767,7 +1821,7 @@ type Multihost_Peer struct {
 
 func (x *Multihost_Peer) Reset() {
 	*x = Multihost_Peer{}
-	mi := &file_v1_config_proto_msgTypes[13]
+	mi := &file_v1_config_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1779,7 +1833,7 @@ func (x *Multihost_Peer) String() string {
 func (*Multihost_Peer) ProtoMessage() {}
 
 func (x *Multihost_Peer) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_config_proto_msgTypes[13]
+	mi := &file_v1_config_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1845,7 +1899,7 @@ type Multihost_PairingToken struct {
 
 func (x *Multihost_PairingToken) Reset() {
 	*x = Multihost_PairingToken{}
-	mi := &file_v1_config_proto_msgTypes[14]
+	mi := &file_v1_config_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1857,7 +1911,7 @@ func (x *Multihost_PairingToken) String() string {
 func (*Multihost_PairingToken) ProtoMessage() {}
 
 func (x *Multihost_PairingToken) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_config_proto_msgTypes[14]
+	mi := &file_v1_config_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1935,7 +1989,7 @@ type Multihost_Permission struct {
 
 func (x *Multihost_Permission) Reset() {
 	*x = Multihost_Permission{}
-	mi := &file_v1_config_proto_msgTypes[15]
+	mi := &file_v1_config_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1947,7 +2001,7 @@ func (x *Multihost_Permission) String() string {
 func (*Multihost_Permission) ProtoMessage() {}
 
 func (x *Multihost_Permission) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_config_proto_msgTypes[15]
+	mi := &file_v1_config_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1991,7 +2045,7 @@ type RetentionPolicy_TimeBucketedCounts struct {
 
 func (x *RetentionPolicy_TimeBucketedCounts) Reset() {
 	*x = RetentionPolicy_TimeBucketedCounts{}
-	mi := &file_v1_config_proto_msgTypes[16]
+	mi := &file_v1_config_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2003,7 +2057,7 @@ func (x *RetentionPolicy_TimeBucketedCounts) String() string {
 func (*RetentionPolicy_TimeBucketedCounts) ProtoMessage() {}
 
 func (x *RetentionPolicy_TimeBucketedCounts) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_config_proto_msgTypes[16]
+	mi := &file_v1_config_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2070,7 +2124,7 @@ type Hook_Command struct {
 
 func (x *Hook_Command) Reset() {
 	*x = Hook_Command{}
-	mi := &file_v1_config_proto_msgTypes[17]
+	mi := &file_v1_config_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2082,7 +2136,7 @@ func (x *Hook_Command) String() string {
 func (*Hook_Command) ProtoMessage() {}
 
 func (x *Hook_Command) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_config_proto_msgTypes[17]
+	mi := &file_v1_config_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2095,7 +2149,7 @@ func (x *Hook_Command) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Hook_Command.ProtoReflect.Descriptor instead.
 func (*Hook_Command) Descriptor() ([]byte, []int) {
-	return file_v1_config_proto_rawDescGZIP(), []int{10, 0}
+	return file_v1_config_proto_rawDescGZIP(), []int{11, 0}
 }
 
 func (x *Hook_Command) GetCommand() string {
@@ -2116,7 +2170,7 @@ type Hook_Webhook struct {
 
 func (x *Hook_Webhook) Reset() {
 	*x = Hook_Webhook{}
-	mi := &file_v1_config_proto_msgTypes[18]
+	mi := &file_v1_config_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2128,7 +2182,7 @@ func (x *Hook_Webhook) String() string {
 func (*Hook_Webhook) ProtoMessage() {}
 
 func (x *Hook_Webhook) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_config_proto_msgTypes[18]
+	mi := &file_v1_config_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2141,7 +2195,7 @@ func (x *Hook_Webhook) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Hook_Webhook.ProtoReflect.Descriptor instead.
 func (*Hook_Webhook) Descriptor() ([]byte, []int) {
-	return file_v1_config_proto_rawDescGZIP(), []int{10, 1}
+	return file_v1_config_proto_rawDescGZIP(), []int{11, 1}
 }
 
 func (x *Hook_Webhook) GetWebhookUrl() string {
@@ -2175,7 +2229,7 @@ type Hook_Discord struct {
 
 func (x *Hook_Discord) Reset() {
 	*x = Hook_Discord{}
-	mi := &file_v1_config_proto_msgTypes[19]
+	mi := &file_v1_config_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2187,7 +2241,7 @@ func (x *Hook_Discord) String() string {
 func (*Hook_Discord) ProtoMessage() {}
 
 func (x *Hook_Discord) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_config_proto_msgTypes[19]
+	mi := &file_v1_config_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2200,7 +2254,7 @@ func (x *Hook_Discord) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Hook_Discord.ProtoReflect.Descriptor instead.
 func (*Hook_Discord) Descriptor() ([]byte, []int) {
-	return file_v1_config_proto_rawDescGZIP(), []int{10, 2}
+	return file_v1_config_proto_rawDescGZIP(), []int{11, 2}
 }
 
 func (x *Hook_Discord) GetWebhookUrl() string {
@@ -2230,7 +2284,7 @@ type Hook_Gotify struct {
 
 func (x *Hook_Gotify) Reset() {
 	*x = Hook_Gotify{}
-	mi := &file_v1_config_proto_msgTypes[20]
+	mi := &file_v1_config_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2242,7 +2296,7 @@ func (x *Hook_Gotify) String() string {
 func (*Hook_Gotify) ProtoMessage() {}
 
 func (x *Hook_Gotify) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_config_proto_msgTypes[20]
+	mi := &file_v1_config_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2255,7 +2309,7 @@ func (x *Hook_Gotify) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Hook_Gotify.ProtoReflect.Descriptor instead.
 func (*Hook_Gotify) Descriptor() ([]byte, []int) {
-	return file_v1_config_proto_rawDescGZIP(), []int{10, 3}
+	return file_v1_config_proto_rawDescGZIP(), []int{11, 3}
 }
 
 func (x *Hook_Gotify) GetBaseUrl() string {
@@ -2303,7 +2357,7 @@ type Hook_Slack struct {
 
 func (x *Hook_Slack) Reset() {
 	*x = Hook_Slack{}
-	mi := &file_v1_config_proto_msgTypes[21]
+	mi := &file_v1_config_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2315,7 +2369,7 @@ func (x *Hook_Slack) String() string {
 func (*Hook_Slack) ProtoMessage() {}
 
 func (x *Hook_Slack) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_config_proto_msgTypes[21]
+	mi := &file_v1_config_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2328,7 +2382,7 @@ func (x *Hook_Slack) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Hook_Slack.ProtoReflect.Descriptor instead.
 func (*Hook_Slack) Descriptor() ([]byte, []int) {
-	return file_v1_config_proto_rawDescGZIP(), []int{10, 4}
+	return file_v1_config_proto_rawDescGZIP(), []int{11, 4}
 }
 
 func (x *Hook_Slack) GetWebhookUrl() string {
@@ -2355,7 +2409,7 @@ type Hook_Shoutrrr struct {
 
 func (x *Hook_Shoutrrr) Reset() {
 	*x = Hook_Shoutrrr{}
-	mi := &file_v1_config_proto_msgTypes[22]
+	mi := &file_v1_config_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2367,7 +2421,7 @@ func (x *Hook_Shoutrrr) String() string {
 func (*Hook_Shoutrrr) ProtoMessage() {}
 
 func (x *Hook_Shoutrrr) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_config_proto_msgTypes[22]
+	mi := &file_v1_config_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2380,7 +2434,7 @@ func (x *Hook_Shoutrrr) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Hook_Shoutrrr.ProtoReflect.Descriptor instead.
 func (*Hook_Shoutrrr) Descriptor() ([]byte, []int) {
-	return file_v1_config_proto_rawDescGZIP(), []int{10, 5}
+	return file_v1_config_proto_rawDescGZIP(), []int{11, 5}
 }
 
 func (x *Hook_Shoutrrr) GetShoutrrrUrl() string {
@@ -2407,7 +2461,7 @@ type Hook_Healthchecks struct {
 
 func (x *Hook_Healthchecks) Reset() {
 	*x = Hook_Healthchecks{}
-	mi := &file_v1_config_proto_msgTypes[23]
+	mi := &file_v1_config_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2419,7 +2473,7 @@ func (x *Hook_Healthchecks) String() string {
 func (*Hook_Healthchecks) ProtoMessage() {}
 
 func (x *Hook_Healthchecks) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_config_proto_msgTypes[23]
+	mi := &file_v1_config_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2432,7 +2486,7 @@ func (x *Hook_Healthchecks) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Hook_Healthchecks.ProtoReflect.Descriptor instead.
 func (*Hook_Healthchecks) Descriptor() ([]byte, []int) {
-	return file_v1_config_proto_rawDescGZIP(), []int{10, 6}
+	return file_v1_config_proto_rawDescGZIP(), []int{11, 6}
 }
 
 func (x *Hook_Healthchecks) GetWebhookUrl() string {
@@ -2460,7 +2514,7 @@ type Hook_Telegram struct {
 
 func (x *Hook_Telegram) Reset() {
 	*x = Hook_Telegram{}
-	mi := &file_v1_config_proto_msgTypes[24]
+	mi := &file_v1_config_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2472,7 +2526,7 @@ func (x *Hook_Telegram) String() string {
 func (*Hook_Telegram) ProtoMessage() {}
 
 func (x *Hook_Telegram) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_config_proto_msgTypes[24]
+	mi := &file_v1_config_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2485,7 +2539,7 @@ func (x *Hook_Telegram) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Hook_Telegram.ProtoReflect.Descriptor instead.
 func (*Hook_Telegram) Descriptor() ([]byte, []int) {
-	return file_v1_config_proto_rawDescGZIP(), []int{10, 7}
+	return file_v1_config_proto_rawDescGZIP(), []int{11, 7}
 }
 
 func (x *Hook_Telegram) GetBotToken() string {
@@ -2552,7 +2606,7 @@ const file_v1_config_proto_rawDesc = "" +
 	"\x1aPERMISSION_READ_OPERATIONS\x10\x01\x12\x1a\n" +
 	"\x16PERMISSION_READ_CONFIG\x10\x02\x12 \n" +
 	"\x1cPERMISSION_READ_WRITE_CONFIG\x10\x03\x12#\n" +
-	"\x1fPERMISSION_RECEIVE_SHARED_REPOS\x10\x04\"\x89\x04\n" +
+	"\x1fPERMISSION_RECEIVE_SHARED_REPOS\x10\x04\"\xbd\x04\n" +
 	"\x04Repo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x10\n" +
 	"\x03uri\x18\x02 \x01(\tR\x03uri\x12\x12\n" +
@@ -2570,7 +2624,8 @@ const file_v1_config_proto_rawDesc = "" +
 	" \x01(\v2\x11.v1.CommandPrefixR\rcommandPrefix\x12\x16\n" +
 	"\x06shared\x18\r \x01(\bR\x06shared\x12,\n" +
 	"\x12origin_instance_id\x18\x0e \x01(\tR\x10originInstanceId\x125\n" +
-	"\rforget_policy\x18\x0f \x01(\v2\x10.v1.ForgetPolicyR\fforgetPolicy\"\xd9\x02\n" +
+	"\rforget_policy\x18\x0f \x01(\v2\x10.v1.ForgetPolicyR\fforgetPolicy\x122\n" +
+	"\findex_policy\x18\x10 \x01(\v2\x0f.v1.IndexPolicyR\vindexPolicy\"\xd9\x02\n" +
 	"\x04Plan\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04repo\x18\x02 \x01(\tR\x04repo\x12\x14\n" +
@@ -2622,7 +2677,9 @@ const file_v1_config_proto_rawDesc = "" +
 	"\vPrunePolicy\x12(\n" +
 	"\bschedule\x18\x02 \x01(\v2\f.v1.ScheduleR\bschedule\x12(\n" +
 	"\x10max_unused_bytes\x18\x03 \x01(\x03R\x0emaxUnusedBytes\x12,\n" +
-	"\x12max_unused_percent\x18\x04 \x01(\x01R\x10maxUnusedPercent\"\xa3\x01\n" +
+	"\x12max_unused_percent\x18\x04 \x01(\x01R\x10maxUnusedPercent\"7\n" +
+	"\vIndexPolicy\x12(\n" +
+	"\bschedule\x18\x01 \x01(\v2\f.v1.ScheduleR\bschedule\"\xa3\x01\n" +
 	"\vCheckPolicy\x12(\n" +
 	"\bschedule\x18\x01 \x01(\v2\f.v1.ScheduleR\bschedule\x12'\n" +
 	"\x0estructure_only\x18d \x01(\bH\x00R\rstructureOnly\x129\n" +
@@ -2738,7 +2795,7 @@ func file_v1_config_proto_rawDescGZIP() []byte {
 }
 
 var file_v1_config_proto_enumTypes = make([]protoimpl.EnumInfo, 8)
-var file_v1_config_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
+var file_v1_config_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_v1_config_proto_goTypes = []any{
 	(Multihost_Permission_Type)(0),             // 0: v1.Multihost.Permission.Type
 	(CommandPrefix_IONiceLevel)(0),             // 1: v1.CommandPrefix.IONiceLevel
@@ -2756,71 +2813,74 @@ var file_v1_config_proto_goTypes = []any{
 	(*RetentionPolicy)(nil),                    // 13: v1.RetentionPolicy
 	(*ForgetPolicy)(nil),                       // 14: v1.ForgetPolicy
 	(*PrunePolicy)(nil),                        // 15: v1.PrunePolicy
-	(*CheckPolicy)(nil),                        // 16: v1.CheckPolicy
-	(*Schedule)(nil),                           // 17: v1.Schedule
-	(*Hook)(nil),                               // 18: v1.Hook
-	(*Auth)(nil),                               // 19: v1.Auth
-	(*User)(nil),                               // 20: v1.User
-	(*Multihost_Peer)(nil),                     // 21: v1.Multihost.Peer
-	(*Multihost_PairingToken)(nil),             // 22: v1.Multihost.PairingToken
-	(*Multihost_Permission)(nil),               // 23: v1.Multihost.Permission
-	(*RetentionPolicy_TimeBucketedCounts)(nil), // 24: v1.RetentionPolicy.TimeBucketedCounts
-	(*Hook_Command)(nil),                       // 25: v1.Hook.Command
-	(*Hook_Webhook)(nil),                       // 26: v1.Hook.Webhook
-	(*Hook_Discord)(nil),                       // 27: v1.Hook.Discord
-	(*Hook_Gotify)(nil),                        // 28: v1.Hook.Gotify
-	(*Hook_Slack)(nil),                         // 29: v1.Hook.Slack
-	(*Hook_Shoutrrr)(nil),                      // 30: v1.Hook.Shoutrrr
-	(*Hook_Healthchecks)(nil),                  // 31: v1.Hook.Healthchecks
-	(*Hook_Telegram)(nil),                      // 32: v1.Hook.Telegram
-	(*PrivateKey)(nil),                         // 33: v1.PrivateKey
+	(*IndexPolicy)(nil),                        // 16: v1.IndexPolicy
+	(*CheckPolicy)(nil),                        // 17: v1.CheckPolicy
+	(*Schedule)(nil),                           // 18: v1.Schedule
+	(*Hook)(nil),                               // 19: v1.Hook
+	(*Auth)(nil),                               // 20: v1.Auth
+	(*User)(nil),                               // 21: v1.User
+	(*Multihost_Peer)(nil),                     // 22: v1.Multihost.Peer
+	(*Multihost_PairingToken)(nil),             // 23: v1.Multihost.PairingToken
+	(*Multihost_Permission)(nil),               // 24: v1.Multihost.Permission
+	(*RetentionPolicy_TimeBucketedCounts)(nil), // 25: v1.RetentionPolicy.TimeBucketedCounts
+	(*Hook_Command)(nil),                       // 26: v1.Hook.Command
+	(*Hook_Webhook)(nil),                       // 27: v1.Hook.Webhook
+	(*Hook_Discord)(nil),                       // 28: v1.Hook.Discord
+	(*Hook_Gotify)(nil),                        // 29: v1.Hook.Gotify
+	(*Hook_Slack)(nil),                         // 30: v1.Hook.Slack
+	(*Hook_Shoutrrr)(nil),                      // 31: v1.Hook.Shoutrrr
+	(*Hook_Healthchecks)(nil),                  // 32: v1.Hook.Healthchecks
+	(*Hook_Telegram)(nil),                      // 33: v1.Hook.Telegram
+	(*PrivateKey)(nil),                         // 34: v1.PrivateKey
 }
 var file_v1_config_proto_depIdxs = []int32{
 	10, // 0: v1.Config.repos:type_name -> v1.Repo
 	11, // 1: v1.Config.plans:type_name -> v1.Plan
-	19, // 2: v1.Config.auth:type_name -> v1.Auth
+	20, // 2: v1.Config.auth:type_name -> v1.Auth
 	9,  // 3: v1.Config.multihost:type_name -> v1.Multihost
-	33, // 4: v1.Multihost.identity:type_name -> v1.PrivateKey
-	21, // 5: v1.Multihost.known_hosts:type_name -> v1.Multihost.Peer
-	21, // 6: v1.Multihost.authorized_clients:type_name -> v1.Multihost.Peer
-	22, // 7: v1.Multihost.pairing_tokens:type_name -> v1.Multihost.PairingToken
+	34, // 4: v1.Multihost.identity:type_name -> v1.PrivateKey
+	22, // 5: v1.Multihost.known_hosts:type_name -> v1.Multihost.Peer
+	22, // 6: v1.Multihost.authorized_clients:type_name -> v1.Multihost.Peer
+	23, // 7: v1.Multihost.pairing_tokens:type_name -> v1.Multihost.PairingToken
 	15, // 8: v1.Repo.prune_policy:type_name -> v1.PrunePolicy
-	16, // 9: v1.Repo.check_policy:type_name -> v1.CheckPolicy
-	18, // 10: v1.Repo.hooks:type_name -> v1.Hook
+	17, // 9: v1.Repo.check_policy:type_name -> v1.CheckPolicy
+	19, // 10: v1.Repo.hooks:type_name -> v1.Hook
 	12, // 11: v1.Repo.command_prefix:type_name -> v1.CommandPrefix
 	14, // 12: v1.Repo.forget_policy:type_name -> v1.ForgetPolicy
-	17, // 13: v1.Plan.schedule:type_name -> v1.Schedule
-	13, // 14: v1.Plan.retention:type_name -> v1.RetentionPolicy
-	18, // 15: v1.Plan.hooks:type_name -> v1.Hook
-	1,  // 16: v1.CommandPrefix.io_nice:type_name -> v1.CommandPrefix.IONiceLevel
-	2,  // 17: v1.CommandPrefix.cpu_nice:type_name -> v1.CommandPrefix.CPUNiceLevel
-	24, // 18: v1.RetentionPolicy.policy_time_bucketed:type_name -> v1.RetentionPolicy.TimeBucketedCounts
-	17, // 19: v1.ForgetPolicy.schedule:type_name -> v1.Schedule
-	13, // 20: v1.ForgetPolicy.retention:type_name -> v1.RetentionPolicy
-	3,  // 21: v1.ForgetPolicy.group_by:type_name -> v1.ForgetPolicy.GroupBy
-	17, // 22: v1.PrunePolicy.schedule:type_name -> v1.Schedule
-	17, // 23: v1.CheckPolicy.schedule:type_name -> v1.Schedule
-	4,  // 24: v1.Schedule.clock:type_name -> v1.Schedule.Clock
-	5,  // 25: v1.Hook.conditions:type_name -> v1.Hook.Condition
-	6,  // 26: v1.Hook.on_error:type_name -> v1.Hook.OnError
-	25, // 27: v1.Hook.action_command:type_name -> v1.Hook.Command
-	26, // 28: v1.Hook.action_webhook:type_name -> v1.Hook.Webhook
-	27, // 29: v1.Hook.action_discord:type_name -> v1.Hook.Discord
-	28, // 30: v1.Hook.action_gotify:type_name -> v1.Hook.Gotify
-	29, // 31: v1.Hook.action_slack:type_name -> v1.Hook.Slack
-	30, // 32: v1.Hook.action_shoutrrr:type_name -> v1.Hook.Shoutrrr
-	31, // 33: v1.Hook.action_healthchecks:type_name -> v1.Hook.Healthchecks
-	32, // 34: v1.Hook.action_telegram:type_name -> v1.Hook.Telegram
-	20, // 35: v1.Auth.users:type_name -> v1.User
-	23, // 36: v1.Multihost.Peer.permissions:type_name -> v1.Multihost.Permission
-	23, // 37: v1.Multihost.PairingToken.permissions:type_name -> v1.Multihost.Permission
-	0,  // 38: v1.Multihost.Permission.type:type_name -> v1.Multihost.Permission.Type
-	7,  // 39: v1.Hook.Webhook.method:type_name -> v1.Hook.Webhook.Method
-	40, // [40:40] is the sub-list for method output_type
-	40, // [40:40] is the sub-list for method input_type
-	40, // [40:40] is the sub-list for extension type_name
-	40, // [40:40] is the sub-list for extension extendee
-	0,  // [0:40] is the sub-list for field type_name
+	16, // 13: v1.Repo.index_policy:type_name -> v1.IndexPolicy
+	18, // 14: v1.Plan.schedule:type_name -> v1.Schedule
+	13, // 15: v1.Plan.retention:type_name -> v1.RetentionPolicy
+	19, // 16: v1.Plan.hooks:type_name -> v1.Hook
+	1,  // 17: v1.CommandPrefix.io_nice:type_name -> v1.CommandPrefix.IONiceLevel
+	2,  // 18: v1.CommandPrefix.cpu_nice:type_name -> v1.CommandPrefix.CPUNiceLevel
+	25, // 19: v1.RetentionPolicy.policy_time_bucketed:type_name -> v1.RetentionPolicy.TimeBucketedCounts
+	18, // 20: v1.ForgetPolicy.schedule:type_name -> v1.Schedule
+	13, // 21: v1.ForgetPolicy.retention:type_name -> v1.RetentionPolicy
+	3,  // 22: v1.ForgetPolicy.group_by:type_name -> v1.ForgetPolicy.GroupBy
+	18, // 23: v1.PrunePolicy.schedule:type_name -> v1.Schedule
+	18, // 24: v1.IndexPolicy.schedule:type_name -> v1.Schedule
+	18, // 25: v1.CheckPolicy.schedule:type_name -> v1.Schedule
+	4,  // 26: v1.Schedule.clock:type_name -> v1.Schedule.Clock
+	5,  // 27: v1.Hook.conditions:type_name -> v1.Hook.Condition
+	6,  // 28: v1.Hook.on_error:type_name -> v1.Hook.OnError
+	26, // 29: v1.Hook.action_command:type_name -> v1.Hook.Command
+	27, // 30: v1.Hook.action_webhook:type_name -> v1.Hook.Webhook
+	28, // 31: v1.Hook.action_discord:type_name -> v1.Hook.Discord
+	29, // 32: v1.Hook.action_gotify:type_name -> v1.Hook.Gotify
+	30, // 33: v1.Hook.action_slack:type_name -> v1.Hook.Slack
+	31, // 34: v1.Hook.action_shoutrrr:type_name -> v1.Hook.Shoutrrr
+	32, // 35: v1.Hook.action_healthchecks:type_name -> v1.Hook.Healthchecks
+	33, // 36: v1.Hook.action_telegram:type_name -> v1.Hook.Telegram
+	21, // 37: v1.Auth.users:type_name -> v1.User
+	24, // 38: v1.Multihost.Peer.permissions:type_name -> v1.Multihost.Permission
+	24, // 39: v1.Multihost.PairingToken.permissions:type_name -> v1.Multihost.Permission
+	0,  // 40: v1.Multihost.Permission.type:type_name -> v1.Multihost.Permission.Type
+	7,  // 41: v1.Hook.Webhook.method:type_name -> v1.Hook.Webhook.Method
+	42, // [42:42] is the sub-list for method output_type
+	42, // [42:42] is the sub-list for method input_type
+	42, // [42:42] is the sub-list for extension type_name
+	42, // [42:42] is the sub-list for extension extendee
+	0,  // [0:42] is the sub-list for field type_name
 }
 
 func init() { file_v1_config_proto_init() }
@@ -2834,17 +2894,17 @@ func file_v1_config_proto_init() {
 		(*RetentionPolicy_PolicyTimeBucketed)(nil),
 		(*RetentionPolicy_PolicyKeepAll)(nil),
 	}
-	file_v1_config_proto_msgTypes[8].OneofWrappers = []any{
+	file_v1_config_proto_msgTypes[9].OneofWrappers = []any{
 		(*CheckPolicy_StructureOnly)(nil),
 		(*CheckPolicy_ReadDataSubsetPercent)(nil),
 	}
-	file_v1_config_proto_msgTypes[9].OneofWrappers = []any{
+	file_v1_config_proto_msgTypes[10].OneofWrappers = []any{
 		(*Schedule_Disabled)(nil),
 		(*Schedule_Cron)(nil),
 		(*Schedule_MaxFrequencyDays)(nil),
 		(*Schedule_MaxFrequencyHours)(nil),
 	}
-	file_v1_config_proto_msgTypes[10].OneofWrappers = []any{
+	file_v1_config_proto_msgTypes[11].OneofWrappers = []any{
 		(*Hook_ActionCommand)(nil),
 		(*Hook_ActionWebhook)(nil),
 		(*Hook_ActionDiscord)(nil),
@@ -2854,7 +2914,7 @@ func file_v1_config_proto_init() {
 		(*Hook_ActionHealthchecks)(nil),
 		(*Hook_ActionTelegram)(nil),
 	}
-	file_v1_config_proto_msgTypes[12].OneofWrappers = []any{
+	file_v1_config_proto_msgTypes[13].OneofWrappers = []any{
 		(*User_PasswordBcrypt)(nil),
 	}
 	type x struct{}
@@ -2863,7 +2923,7 @@ func file_v1_config_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_config_proto_rawDesc), len(file_v1_config_proto_rawDesc)),
 			NumEnums:      8,
-			NumMessages:   25,
+			NumMessages:   26,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

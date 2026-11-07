@@ -75,6 +75,8 @@ Expressions that are syntactically valid but can never match a real date, such a
 - **Prune/Check Operations** (Repo Settings):
   - Run infrequently (e.g., monthly)
   - Use "Last Run Time" clock to prevent skips
+- **Index Snapshots** (Repo Settings):
+  - Hourly or daily, depending on how often other clients back up
 :::
 
 ## Operation Types
@@ -220,3 +222,33 @@ Verifies repository integrity using `restic check`.
 ::: warning
 A value of 100% for *read data%* will read/download every pack file in your repository. This can be very slow and, if your provider bills for egress bandwidth, can be expensive. It is recommended to set this to 0% or a low value (e.g. 10%) for most use cases.
 :::
+
+### 🗂️ Index Snapshots
+[Restic Documentation](https://restic.readthedocs.io/en/latest/045_working_with_repos.html#listing-all-snapshots)
+
+Reads the list of snapshots in the repository using `restic snapshots` and records them in Backrest's operation history. Snapshots that no longer exist in the repository are marked as forgotten.
+
+Backrest indexes a repository:
+- after each backup run by one of its plans
+- when you click **Index Snapshots** in the repository view
+- on the repository's **Index Policy** schedule, if one is set
+
+**Configuration:**
+- Scheduled in repo settings (**Index Policy**), disabled by default
+- **Parameters:**
+  - Schedule timing
+
+Enable the Index Policy for repositories that other machines or tools back up into (for example `resticprofile` or your own scripts calling `restic backup`). Without it, Backrest only notices their snapshots after its own backups or when you index manually.
+
+The index schedule is tracked in memory, so a scheduled index also runs once shortly after Backrest starts.
+
+#### Sources
+
+The **Sources** tab of the repository view groups the indexed snapshots by **source**: the hostname and the exact set of backed-up paths. This is the same grouping restic uses for `restic forget --group-by host,paths`:
+
+- Paths are sorted, so `restic backup /data /etc` and `restic backup /etc /data` are the same source.
+- A snapshot of `[/data, /etc]` is a different source from a snapshot of `[/data]`. A restic snapshot is a single unit, so it belongs to exactly one source.
+- Hostnames are compared exactly, including case.
+- Tags are not part of the source. Snapshots created by a Backrest plan show the plan; snapshots without a `plan:` tag are shown as **External**.
+
+For each source, the table shows the number of snapshots, the time of the latest snapshot and its size (the amount of data restic processed for it, before deduplication).

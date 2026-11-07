@@ -96,9 +96,10 @@ Click **"Add Repo"** to configure your backup storage location. You can either c
 5. **Maintenance Policies**
    - **Prune Policy**: Schedule for cleaning unreferenced data.
    - **Check Policy**: Schedule for backup integrity verification.
+   - **Index Policy**: Schedule for re-reading the repository's snapshots. Enable it if other machines or tools also back up into this repository.
 
 ::: info
-Once you've saved the repository, navigate to the Repository View and click **"Index Snapshots"** to import any previous backups. Backrest will also automatically index snapshots the first time a backup plan runs successfully.
+Once you've saved the repository, navigate to the Repository View and click **"Index Snapshots"** to import any previous backups. Backrest will also automatically index snapshots the first time a backup plan runs successfully. The **Sources** tab then lists the snapshots grouped by host and backed-up paths.
 :::
 
 ### 3. Backup Plan Configuration

@@ -49,6 +49,10 @@ service Backrest {
 
   rpc ListSnapshotFiles(ListSnapshotFilesRequest) returns (ListSnapshotFilesResponse) {}
 
+  // ListSources returns the snapshot sources (hostname + paths, as restic's `--group-by host,paths`) of a repo,
+  // computed from the indexed snapshots.
+  rpc ListSources(ListSourcesRequest) returns (ListSourcesResponse) {}
+
   // Backup schedules a backup operation. It accepts a plan id and returns empty if the task is enqueued.
   rpc Backup(BackupRequest) returns (google.protobuf.Empty) {}
 
@@ -158,6 +162,31 @@ message ForgetRequest {
 message ListSnapshotsRequest {
   string repo_id = 1;
   string plan_id = 2;
+  string source_id = 3; // optional, restricts the result to snapshots of exactly this source (see SnapshotSource.id).
+}
+
+message ListSourcesRequest {
+  string repo_id = 1;
+}
+
+message ListSourcesResponse {
+  repeated SnapshotSource sources = 1;
+}
+
+// SnapshotSource groups snapshots by (hostname, sorted paths), the same key restic uses for `--group-by host,paths`.
+// Tags are not part of the key.
+message SnapshotSource {
+  string id = 1; // stable ID derived from hostname and sorted paths, independent of the repo.
+  string repo_id = 2;
+  string hostname = 3;
+  repeated string paths = 4; // sorted.
+  repeated string plan_ids = 5; // distinct plan IDs (from `plan:` tags) of its snapshots, empty for external snapshots.
+  repeated string instance_ids = 6; // distinct instance IDs (from `created-by:` tags) of its snapshots.
+  int64 snapshot_count = 7; // number of snapshots not yet forgotten.
+  int64 first_snapshot_time_ms = 8;
+  int64 last_snapshot_time_ms = 9;
+  string last_snapshot_id = 10;
+  int64 last_snapshot_bytes = 11; // logical size (total_bytes_processed) of the latest snapshot, 0 if unknown.
 }
 
 message GetOperationsRequest {

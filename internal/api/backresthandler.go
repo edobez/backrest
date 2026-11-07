@@ -19,6 +19,7 @@ import (
 	"github.com/garethgeorge/backrest/gen/go/types"
 	v1 "github.com/garethgeorge/backrest/gen/go/v1"
 	"github.com/garethgeorge/backrest/gen/go/v1/v1connect"
+	"github.com/garethgeorge/backrest/internal/adoption"
 	"github.com/garethgeorge/backrest/internal/api/sftputil"
 	syncapi "github.com/garethgeorge/backrest/internal/api/syncapi"
 	"github.com/garethgeorge/backrest/internal/config"
@@ -431,6 +432,49 @@ func (s *BackrestHandler) ListSources(ctx context.Context, req *connect.Request[
 
 	return connect.NewResponse(&v1.ListSourcesResponse{
 		Sources: sources.Build(repoCfg.GetId(), snapshots),
+	}), nil
+}
+
+// PreviewAdoptedSource resolves an adopted source rule with a lock-free dry run and returns what the
+// rule would keep and remove per matched source. Nothing is modified.
+func (s *BackrestHandler) PreviewAdoptedSource(ctx context.Context, req *connect.Request[v1.PreviewAdoptedSourceRequest]) (*connect.Response[v1.PreviewAdoptedSourceResponse], error) {
+	repoCfg, err := s.orchestrator.GetRepo(req.Msg.GetRepoId())
+	if err != nil {
+		return nil, withLookupCode(fmt.Errorf("failed to get repo: %w", err))
+	}
+	// Adoption is only allowed where Backrest may forget, so a preview elsewhere would be misleading.
+	if err := checkRepoMode(repoCfg, repomode.ActionForget); err != nil {
+		return nil, err
+	}
+
+	rule := req.Msg.GetRule()
+	if rule.GetHostname() == "" || rule.GetPath() == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("rule must specify hostname and path"))
+	}
+	if rule.GetRetention() == nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("rule must specify a retention policy"))
+	}
+	if err := protoutil.ValidateRetentionPolicy(rule.GetRetention()); err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+	if !adoption.RemovesSnapshots(rule.GetRetention()) {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("retention policy keeps every snapshot"))
+	}
+
+	r, err := s.orchestrator.GetRepoOrchestrator(repoCfg.GetId())
+	if err != nil {
+		return nil, fmt.Errorf("failed to get repo orchestrator: %w", err)
+	}
+	groups, err := r.ForgetDryRunBySource(ctx, rule.GetRetention(), rule.GetHostname(), rule.GetPath())
+	if err != nil {
+		return nil, err
+	}
+	matches, err := adoption.Select(repoCfg.GetId(), rule, groups)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(&v1.PreviewAdoptedSourceResponse{
+		Matches: adoption.ToProto(matches),
 	}), nil
 }
 

@@ -88,6 +88,8 @@ const hookConditionDescriptions: Record<string, string> = {
   CONDITION_FORGET_SUCCESS:
     m.repo_hooks_command_runs_condition_forget_success(),
   CONDITION_FORGET_ERROR: m.repo_hooks_command_runs_condition_forget_error(),
+  CONDITION_ADOPTED_SOURCE_NEW:
+    m.repo_hooks_command_runs_condition_adopted_source_new(),
   CONDITION_ANY_ERROR: m.repo_hooks_command_runs_condition_any_error(),
   CONDITION_UNKNOWN: m.repo_hooks_command_runs_condition_unknown(),
 };
@@ -400,7 +402,9 @@ const hookTypes: {
       return (
         <Stack gap={2}>
           <Input
-            placeholder={m.hooks_form_list_service_base_url({ service: "Gotify" })}
+            placeholder={m.hooks_form_list_service_base_url({
+              service: "Gotify",
+            })}
             value={hook.actionGotify?.baseUrl || ""}
             onChange={(e) => updateGotify("baseUrl", e.target.value)}
             size="sm"
@@ -428,11 +432,23 @@ const hookTypes: {
           />
           <EnumSelector
             options={[
-              { label: "0 - " + m.hooks_form_list_no_notification(), value: "0" },
-              { label: "1 - " + m.hooks_form_list_icon_in_notification_bar(), value: "1" },
-              { label: "4 - " + m.hooks_form_list_icon_in_notification_bar_sound(), value: "4" },
               {
-                label: "8 - " + m.hooks_form_list_icon_in_notification_bar_sound_vibration(),
+                label: "0 - " + m.hooks_form_list_no_notification(),
+                value: "0",
+              },
+              {
+                label: "1 - " + m.hooks_form_list_icon_in_notification_bar(),
+                value: "1",
+              },
+              {
+                label:
+                  "4 - " + m.hooks_form_list_icon_in_notification_bar_sound(),
+                value: "4",
+              },
+              {
+                label:
+                  "8 - " +
+                  m.hooks_form_list_icon_in_notification_bar_sound_vibration(),
                 value: "8",
               },
             ]}

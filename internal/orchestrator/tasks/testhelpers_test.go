@@ -21,6 +21,11 @@ type fakeRepoOrchestrator struct {
 
 	forgetSnapshotErr error
 
+	forgetDryRunGroups []restic.ForgetGroup
+	forgetDryRunErr    error
+	forgetSnapshotsErr error
+	forgotSnapshotIDs  []string
+
 	pruneErr error
 	checkErr error
 
@@ -64,6 +69,19 @@ func (f *fakeRepoOrchestrator) Forget(ctx context.Context, policy *v1.RetentionP
 func (f *fakeRepoOrchestrator) ForgetSnapshot(ctx context.Context, snapshotId string) error {
 	f.calls = append(f.calls, "ForgetSnapshot")
 	return f.forgetSnapshotErr
+}
+
+func (f *fakeRepoOrchestrator) ForgetDryRunBySource(ctx context.Context, policy *v1.RetentionPolicy, hostname, path string) ([]restic.ForgetGroup, error) {
+	f.calls = append(f.calls, "ForgetDryRunBySource")
+	return f.forgetDryRunGroups, f.forgetDryRunErr
+}
+
+func (f *fakeRepoOrchestrator) ForgetSnapshots(ctx context.Context, snapshotIDs []string) error {
+	f.calls = append(f.calls, "ForgetSnapshots")
+	if f.forgetSnapshotsErr == nil {
+		f.forgotSnapshotIDs = append(f.forgotSnapshotIDs, snapshotIDs...)
+	}
+	return f.forgetSnapshotsErr
 }
 
 func (f *fakeRepoOrchestrator) Prune(ctx context.Context, output io.Writer) error {

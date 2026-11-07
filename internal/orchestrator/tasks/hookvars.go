@@ -25,6 +25,7 @@ type HookVars struct {
 	CurTime       time.Time                   // the current time as time.Time
 	Duration      time.Duration               // the duration of the operation that triggered the hook.
 	Error         string                      // the error that caused the hook to run as a string.
+	Sources       []*v1.SnapshotSource        // the sources an event is about, e.g. sources newly matched by an adopted source rule.
 }
 
 func (v HookVars) EventName(cond v1.Hook_Condition) string {
@@ -61,6 +62,8 @@ func (v HookVars) EventName(cond v1.Hook_Condition) string {
 		return "forget error"
 	case v1.Hook_CONDITION_FORGET_SUCCESS:
 		return "forget success"
+	case v1.Hook_CONDITION_ADOPTED_SOURCE_NEW:
+		return "new adopted source"
 	default:
 		return "unknown"
 	}
@@ -120,6 +123,8 @@ func (v HookVars) Summary() (string, error) {
 		return v.renderTemplate(templateForSnapshotStart)
 	case v1.Hook_CONDITION_SNAPSHOT_END, v1.Hook_CONDITION_SNAPSHOT_WARNING, v1.Hook_CONDITION_SNAPSHOT_SUCCESS:
 		return v.renderTemplate(templateForSnapshotEnd)
+	case v1.Hook_CONDITION_ADOPTED_SOURCE_NEW:
+		return v.renderTemplate(templateForAdoptedSourceNew)
 	default:
 		return v.renderTemplate(templateDefault)
 	}
@@ -179,6 +184,16 @@ Backup Statistics:
 - Tree blobs: {{ .SnapshotStats.TreeBlobs }}
 - Total duration: {{ .SnapshotStats.TotalDuration }}s
 {{ end }}
+{{ end }}`
+
+var templateForAdoptedSourceNew = `
+Backrest Notification for New Adopted Sources
+Task: "{{ .Task }}" at {{ .FormatTime .CurTime }}
+Event: {{ .EventName .Event }}
+Repo: {{ .Repo.Id }}
+The following sources are now under the retention policy of an adopted source rule:
+{{ range .Sources -}}
+ - host {{ .Hostname }}, paths: {{ range $i, $p := .Paths }}{{ if $i }}, {{ end }}{{ $p }}{{ end }} ({{ .SnapshotCount }} snapshots)
 {{ end }}`
 
 var templateForSnapshotStart = `

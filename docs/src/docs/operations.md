@@ -253,6 +253,47 @@ The **Sources** tab of the repository view groups the indexed snapshots by **sou
 
 For each source, the table shows the number of snapshots, the time of the latest snapshot and its size (the amount of data restic processed for it, before deduplication).
 
+#### Adopting external sources
+
+Snapshots without a `plan:` tag (created by other machines or tools) can be put under a retention policy with an **adoption rule**. Open the **Sources** tab and click **Adopt** on an external source, or **Add rule**. A rule has:
+
+- a **hostname**, matched exactly, as restic compares hostnames;
+- a **path**: the rule matches every source of that host whose paths contain it. A rule for `nas` + `/data` matches both `[/data]` and `[/data, /etc]`;
+- a **retention policy** and a **schedule**.
+
+The rule stores this selector, not a list of sources, and resolves it again on every run. Retention is applied to **each matched source independently**. A snapshot of `[/data, /etc]` is kept or forgotten as a whole, so the rule above also puts the `[/data, /etc]` source under the policy. Before a rule is saved, Backrest shows a dry-run preview of the matched sources and the snapshots that would be removed.
+
+Only snapshots without a `plan:` tag can be adopted, which also excludes snapshots of other Backrest instances:
+
+- A source made only of plan snapshots is managed by its plan. The rule ignores it.
+- A source that **mixes** plan snapshots and external snapshots is **refused**: none of its snapshots are touched and the run fails with an error that names the source, because the plan snapshots would distort the retention counts.
+
+restic cannot select "exactly this source" (`--path` also matches supersets of the paths) or "without tag `plan:*`" (`--tag` has no negation), so each run has two steps:
+
+1. A dry run, without a lock: `restic forget --dry-run --no-lock --json --group-by host,paths --host <hostname> --path <path> <policy>`. restic computes what to keep and remove per source, so the retention semantics are restic's own.
+2. Backrest keeps only the sources the rule matches and forgets exactly the computed snapshot IDs with `restic forget <id>...`. Snapshots added between the two steps are never removed.
+
+The result is recorded as a normal forget operation. Removing the rule stops all management of its sources. Adoption rules:
+
+- are not allowed on append-only or read-only repositories;
+- cannot be combined with an enabled repo-level **Forget Policy**, which already applies to every snapshot in the repository;
+- do not change plan retention.
+
+When a rule starts matching a source it did not match before, for example because the external tool started backing up an additional path, Backrest runs the hooks for `CONDITION_ADOPTED_SOURCE_NEW` before forgetting anything. The first run of a rule reports all its sources as new. A hook with `ON_ERROR_CANCEL` that fails stops the run, and the sources are reported again on the next run.
+
+Differences from plan retention:
+
+- Plan retention follows the plan across host and path changes. An adopted source is an exact host and set of paths: a client renamed to another hostname produces a new source that the rule does not match, so its snapshots are kept until a rule covers it.
+- `forget` takes an exclusive lock, and so does prune. Client backups that start during it fail until it finishes, so schedule rules in a quiet window.
+
+::: tip Central retention for append-only clients
+Several machines back up with another tool (e.g. resticprofile) into a rest-server running with `--append-only`, so they cannot forget or prune. One central Backrest instance owns retention and prune:
+
+- Give Backrest a **non-append-only** path to the same repository: a second rest-server process without `--append-only` on the same data directory, reachable only by Backrest, or direct local or SFTP access on the storage host. In Backrest, this repository is **Managed**. Backrest's own append-only mode means "Backrest does not delete", which is a different thing.
+- Disable client-side retention (resticprofile's `retention` section).
+- Enable the repository's **Index Policy**, so Backrest sees new client snapshots even without plans of its own on the repository.
+:::
+
 ## Repository Modes
 
 restic has no concept of repository ownership: any key can forget and prune. When a repository is managed by another tool or machine, set its **Mode** in the repo settings so that Backrest does not remove data it does not own.
@@ -262,7 +303,7 @@ restic has no concept of repository ownership: any key can forget and prune. Whe
 | Backup | ✅ | ✅ | ❌ |
 | Index snapshots, browse, restore, download, stats | ✅ | ✅ | ✅ (with `--no-lock`) |
 | Check | ✅ | ✅ | Manual only, after confirmation |
-| Forget (plan retention, repo forget policy, single snapshot) | ✅ | ❌ | ❌ |
+| Forget (plan retention, repo forget policy, adoption rules, single snapshot) | ✅ | ❌ | ❌ |
 | Prune | ✅ | ❌ | ❌ |
 | Unlock, auto unlock | ✅ | ❌ | ❌ |
 | Auto initialize | ✅ | ✅ | ❌ |
@@ -274,4 +315,4 @@ restic has no concept of repository ownership: any key can forget and prune. Whe
 Without a lock, nothing protects a browse or restore on a read-only repository from a concurrent prune by the repository's owner. The operation can then fail with missing-pack errors. Retry it; no data is damaged.
 :::
 
-Backrest refuses forbidden operations wherever they come from: schedules, hooks and API calls, not only the UI. Saving a restricted mode fails while the configuration still asks for something the mode forbids, and the error lists what to remove: plans with a retention policy (append-only), any plan (read-only), enabled prune, forget or check schedules, auto unlock and auto initialize. Selecting a restricted mode in the repo settings turns off the conflicting repo settings for you; plans must be changed separately.
+Backrest refuses forbidden operations wherever they come from: schedules, hooks and API calls, not only the UI. Saving a restricted mode fails while the configuration still asks for something the mode forbids, and the error lists what to remove: plans with a retention policy (append-only), any plan (read-only), enabled prune, forget or check schedules, adoption rules, auto unlock and auto initialize. Selecting a restricted mode in the repo settings turns off the conflicting repo settings for you; plans must be changed separately.

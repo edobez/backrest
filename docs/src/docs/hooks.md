@@ -28,6 +28,9 @@ Hooks can be triggered by the following events:
 - `CONDITION_FORGET_SUCCESS`: Triggered when a forget operation completes successfully
 - `CONDITION_FORGET_ERROR`: Triggered when a forget operation fails
 
+### Adoption Events
+- `CONDITION_ADOPTED_SOURCE_NEW`: Triggered when an adopted source rule starts matching a source it did not match before, before any of its snapshots are forgotten. The `.Sources` variable lists the new sources (`.Hostname`, `.Paths`, `.SnapshotCount`).
+
 ### General Events
 - `CONDITION_ANY_ERROR`: Triggered when any operation fails
 
@@ -81,6 +84,7 @@ Hooks use Go templates for formatting notifications and scripts. The following v
 | `CurTime`       | `time.Time`                  | Current timestamp           | <code v-pre>{{ .FormatTime .CurTime }}</code>      |
 | `Duration`      | `time.Duration`              | Operation duration          | <code v-pre>{{ .FormatDuration .Duration }}</code> |
 | `Error`         | `string`                     | Error message if applicable | <code v-pre>{{ .Error }}</code>                    |
+| `Sources`       | `[]v1.SnapshotSource`        | Sources the event is about (`CONDITION_ADOPTED_SOURCE_NEW`) | <code v-pre>{{ range .Sources }}{{ .Hostname }} {{ .Paths }}{{ end }}</code> |
 
 ### Helper Functions
 

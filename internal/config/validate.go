@@ -145,6 +145,10 @@ func validateRepo(repo *v1.Repo) error {
 		}
 	}
 
+	if e := validateAdoptedSources(repo); e != nil {
+		err = multierror.Append(err, e)
+	}
+
 	for _, env := range repo.Env {
 		if !strings.Contains(env, "=") {
 			err = multierror.Append(err, fmt.Errorf("invalid env var %s, must take format KEY=VALUE", env))

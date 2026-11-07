@@ -379,6 +379,62 @@ func (r *Repo) Forget(ctx context.Context, policy *RetentionPolicy, opts ...Gene
 	return merged, nil
 }
 
+// ForgetDryRun runs `restic forget --dry-run --no-lock --json` with the policy and returns restic's
+// per-group keep/remove lists unmerged, so callers can select groups themselves. Nothing is removed,
+// and no lock is taken (restic only skips the lock for a dry run with --no-lock). No output means no
+// snapshot matched and yields no groups.
+func (r *Repo) ForgetDryRun(ctx context.Context, policy *RetentionPolicy, opts ...GenericOption) ([]ForgetGroup, error) {
+	if policy == nil {
+		return nil, fmt.Errorf("forget dry run: nil retention policy")
+	}
+	flags := policy.toForgetFlags()
+	if len(flags) == 0 {
+		return nil, fmt.Errorf("forget dry run: retention policy keeps everything")
+	}
+	args := append([]string{"forget", "--json", "--dry-run", "--no-lock"}, flags...)
+
+	errorCollector := errorMessageCollector{}
+	stdout := bytes.NewBuffer(nil)
+	cmd := r.commandWithContext(ctx, args, opts...)
+	r.handleOutput(cmd, withAllTo(&errorCollector), withStdOutTo(stdout), withLogWriterFromContext(ctx))
+	if err := cmd.Run(); err != nil {
+		return nil, errorCollector.AddCmdOutputToError(cmd, err)
+	}
+
+	if len(bytes.TrimSpace(stdout.Bytes())) == 0 {
+		return nil, nil
+	}
+	var groups []ForgetGroup
+	if _, _, err := parseJSONSkippingWarnings(stdout.Bytes(), &groups); err != nil {
+		return nil, errorCollector.AddCmdOutputToError(cmd, fmt.Errorf("command output is not valid JSON: %w", err))
+	}
+	for i := range groups {
+		if err := groups[i].Validate(); err != nil {
+			return nil, fmt.Errorf("invalid forget result: %w", err)
+		}
+	}
+	return groups, nil
+}
+
+// ForgetSnapshots forgets exactly the given snapshot IDs. No retention policy is applied.
+func (r *Repo) ForgetSnapshots(ctx context.Context, snapshotIDs []string, opts ...GenericOption) error {
+	if len(snapshotIDs) == 0 {
+		return nil
+	}
+	for _, id := range snapshotIDs {
+		if err := ValidateSnapshotId(id); err != nil {
+			return err
+		}
+	}
+	args := append([]string{"forget"}, snapshotIDs...)
+	cmd := r.commandWithContext(ctx, args, opts...)
+	errorCollector := errorMessageCollector{}
+	r.handleOutput(cmd, withAllTo(&errorCollector), withLogWriterFromContext(ctx))
+	if err := cmd.Run(); err != nil {
+		return errorCollector.AddCmdOutputToError(cmd, err)
+	}
+	return nil
+}
 
 func (r *Repo) ForgetSnapshot(ctx context.Context, snapshotId string, opts ...GenericOption) error {
 	args := []string{"forget", "--json", snapshotId}

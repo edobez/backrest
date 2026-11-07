@@ -21,7 +21,8 @@ var errorConditionsMap = map[v1.Hook_Condition]bool{
 }
 
 var logConditionsMap = map[v1.Hook_Condition]bool{
-	v1.Hook_CONDITION_SNAPSHOT_END: true,
+	v1.Hook_CONDITION_SNAPSHOT_END:       true,
+	v1.Hook_CONDITION_ADOPTED_SOURCE_NEW: true,
 }
 
 var successConditionsMap = map[v1.Hook_Condition]bool{

@@ -221,29 +221,8 @@ func forgetHelper(ctx context.Context, st ScheduledTask, runner TaskRunner, poli
 	}
 	st.Op.Op = forgetOp
 
-	// Mark forgotten snapshots in the oplog
-	var ops []*v1.Operation
-	for _, f := range forgot {
-		if e := runner.QueryOperations(oplog.Query{}.
-			SetRepoGUID(t.Repo().GetGuid()).
-			SetSnapshotID(f.Id), func(op *v1.Operation) error {
-			ops = append(ops, op)
-			return nil
-		}); e != nil {
-			err = multierror.Append(err, fmt.Errorf("lookup snapshot %v: %w", f.Id, e))
-		}
-	}
-
-	l := runner.Logger(ctx)
-	l.Sugar().Debugf("found %v snapshots were forgotten, marking this in oplog", len(ops))
-
-	for _, op := range ops {
-		if indexOp, ok := op.Op.(*v1.Operation_OperationIndexSnapshot); ok {
-			indexOp.OperationIndexSnapshot.Forgot = true
-			if e := runner.UpdateOperation(op); e != nil {
-				err = multierror.Append(err, fmt.Errorf("mark index snapshot %v as forgotten: %w", op.Id, e))
-			}
-		}
+	if e := markSnapshotsForgotten(ctx, runner, t.Repo().GetGuid(), forgot); e != nil {
+		err = multierror.Append(err, e)
 	}
 
 	if err != nil {
@@ -257,6 +236,34 @@ func forgetHelper(ctx context.Context, st ScheduledTask, runner TaskRunner, poli
 	}
 
 	return nil
+}
+
+// markSnapshotsForgotten marks the index operations of the given snapshots as forgotten.
+func markSnapshotsForgotten(ctx context.Context, runner TaskRunner, repoGUID string, forgot []*v1.ResticSnapshot) error {
+	var err error
+	var ops []*v1.Operation
+	for _, f := range forgot {
+		if e := runner.QueryOperations(oplog.Query{}.
+			SetRepoGUID(repoGUID).
+			SetSnapshotID(f.Id), func(op *v1.Operation) error {
+			ops = append(ops, op)
+			return nil
+		}); e != nil {
+			err = multierror.Append(err, fmt.Errorf("lookup snapshot %v: %w", f.Id, e))
+		}
+	}
+
+	runner.Logger(ctx).Sugar().Debugf("found %v snapshots were forgotten, marking this in oplog", len(ops))
+
+	for _, op := range ops {
+		if indexOp, ok := op.Op.(*v1.Operation_OperationIndexSnapshot); ok {
+			indexOp.OperationIndexSnapshot.Forgot = true
+			if e := runner.UpdateOperation(op); e != nil {
+				err = multierror.Append(err, fmt.Errorf("mark index snapshot %v as forgotten: %w", op.Id, e))
+			}
+		}
+	}
+	return err
 }
 
 // UseLegacyCompatMode checks if there are any snapshots that were created without a `created-by` tag still exist in the repo.

@@ -53,6 +53,10 @@ service Backrest {
   // computed from the indexed snapshots.
   rpc ListSources(ListSourcesRequest) returns (ListSourcesResponse) {}
 
+  // PreviewAdoptedSource resolves an adopted source rule with a lock-free dry run and returns the
+  // matched sources and the snapshots the rule would keep and remove. Nothing is modified.
+  rpc PreviewAdoptedSource(PreviewAdoptedSourceRequest) returns (PreviewAdoptedSourceResponse) {}
+
   // Backup schedules a backup operation. It accepts a plan id and returns empty if the task is enqueued.
   rpc Backup(BackupRequest) returns (google.protobuf.Empty) {}
 
@@ -171,6 +175,24 @@ message ListSourcesRequest {
 
 message ListSourcesResponse {
   repeated SnapshotSource sources = 1;
+}
+
+message PreviewAdoptedSourceRequest {
+  string repo_id = 1;
+  AdoptedSource rule = 2;
+}
+
+message PreviewAdoptedSourceResponse {
+  repeated AdoptedSourceMatch matches = 1;
+}
+
+// AdoptedSourceMatch is one source matched by an adopted source rule.
+message AdoptedSourceMatch {
+  SnapshotSource source = 1;
+  repeated ResticSnapshot keep = 2;
+  repeated ResticSnapshot remove = 3; // empty when the source is refused.
+  string refused_reason = 4; // set when the rule does not manage this source. Refusals are errors unless skipped is set.
+  bool skipped = 5; // the source contains only plan snapshots, so it is managed by its plan and ignored by the rule. Not an error.
 }
 
 // SnapshotSource groups snapshots by (hostname, sorted paths), the same key restic uses for `--group-by host,paths`.

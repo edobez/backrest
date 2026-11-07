@@ -63,6 +63,18 @@ func TestReadOnlyRepoRPCs(t *testing.T) {
 		t.Errorf("Forget: want FailedPrecondition, got %v", err)
 	}
 
+	_, err = sut.handler.PreviewAdoptedSource(ctx, connect.NewRequest(&v1.PreviewAdoptedSourceRequest{
+		RepoId: "ro",
+		Rule: &v1.AdoptedSource{
+			Hostname:  "nas",
+			Path:      "/data",
+			Retention: &v1.RetentionPolicy{Policy: &v1.RetentionPolicy_PolicyKeepLastN{PolicyKeepLastN: 1}},
+		},
+	}))
+	if connect.CodeOf(err) != connect.CodeFailedPrecondition {
+		t.Errorf("PreviewAdoptedSource: want FailedPrecondition, got %v", err)
+	}
+
 	res, err := sut.handler.DoRepoTask(ctx, connect.NewRequest(&v1.DoRepoTaskRequest{RepoId: "ro", Task: v1.DoRepoTaskRequest_TASK_CHECK}))
 	if err != nil {
 		t.Fatalf("manual check: %v", err)

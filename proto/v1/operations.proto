@@ -102,6 +102,16 @@ message OperationIndexSnapshot {
 message OperationForget {
   repeated ResticSnapshot forget = 1;
   RetentionPolicy policy = 2;
+  AdoptedForget adopted = 3; // set when the forget applied an adopted source rule.
+}
+
+// AdoptedForget records which adopted source rule a forget applied and what it matched.
+message AdoptedForget {
+  string hostname = 1; // the rule's hostname selector.
+  string path = 2; // the rule's path selector.
+  bool resolved = 3; // true once the selector was resolved; source_ids are only meaningful then.
+  repeated string source_ids = 4; // IDs of the sources the selector matched, refused ones included and plan-only ones excluded.
+  repeated string refused_source_ids = 5; // IDs of matched sources that were refused (e.g. they contain plan snapshots).
 }
 
 // OperationPrune tracks a prune operation.

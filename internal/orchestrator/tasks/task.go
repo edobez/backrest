@@ -19,6 +19,8 @@ type RepoOrchestrator interface {
 	Backup(ctx context.Context, plan *v1.Plan, dryRun bool, progressCallback func(event *restic.BackupProgressEntry)) (*restic.BackupProgressEntry, error)
 	Forget(ctx context.Context, policy *v1.RetentionPolicy, opts ...restic.GenericOption) ([]*v1.ResticSnapshot, error)
 	ForgetSnapshot(ctx context.Context, snapshotId string) error
+	ForgetDryRunBySource(ctx context.Context, policy *v1.RetentionPolicy, hostname, path string) ([]restic.ForgetGroup, error)
+	ForgetSnapshots(ctx context.Context, snapshotIDs []string) error
 	Prune(ctx context.Context, output io.Writer) error
 	Check(ctx context.Context, output io.Writer) error
 	Stats(ctx context.Context) (*v1.RepoStats, error)

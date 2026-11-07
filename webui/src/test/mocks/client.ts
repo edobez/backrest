@@ -57,6 +57,8 @@ export const backrestService = {
   getOperations: vi.fn(async () => create(OperationListSchema, {})),
   listSnapshots: vi.fn(),
   listSnapshotFiles: vi.fn(),
+  listSources: vi.fn(),
+  previewAdoptedSource: vi.fn(),
   backup: vi.fn(),
   doRepoTask: vi.fn(),
   forget: vi.fn(),

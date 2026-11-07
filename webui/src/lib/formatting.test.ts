@@ -1,11 +1,15 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   formatBytes,
   formatDate,
   formatDuration,
   formatMonth,
   formatTime,
+  getDateFormatPreference,
   localISOTime,
+  setDateFormatPreference,
+  subscribeDateFormat,
+  DATE_FORMAT_STORAGE_KEY,
   normalizeSnapshotId,
 } from "./formatting";
 
@@ -153,5 +157,160 @@ describe("localISOTime", () => {
     const ms = 1610668800000;
     expect(localISOTime(String(ms))).toBe(localISOTime(ms));
     expect(localISOTime(new Date(ms))).toBe(localISOTime(ms));
+  });
+});
+
+describe("date format preference", () => {
+  // Built from local components so the tests are timezone-independent.
+  const afternoon = new Date(2026, 10, 6, 14, 30);
+  const morning = new Date(2026, 10, 6, 9, 5);
+
+  afterEach(() => {
+    setDateFormatPreference({ style: "browser", hourCycle: "auto" });
+    localStorage.clear();
+  });
+
+  it("defaults to browser style with automatic clock", () => {
+    expect(getDateFormatPreference()).toEqual({
+      style: "browser",
+      hourCycle: "auto",
+    });
+  });
+
+  it("formats ISO 8601 in local time, always 24h", () => {
+    setDateFormatPreference({ style: "iso", hourCycle: "h12" });
+    expect(formatTime(afternoon)).toBe("2026-11-06 14:30");
+    expect(formatTime(morning)).toBe("2026-11-06 09:05");
+    expect(formatDate(afternoon)).toBe("2026-11-06");
+    expect(formatMonth(afternoon)).toBe("2026-11");
+  });
+
+  it("formats by locale", () => {
+    setDateFormatPreference({
+      style: "locale",
+      locale: "en-US",
+      hourCycle: "auto",
+    });
+    expect(formatDate(afternoon)).toBe("11/06/2026");
+    expect(formatMonth(afternoon)).toBe("11/2026");
+    setDateFormatPreference({
+      style: "locale",
+      locale: "de-DE",
+      hourCycle: "auto",
+    });
+    expect(formatDate(afternoon)).toBe("06.11.2026");
+    expect(formatMonth(afternoon)).toMatch(/^11[./]2026$/);
+    setDateFormatPreference({
+      style: "locale",
+      locale: "en-GB",
+      hourCycle: "auto",
+    });
+    expect(formatDate(afternoon)).toBe("06/11/2026");
+  });
+
+  it("honours 12h and 24h clock for locale style", () => {
+    setDateFormatPreference({
+      style: "locale",
+      locale: "en-US",
+      hourCycle: "h12",
+    });
+    expect(formatTime(afternoon)).toMatch(/2:30\s?PM/);
+    setDateFormatPreference({
+      style: "locale",
+      locale: "en-US",
+      hourCycle: "h23",
+    });
+    expect(formatTime(afternoon)).toMatch(/14:30/);
+    expect(formatTime(afternoon)).not.toMatch(/PM/);
+    setDateFormatPreference({
+      style: "locale",
+      locale: "de-DE",
+      hourCycle: "h12",
+    });
+    expect(formatTime(afternoon)).toMatch(/2:30/);
+  });
+
+  it("honours the clock option for browser style", () => {
+    setDateFormatPreference({ style: "browser", hourCycle: "h23" });
+    expect(formatTime(afternoon)).toMatch(/14:30/);
+    setDateFormatPreference({ style: "browser", hourCycle: "h12" });
+    expect(formatTime(afternoon)).toMatch(/2:30/);
+  });
+
+  it("falls back to the browser default for an invalid locale", () => {
+    setDateFormatPreference({
+      style: "locale",
+      locale: "not a locale!!",
+      hourCycle: "auto",
+    });
+    expect(() => formatTime(afternoon)).not.toThrow();
+    setDateFormatPreference({ style: "browser", hourCycle: "auto" });
+    const expected = formatTime(afternoon);
+    setDateFormatPreference({
+      style: "locale",
+      locale: "not a locale!!",
+      hourCycle: "auto",
+    });
+    expect(formatTime(afternoon)).toBe(expected);
+    expect(formatDate(afternoon)).toMatch(/2026/);
+  });
+
+  it("rebuilds formatters after the preference changes", () => {
+    setDateFormatPreference({
+      style: "locale",
+      locale: "de-DE",
+      hourCycle: "auto",
+    });
+    const de = formatDate(afternoon);
+    expect(formatDate(afternoon)).toBe(de); // memoized path
+    setDateFormatPreference({
+      style: "locale",
+      locale: "en-US",
+      hourCycle: "auto",
+    });
+    expect(formatDate(afternoon)).not.toBe(de);
+  });
+
+  it("does not change localISOTime", () => {
+    const before = localISOTime(afternoon);
+    setDateFormatPreference({ style: "iso", hourCycle: "auto" });
+    expect(localISOTime(afternoon)).toBe(before);
+  });
+
+  it("notifies subscribers and supports unsubscribe", () => {
+    const listener = vi.fn();
+    const unsubscribe = subscribeDateFormat(listener);
+    setDateFormatPreference({ style: "iso", hourCycle: "auto" });
+    expect(listener).toHaveBeenCalledTimes(1);
+    unsubscribe();
+    setDateFormatPreference({ style: "browser", hourCycle: "auto" });
+    expect(listener).toHaveBeenCalledTimes(1);
+  });
+
+  it("persists to localStorage and sanitizes input", () => {
+    setDateFormatPreference({
+      style: "locale",
+      locale: "fr-FR",
+      hourCycle: "h23",
+    });
+    expect(JSON.parse(localStorage.getItem(DATE_FORMAT_STORAGE_KEY)!)).toEqual({
+      style: "locale",
+      locale: "fr-FR",
+      hourCycle: "h23",
+    });
+    setDateFormatPreference({ style: "bogus", hourCycle: "x" } as any);
+    expect(getDateFormatPreference()).toEqual({
+      style: "browser",
+      hourCycle: "auto",
+    });
+  });
+
+  it("formats with an explicit preference without applying it", () => {
+    setDateFormatPreference({ style: "browser", hourCycle: "auto" });
+    const d = new Date(2026, 10, 6, 14, 30);
+    expect(formatTime(d, { style: "iso", hourCycle: "auto" })).toBe(
+      "2026-11-06 14:30",
+    );
+    expect(getDateFormatPreference().style).toBe("browser");
   });
 });

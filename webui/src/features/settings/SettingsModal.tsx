@@ -48,6 +48,13 @@ import {
 import { useConfig } from "../../app/provider";
 import { useUserPreferences } from "../../lib/userPreferences";
 import {
+  DateFormatPreference,
+  formatTime,
+  getDateFormatPreference,
+  setDateFormatPreference,
+  useDateFormat,
+} from "../../lib/formatting";
+import {
   TwoPaneModal,
   TwoPaneSection,
   type SectionDef,
@@ -103,7 +110,18 @@ export const SettingsModal = () => {
   const [initialFormData, setInitialFormData] = useState(() =>
     JSON.stringify(formData),
   );
-  const dirty = JSON.stringify(formData) !== initialFormData;
+  const configDirty = JSON.stringify(formData) !== initialFormData;
+
+  // The date format is a browser-local preference, but it follows the form's
+  // save/discard flow: edits stay in a draft until Save is pressed.
+  const [savedDateFormat, setSavedDateFormat] = useState<DateFormatPreference>(
+    getDateFormatPreference,
+  );
+  const [dateFormatDraft, setDateFormatDraft] =
+    useState<DateFormatPreference>(savedDateFormat);
+  const dateFormatDirty =
+    JSON.stringify(dateFormatDraft) !== JSON.stringify(savedDateFormat);
+  const dirty = configDirty || dateFormatDirty;
 
   const ttlOptions = createListCollection({
     items: [
@@ -142,7 +160,12 @@ export const SettingsModal = () => {
       setGeneratedToken(resp.token);
       await refreshConfig();
     } catch (e: any) {
-      alerts.error(formatErrorAlert(e, m.settings_modal_failed_to_generate_pairing_token()));
+      alerts.error(
+        formatErrorAlert(
+          e,
+          m.settings_modal_failed_to_generate_pairing_token(),
+        ),
+      );
     } finally {
       setGenerateLoading(false);
     }
@@ -158,7 +181,9 @@ export const SettingsModal = () => {
       setConfig(await backrestService.setConfig(newConfig));
       alerts.success(m.settings_modal_pairing_token_removed());
     } catch (e: any) {
-      alerts.error(formatErrorAlert(e, m.settings_modal_failed_to_remove_pairing_token()));
+      alerts.error(
+        formatErrorAlert(e, m.settings_modal_failed_to_remove_pairing_token()),
+      );
     }
   };
 
@@ -186,9 +211,23 @@ export const SettingsModal = () => {
     return curr;
   };
 
+  const applyDateFormat = () => {
+    setDateFormatPreference(dateFormatDraft);
+    const applied = getDateFormatPreference();
+    setSavedDateFormat(applied);
+    setDateFormatDraft(applied);
+  };
+
   const handleOk = async () => {
     setConfirmLoading(true);
     try {
+      if (!configDirty) {
+        // Only local preferences changed: nothing to send to the server.
+        applyDateFormat();
+        alerts.success(m.settings_success_updated());
+        return;
+      }
+
       const workingData = JSON.parse(JSON.stringify(formData));
 
       if (workingData.auth?.users) {
@@ -221,6 +260,7 @@ export const SettingsModal = () => {
 
       setConfig(await backrestService.setConfig(newConfig));
       setInitialFormData(JSON.stringify(formData));
+      applyDateFormat();
       setReloadOnCancel(true);
       alerts.success(m.settings_success_updated());
     } catch (e: any) {
@@ -240,8 +280,16 @@ export const SettingsModal = () => {
   const users = getField(["auth", "users"]) || [];
 
   const sections: SectionDef[] = [
-    { id: "general", label: m.settings_modal_general(), icon: <FiSettings size={14} /> },
-    { id: "auth", label: m.settings_modal_authentication(), icon: <FiLock size={14} /> },
+    {
+      id: "general",
+      label: m.settings_modal_general(),
+      icon: <FiSettings size={14} />,
+    },
+    {
+      id: "auth",
+      label: m.settings_modal_authentication(),
+      icon: <FiLock size={14} />,
+    },
     ...(isMultihostSyncEnabled
       ? [
           {
@@ -261,10 +309,11 @@ export const SettingsModal = () => {
       headerIcon={<FiSettings size={14} />}
       sections={sections}
       dirty={dirty}
-      dirtyCount={1}
+      dirtyCount={(configDirty ? 1 : 0) + (dateFormatDirty ? 1 : 0)}
       onSave={handleOk}
       onDiscard={() => {
         setFormData(JSON.parse(initialFormData));
+        setDateFormatDraft(savedDateFormat);
       }}
       saving={confirmLoading}
       saveTestId="settings-submit"
@@ -305,7 +354,12 @@ export const SettingsModal = () => {
               />
             </Field>
 
-            <UserSettingsForm />
+            <UserSettingsForm
+              dateFormat={dateFormatDraft}
+              onDateFormatChange={(update) =>
+                setDateFormatDraft((prev) => ({ ...prev, ...update }))
+              }
+            />
           </Stack>
         </SectionCard>
       </TwoPaneSection>
@@ -474,7 +528,9 @@ export const SettingsModal = () => {
                       <Input
                         value={tokenLabel}
                         onChange={(e) => setTokenLabel(e.target.value)}
-                        placeholder={m.settings_modal_eg_laptop2({ example: "laptop-2" })}
+                        placeholder={m.settings_modal_eg_laptop2({
+                          example: "laptop-2",
+                        })}
                         width="full"
                       />
                     </Field>
@@ -487,7 +543,9 @@ export const SettingsModal = () => {
                         {/* @ts-ignore */}
                         <SelectTrigger>
                           {/* @ts-ignore */}
-                          <SelectValueText placeholder={m.settings_modal_select_ttl()} />
+                          <SelectValueText
+                            placeholder={m.settings_modal_select_ttl()}
+                          />
                         </SelectTrigger>
                         {/* @ts-ignore */}
                         <SelectContent zIndex={2000}>
@@ -499,7 +557,10 @@ export const SettingsModal = () => {
                         </SelectContent>
                       </SelectRoot>
                     </Field>
-                    <Field label={m.settings_modal_max_uses()} helperText={"0 = " + m.settings_modal_0_unlimited()}>
+                    <Field
+                      label={m.settings_modal_max_uses()}
+                      helperText={"0 = " + m.settings_modal_0_unlimited()}
+                    >
                       <Input
                         type="number"
                         value={tokenMaxUses}
@@ -605,6 +666,7 @@ const PairingTokenItem = ({
   onRemove: () => void;
 }) => {
   const [showToken, setShowToken] = useState(isNew);
+  useDateFormat();
 
   // Build the full token string: <keyid>:<secret>#<instanceid>
   const fullTokenString =
@@ -618,12 +680,13 @@ const PairingTokenItem = ({
     token.maxUses === 0
       ? `${token.uses} uses (unlimited)`
       : `${token.uses}/${token.maxUses} uses`;
+  const expiryTime = formatTime(Number(token.expiresAtUnix) * 1000);
   const expiryText =
     token.expiresAtUnix === 0n
       ? "Never expires"
       : isExpired
-        ? `Expired ${new Date(Number(token.expiresAtUnix) * 1000).toLocaleString()}`
-        : `Expires ${new Date(Number(token.expiresAtUnix) * 1000).toLocaleString()}`;
+        ? m.settings_token_expired({ time: expiryTime })
+        : m.settings_token_expires({ time: expiryTime });
 
   return (
     <Box p={3} borderWidth="1px" borderRadius="md">
@@ -641,7 +704,11 @@ const PairingTokenItem = ({
             size="xs"
             variant="ghost"
             onClick={() => setShowToken(!showToken)}
-            aria-label={showToken ? m.settings_modal_hide_token() : m.settings_modal_show_token()}
+            aria-label={
+              showToken
+                ? m.settings_modal_hide_token()
+                : m.settings_modal_show_token()
+            }
           >
             {showToken ? <FiEyeOff size={14} /> : <FiEye size={14} />}
           </IconButton>
@@ -721,7 +788,9 @@ const KnownHostsList = ({ items, onUpdate, peerStates, config }: any) => {
       const colonIdx = pairToken.indexOf(":");
       if (hashIdx === -1 || colonIdx === -1 || colonIdx > hashIdx) {
         throw new Error(
-          m.settings_modal_invalid_token_format_expected_keyidsecretinstanceid({ expected: "<keyid>:<secret>#<instanceid>" }),
+          m.settings_modal_invalid_token_format_expected_keyidsecretinstanceid({
+            expected: "<keyid>:<secret>#<instanceid>",
+          }),
         );
       }
       const keyId = pairToken.substring(0, colonIdx);
@@ -757,9 +826,13 @@ const KnownHostsList = ({ items, onUpdate, peerStates, config }: any) => {
       setPairToken("");
       setPairInstanceUrl("");
       setShowAddForm(false);
-      alerts.success(m.settings_modal_server_added_to_known_hosts_save_settings_to_apply());
+      alerts.success(
+        m.settings_modal_server_added_to_known_hosts_save_settings_to_apply(),
+      );
     } catch (e: any) {
-      alerts.error(formatErrorAlert(e, m.settings_modal_failed_to_add_known_host()));
+      alerts.error(
+        formatErrorAlert(e, m.settings_modal_failed_to_add_known_host()),
+      );
     }
   };
 
@@ -795,7 +868,9 @@ const KnownHostsList = ({ items, onUpdate, peerStates, config }: any) => {
               <Input
                 value={pairInstanceUrl}
                 onChange={(e) => setPairInstanceUrl(e.target.value)}
-                placeholder={m.settings_modal_eg_laptop2({ example: "http://server:9898" })}
+                placeholder={m.settings_modal_eg_laptop2({
+                  example: "http://server:9898",
+                })}
                 width="full"
               />
             </Field>
@@ -1162,7 +1237,27 @@ const languageNames: Record<string, string> = {
   pl: "Polski",
 };
 
-const UserSettingsForm = () => {
+const dateStyleLocales = [
+  "en-US",
+  "en-GB",
+  "de-DE",
+  "de-CH",
+  "fr-FR",
+  "it-IT",
+  "es-ES",
+  "nl-NL",
+  "pt-BR",
+  "ja-JP",
+  "zh-CN",
+];
+
+const UserSettingsForm = ({
+  dateFormat,
+  onDateFormatChange: updateDateFormat,
+}: {
+  dateFormat: DateFormatPreference;
+  onDateFormatChange: (update: Partial<DateFormatPreference>) => void;
+}) => {
   const { preferences, updatePreference, availableLanguages } =
     useUserPreferences();
 
@@ -1173,34 +1268,146 @@ const UserSettingsForm = () => {
     })),
   });
 
+  const dateStyleOptions = createListCollection({
+    items: [
+      { label: m.settings_date_format_browser(), value: "browser" },
+      { label: m.settings_date_format_iso(), value: "iso" },
+      { label: m.settings_date_format_locale(), value: "locale" },
+    ],
+  });
+
+  const dateLocaleOptions = createListCollection({
+    items: dateStyleLocales.map((tag) => ({
+      label: tag,
+      value: tag,
+    })),
+  });
+
+  const hourCycleOptions = createListCollection({
+    items: [
+      { label: m.settings_clock_auto(), value: "auto" },
+      { label: m.settings_clock_12h(), value: "h12" },
+      { label: m.settings_clock_24h(), value: "h23" },
+    ],
+  });
+
   return (
-    <Field
-      label={
-        // @ts-ignore
-        m.settings_field_language
-          ? m.settings_field_language()
-          : m.settings_field_language()
-      }
-    >
-      <SelectRoot
-        collection={languageOptions}
-        value={[preferences.language]}
-        onValueChange={(e: any) => updatePreference("language", e.value[0])}
+    <Stack gap={4}>
+      <Field
+        label={
+          // @ts-ignore
+          m.settings_field_language
+            ? m.settings_field_language()
+            : m.settings_field_language()
+        }
       >
-        {/* @ts-ignore */}
-        <SelectTrigger>
+        <SelectRoot
+          collection={languageOptions}
+          value={[preferences.language]}
+          onValueChange={(e: any) => updatePreference("language", e.value[0])}
+        >
           {/* @ts-ignore */}
-          <SelectValueText placeholder={m.settings_modal_select_language()} />
-        </SelectTrigger>
-        {/* @ts-ignore */}
-        <SelectContent zIndex={2000}>
-          {languageOptions.items.map((option: any) => (
-            <SelectItem item={option} key={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </SelectRoot>
-    </Field>
+          <SelectTrigger>
+            {/* @ts-ignore */}
+            <SelectValueText placeholder={m.settings_modal_select_language()} />
+          </SelectTrigger>
+          {/* @ts-ignore */}
+          <SelectContent zIndex={2000}>
+            {languageOptions.items.map((option: any) => (
+              <SelectItem item={option} key={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </SelectRoot>
+      </Field>
+
+      <Field label={m.settings_field_date_format()}>
+        <SelectRoot
+          collection={dateStyleOptions}
+          value={[dateFormat.style]}
+          onValueChange={(e: any) => {
+            const style = e.value[0];
+            updateDateFormat({
+              style,
+              locale:
+                style === "locale"
+                  ? dateFormat.locale || dateStyleLocales[0]
+                  : dateFormat.locale,
+            });
+          }}
+        >
+          {/* @ts-ignore */}
+          <SelectTrigger>
+            {/* @ts-ignore */}
+            <SelectValueText />
+          </SelectTrigger>
+          {/* @ts-ignore */}
+          <SelectContent zIndex={2000}>
+            {dateStyleOptions.items.map((option: any) => (
+              <SelectItem item={option} key={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </SelectRoot>
+      </Field>
+
+      {dateFormat.style === "locale" && (
+        <Field label={m.settings_field_date_locale()}>
+          <SelectRoot
+            collection={dateLocaleOptions}
+            value={dateFormat.locale ? [dateFormat.locale] : []}
+            onValueChange={(e: any) => updateDateFormat({ locale: e.value[0] })}
+          >
+            {/* @ts-ignore */}
+            <SelectTrigger>
+              {/* @ts-ignore */}
+              <SelectValueText />
+            </SelectTrigger>
+            {/* @ts-ignore */}
+            <SelectContent zIndex={2000}>
+              {dateLocaleOptions.items.map((option: any) => (
+                <SelectItem item={option} key={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </SelectRoot>
+        </Field>
+      )}
+
+      {dateFormat.style !== "iso" && (
+        <Field label={m.settings_field_clock()}>
+          <SelectRoot
+            collection={hourCycleOptions}
+            value={[dateFormat.hourCycle]}
+            onValueChange={(e: any) =>
+              updateDateFormat({ hourCycle: e.value[0] })
+            }
+          >
+            {/* @ts-ignore */}
+            <SelectTrigger>
+              {/* @ts-ignore */}
+              <SelectValueText />
+            </SelectTrigger>
+            {/* @ts-ignore */}
+            <SelectContent zIndex={2000}>
+              {hourCycleOptions.items.map((option: any) => (
+                <SelectItem item={option} key={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </SelectRoot>
+        </Field>
+      )}
+
+      <Text fontSize="sm" color="fg.muted">
+        {m.settings_date_format_preview({
+          time: formatTime(Date.now(), dateFormat),
+        })}
+      </Text>
+    </Stack>
   );
 };

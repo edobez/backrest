@@ -7,7 +7,7 @@ import {
 } from "../../../gen/ts/v1/service_pb";
 import { backrestService } from "../../api/client";
 import { operationsStream } from "../../api/oplog";
-import { formatBytes, formatTime } from "../../lib/formatting";
+import { formatBytes, formatTime, useDateFormat } from "../../lib/formatting";
 import { Button } from "../../components/ui/button";
 import * as m from "../../paraglide/messages";
 
@@ -26,6 +26,7 @@ export const SourcesTable = ({
   repoId: string;
   repoGuid: string;
 }) => {
+  useDateFormat(); // re-render when the date format preference changes
   const [sources, setSources] = useState<SnapshotSource[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);

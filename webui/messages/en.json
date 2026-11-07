@@ -704,5 +704,17 @@
   "sources_external": "External",
   "sources_empty": "No snapshots indexed yet. Use \"Index Snapshots\" to read them from the repo.",
   "sources_error": "Failed to load sources: ",
-  "sources_refresh": "Refresh"
+  "sources_refresh": "Refresh",
+  "settings_field_date_format": "Date and time format",
+  "settings_date_format_browser": "Browser default",
+  "settings_date_format_iso": "ISO 8601 (2026-11-06 14:30)",
+  "settings_date_format_locale": "Specific locale",
+  "settings_field_date_locale": "Locale",
+  "settings_field_clock": "Clock",
+  "settings_clock_auto": "Automatic",
+  "settings_clock_12h": "12-hour",
+  "settings_clock_24h": "24-hour",
+  "settings_date_format_preview": "Preview: {time}",
+  "settings_token_expired": "Expired {time}",
+  "settings_token_expires": "Expires {time}"
 }

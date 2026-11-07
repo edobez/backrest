@@ -30,6 +30,7 @@ import (
 	"github.com/garethgeorge/backrest/internal/orchestrator/repo"
 	"github.com/garethgeorge/backrest/internal/orchestrator/tasks"
 	"github.com/garethgeorge/backrest/internal/protoutil"
+	"github.com/garethgeorge/backrest/internal/repomode"
 	"github.com/garethgeorge/backrest/internal/resticinstaller"
 	"github.com/garethgeorge/backrest/internal/sources"
 	"github.com/garethgeorge/backrest/pkg/restic"
@@ -184,6 +185,14 @@ func isHostKeyVerificationError(err error) bool {
 		}
 	}
 	return false
+}
+
+// checkRepoMode returns a FailedPrecondition error if the repo's mode forbids the action.
+func checkRepoMode(repo *v1.Repo, action repomode.Action) error {
+	if err := repomode.Check(repo, action); err != nil {
+		return connect.NewError(connect.CodeFailedPrecondition, err)
+	}
+	return nil
 }
 
 // AddRepo implements POST /v1/config/repo, it includes validation that the repo can be initialized.
@@ -558,6 +567,9 @@ func (s *BackrestHandler) Backup(ctx context.Context, req *connect.Request[v1.Ba
 	if err != nil {
 		return nil, withLookupCode(err)
 	}
+	if err := checkRepoMode(repo, repomode.ActionBackup); err != nil {
+		return nil, err
+	}
 	if err := s.scheduleTaskAndWait(tasks.NewOneoffBackupTask(repo, plan, time.Now(), req.Msg.DryRun), tasks.TaskPriorityInteractive); err != nil {
 		return nil, err
 	}
@@ -574,6 +586,10 @@ func (s *BackrestHandler) Forget(ctx context.Context, req *connect.Request[v1.Fo
 
 	if req.Msg.PlanId == "" {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("must specify repoId and planId and (optionally) snapshotId"))
+	}
+
+	if err := checkRepoMode(repo, repomode.ActionForget); err != nil {
+		return nil, err
 	}
 
 	var task tasks.Task
@@ -596,6 +612,20 @@ func (s BackrestHandler) DoRepoTask(ctx context.Context, req *connect.Request[v1
 	repo, err := s.orchestrator.GetRepo(req.Msg.RepoId)
 	if err != nil {
 		return nil, withLookupCode(err)
+	}
+
+	// TASK_CHECK from this RPC is the explicit user action that the READ_ONLY
+	// mode requires for a check; the UI confirms the exclusive lock first.
+	modeActions := map[v1.DoRepoTaskRequest_Task]repomode.Action{
+		v1.DoRepoTaskRequest_TASK_CHECK:  repomode.ActionManualCheck,
+		v1.DoRepoTaskRequest_TASK_PRUNE:  repomode.ActionPrune,
+		v1.DoRepoTaskRequest_TASK_FORGET: repomode.ActionForget,
+		v1.DoRepoTaskRequest_TASK_UNLOCK: repomode.ActionUnlock,
+	}
+	if action, ok := modeActions[req.Msg.Task]; ok {
+		if err := checkRepoMode(repo, action); err != nil {
+			return nil, err
+		}
 	}
 
 	priority := tasks.TaskPriorityInteractive

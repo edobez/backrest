@@ -1,7 +1,15 @@
 import React, { Suspense, useContext, useEffect, useState } from "react";
-import { Repo } from "../../../gen/ts/v1/config_pb";
+import { Repo, RepoMode } from "../../../gen/ts/v1/config_pb";
 import { Button } from "../../components/ui/button";
-import { Flex, Heading, Box, Group, IconButton } from "@chakra-ui/react";
+import {
+  Badge,
+  Flex,
+  Heading,
+  Box,
+  Group,
+  IconButton,
+  Text,
+} from "@chakra-ui/react";
 import { FiChevronDown } from "react-icons/fi";
 import {
   Tabs,
@@ -38,6 +46,13 @@ import { create } from "@bufbuild/protobuf";
 import { RepoProps } from "../../state/peerStates";
 import * as m from "../../paraglide/messages";
 import { SourcesTable } from "./SourcesTable";
+import { FormModal } from "../../components/common/FormModal";
+import {
+  RepoAction,
+  repoModeAllows,
+  repoModeDisallowedReason,
+  repoModeLabel,
+} from "../../lib/repoMode";
 
 const StatsPanel = React.lazy(() => import("../dashboard/StatsPanel"));
 
@@ -102,7 +117,7 @@ export const RepoView = ({
     }
   };
 
-  const handleCheckNow = async () => {
+  const runCheck = async () => {
     try {
       await backrestService.doRepoTask(
         create(DoRepoTaskRequestSchema, {
@@ -113,6 +128,17 @@ export const RepoView = ({
     } catch (e: any) {
       alerts.error(formatErrorAlert(e, m.repo_error_check()));
     }
+  };
+
+  // On a READ_ONLY repo the manual check is the one operation that writes to
+  // the repo (an exclusive lock), so the user confirms it first.
+  const handleCheckNow = async () => {
+    const mode = config?.repos?.find((r) => r.id === repo.id)?.mode;
+    if (mode === RepoMode.READ_ONLY) {
+      showModal(<CheckLockConfirmModal onConfirm={runCheck} />);
+      return;
+    }
+    await runCheck();
   };
 
   const handleForgetNow = async () => {
@@ -141,11 +167,54 @@ export const RepoView = ({
     );
   }
   repo = repoInConfig;
+  const mode = repoInConfig.mode;
+
+  // Renders a menu action, disabled with an explanation when the repo mode
+  // does not allow it.
+  const actionItem = (
+    value: string,
+    action: RepoAction,
+    onClick: () => void,
+    label: string,
+  ) => {
+    if (repoModeAllows(mode, action)) {
+      return (
+        <MenuItem value={value} onClick={onClick}>
+          {label}
+        </MenuItem>
+      );
+    }
+    return (
+      <Tooltip content={repoModeDisallowedReason(mode)} showArrow>
+        <MenuItem value={value} disabled>
+          {label}
+        </MenuItem>
+      </Tooltip>
+    );
+  };
 
   return (
     <Box>
       <Flex gap={4} align="center" wrap="wrap" mb={4}>
         <Heading size="xl">{repo.id}</Heading>
+        {mode !== undefined && mode !== RepoMode.MANAGED && (
+          <Tooltip
+            content={
+              mode === RepoMode.READ_ONLY
+                ? m.repo_mode_badge_tooltip_read_only()
+                : m.repo_mode_badge_tooltip_append_only()
+            }
+            showArrow
+          >
+            <Badge
+              colorPalette={mode === RepoMode.READ_ONLY ? "purple" : "orange"}
+              size="lg"
+              data-testid="repo-mode-badge"
+            >
+              {repoModeLabel(mode)}
+            </Badge>
+          </Tooltip>
+        )}
         <Box flex="1" />
 
         <Group attached>
@@ -173,20 +242,31 @@ export const RepoView = ({
               >
                 {m.op_type_run_command()}
               </MenuItem>
-              <MenuItem value="unlock" onClick={handleUnlockNow}>
-                {m.repo_button_unlock()}
-              </MenuItem>
-              <MenuItem value="prune" onClick={handlePruneNow}>
-                {m.repo_button_prune()}
-              </MenuItem>
-              {repoInConfig.forgetPolicy && (
-                <MenuItem value="forget" onClick={handleForgetNow}>
-                  {m.repo_button_forget()}
-                </MenuItem>
+              {actionItem(
+                "unlock",
+                "unlock",
+                handleUnlockNow,
+                m.repo_button_unlock(),
               )}
-              <MenuItem value="check" onClick={handleCheckNow}>
-                {m.repo_button_check()}
-              </MenuItem>
+              {actionItem(
+                "prune",
+                "prune",
+                handlePruneNow,
+                m.repo_button_prune(),
+              )}
+              {repoInConfig.forgetPolicy &&
+                actionItem(
+                  "forget",
+                  "forget",
+                  handleForgetNow,
+                  m.repo_button_forget(),
+                )}
+              {actionItem(
+                "check",
+                "manualCheck",
+                handleCheckNow,
+                m.repo_button_check(),
+              )}
               <MenuItem value="stats" onClick={handleStatsNow}>
                 {m.repo_button_stats()}
               </MenuItem>
@@ -254,5 +334,40 @@ export const RepoView = ({
         </TabsContent>
       </TabsRoot>
     </Box>
+  );
+};
+
+const CheckLockConfirmModal = ({
+  onConfirm,
+}: {
+  onConfirm: () => Promise<void>;
+}) => {
+  const showModal = useShowModal();
+  const close = () => showModal(null);
+  return (
+    <FormModal
+      isOpen={true}
+      onClose={close}
+      title={m.repo_check_lock_title()}
+      footer={
+        <Flex gap={2} justify="flex-end" width="full">
+          <Button variant="outline" onClick={close}>
+            {m.button_cancel()}
+          </Button>
+          <Button
+            colorPalette="orange"
+            data-testid="confirm-check-lock"
+            onClick={async () => {
+              close();
+              await onConfirm();
+            }}
+          >
+            {m.repo_check_lock_confirm()}
+          </Button>
+        </Flex>
+      }
+    >
+      <Text>{m.repo_check_lock_warning()}</Text>
+    </FormModal>
   );
 };

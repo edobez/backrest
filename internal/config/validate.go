@@ -71,6 +71,12 @@ func ValidateConfig(c *v1.Config) error {
 		})
 	}
 
+	for _, repo := range c.Repos {
+		if e := validateRepoMode(repo, c.Plans); e != nil {
+			err = multierror.Append(err, fmt.Errorf("repo %s: %w", repo.GetId(), e))
+		}
+	}
+
 	if e := validateMultihost(c); e != nil {
 		err = multierror.Append(err, fmt.Errorf("multihost: %w", e))
 	}

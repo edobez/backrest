@@ -12,6 +12,7 @@ import (
 	"github.com/garethgeorge/backrest/internal/metric"
 	"github.com/garethgeorge/backrest/internal/oplog"
 	"github.com/garethgeorge/backrest/internal/protoutil"
+	"github.com/garethgeorge/backrest/internal/repomode"
 	"github.com/garethgeorge/backrest/pkg/restic"
 	"go.uber.org/zap"
 )
@@ -75,7 +76,7 @@ func (t *BackupTask) Next(now time.Time, runner TaskRunner) (ScheduledTask, erro
 		return NeverScheduledTask, err
 	}
 
-	if plan.Schedule == nil {
+	if plan.Schedule == nil || !repoModeAllows(runner, t.RepoID(), repomode.ActionBackup) {
 		return NeverScheduledTask, nil
 	}
 
@@ -133,6 +134,10 @@ func (t *BackupTask) Run(ctx context.Context, st ScheduledTask, runner TaskRunne
 	// Helper to notify of errors during the setup phase
 	notifyError := func(err error) error {
 		return NotifyError(ctx, runner, t.Name(), err, v1.Hook_CONDITION_SNAPSHOT_ERROR)
+	}
+
+	if err := checkRepoMode(runner, t.RepoID(), repomode.ActionBackup); err != nil {
+		return notifyError(err)
 	}
 
 	repo, err := runner.GetRepoOrchestrator(t.RepoID())
@@ -268,7 +273,7 @@ func (t *BackupTask) Run(ctx context.Context, st ScheduledTask, runner TaskRunne
 		// new repos) must not suppress per-plan retention, otherwise no forget
 		// runs at either level and snapshots are retained forever.
 		repoConfig, _ := runner.GetRepo(t.RepoID())
-		if !protoutil.ScheduleEnabled(repoConfig.GetForgetPolicy().GetSchedule()) {
+		if !protoutil.ScheduleEnabled(repoConfig.GetForgetPolicy().GetSchedule()) && repomode.Allows(repoConfig.GetMode(), repomode.ActionForget) {
 			if _, ok := plan.Retention.GetPolicy().(*v1.RetentionPolicy_PolicyKeepAll); plan.Retention != nil && !ok {
 				if err := runner.ScheduleTask(NewOneoffForgetTask(t.Repo(), t.PlanID(), op.FlowId, at), TaskPriorityForget); err != nil {
 					return fmt.Errorf("failed to schedule forget task: %w", err)

@@ -403,6 +403,7 @@ func (r *Repo) Dump(ctx context.Context, snapshotID string, file string, dumpOut
 	if logWriter == nil {
 		logWriter = io.Discard
 	}
+	fmt.Fprintf(logWriter, "command: %q\n", cmd)
 	errorCollector := errorMessageCollector{}
 
 	// Dump writes binary output to stdout, we should only ever capture and print stderr

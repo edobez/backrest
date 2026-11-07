@@ -6,6 +6,7 @@ import (
 	"time"
 
 	v1 "github.com/garethgeorge/backrest/gen/go/v1"
+	"github.com/garethgeorge/backrest/internal/repomode"
 )
 
 func NewOneoffForgetSnapshotTask(repo *v1.Repo, planID string, flowID int64, at time.Time, snapshotID string) Task {
@@ -35,6 +36,10 @@ func NewOneoffForgetSnapshotTask(repo *v1.Repo, planID string, flowID int64, at 
 
 func forgetSnapshotHelper(ctx context.Context, st ScheduledTask, taskRunner TaskRunner, snapshotID string) error {
 	t := st.Task
+
+	if err := checkRepoMode(taskRunner, t.RepoID(), repomode.ActionForget); err != nil {
+		return err
+	}
 
 	repo, err := taskRunner.GetRepoOrchestrator(t.RepoID())
 	if err != nil {

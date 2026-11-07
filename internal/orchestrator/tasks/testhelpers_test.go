@@ -36,15 +36,20 @@ type fakeRepoOrchestrator struct {
 	addTagsErr error
 
 	runCommandErr error
+
+	// calls records the names of the methods called, in order.
+	calls []string
 }
 
 var _ RepoOrchestrator = &fakeRepoOrchestrator{}
 
 func (f *fakeRepoOrchestrator) UnlockIfAutoEnabled(ctx context.Context) error {
+	f.calls = append(f.calls, "UnlockIfAutoEnabled")
 	return f.unlockErr
 }
 
 func (f *fakeRepoOrchestrator) Backup(ctx context.Context, plan *v1.Plan, dryRun bool, cb func(event *restic.BackupProgressEntry)) (*restic.BackupProgressEntry, error) {
+	f.calls = append(f.calls, "Backup")
 	if cb != nil && f.backupResult != nil {
 		cb(f.backupResult)
 	}
@@ -52,18 +57,22 @@ func (f *fakeRepoOrchestrator) Backup(ctx context.Context, plan *v1.Plan, dryRun
 }
 
 func (f *fakeRepoOrchestrator) Forget(ctx context.Context, policy *v1.RetentionPolicy, opts ...restic.GenericOption) ([]*v1.ResticSnapshot, error) {
+	f.calls = append(f.calls, "Forget")
 	return f.forgetResult, f.forgetErr
 }
 
 func (f *fakeRepoOrchestrator) ForgetSnapshot(ctx context.Context, snapshotId string) error {
+	f.calls = append(f.calls, "ForgetSnapshot")
 	return f.forgetSnapshotErr
 }
 
 func (f *fakeRepoOrchestrator) Prune(ctx context.Context, output io.Writer) error {
+	f.calls = append(f.calls, "Prune")
 	return f.pruneErr
 }
 
 func (f *fakeRepoOrchestrator) Check(ctx context.Context, output io.Writer) error {
+	f.calls = append(f.calls, "Check")
 	return f.checkErr
 }
 
@@ -83,6 +92,7 @@ func (f *fakeRepoOrchestrator) Snapshots(ctx context.Context) ([]*restic.Snapsho
 }
 
 func (f *fakeRepoOrchestrator) AddTags(ctx context.Context, snapshotIDs []string, tags []string) error {
+	f.calls = append(f.calls, "AddTags")
 	return f.addTagsErr
 }
 

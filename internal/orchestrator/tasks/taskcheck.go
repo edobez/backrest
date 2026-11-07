@@ -9,6 +9,7 @@ import (
 	v1 "github.com/garethgeorge/backrest/gen/go/v1"
 	"github.com/garethgeorge/backrest/internal/oplog"
 	"github.com/garethgeorge/backrest/internal/protoutil"
+	"github.com/garethgeorge/backrest/internal/repomode"
 )
 
 type CheckTask struct {
@@ -48,7 +49,7 @@ func (t *CheckTask) Next(now time.Time, runner TaskRunner) (ScheduledTask, error
 		return ScheduledTask{}, fmt.Errorf("get repo %v: %w", t.RepoID(), err)
 	}
 
-	if repo.CheckPolicy.GetSchedule() == nil {
+	if repo.CheckPolicy.GetSchedule() == nil || !repomode.Allows(repo.GetMode(), repomode.ActionScheduledCheck) {
 		return NeverScheduledTask, nil
 	}
 
@@ -97,6 +98,16 @@ func (t *CheckTask) Run(ctx context.Context, st ScheduledTask, runner TaskRunner
 	// Helper to notify of errors during the setup phase
 	notifyError := func(err error) error {
 		return NotifyError(ctx, runner, t.Name(), err, v1.Hook_CONDITION_CHECK_ERROR)
+	}
+
+	// A forced check is one the user started explicitly (DoRepoTask). It is the
+	// only check allowed on a READ_ONLY repo.
+	action := repomode.ActionScheduledCheck
+	if t.force {
+		action = repomode.ActionManualCheck
+	}
+	if err := checkRepoMode(runner, t.RepoID(), action); err != nil {
+		return notifyError(err)
 	}
 
 	repo, err := runner.GetRepoOrchestrator(t.RepoID())

@@ -252,3 +252,26 @@ The **Sources** tab of the repository view groups the indexed snapshots by **sou
 - Tags are not part of the source. Snapshots created by a Backrest plan show the plan; snapshots without a `plan:` tag are shown as **External**.
 
 For each source, the table shows the number of snapshots, the time of the latest snapshot and its size (the amount of data restic processed for it, before deduplication).
+
+## Repository Modes
+
+restic has no concept of repository ownership: any key can forget and prune. When a repository is managed by another tool or machine, set its **Mode** in the repo settings so that Backrest does not remove data it does not own.
+
+| | Managed (default) | Append-only | Read-only |
+|---|---|---|---|
+| Backup | ✅ | ✅ | ❌ |
+| Index snapshots, browse, restore, download, stats | ✅ | ✅ | ✅ (with `--no-lock`) |
+| Check | ✅ | ✅ | Manual only, after confirmation |
+| Forget (plan retention, repo forget policy, single snapshot) | ✅ | ❌ | ❌ |
+| Prune | ✅ | ❌ | ❌ |
+| Unlock, auto unlock | ✅ | ❌ | ❌ |
+| Auto initialize | ✅ | ✅ | ❌ |
+
+- **Append-only** matches restic rest-server's `--append-only` mode: Backrest adds backups but never removes data.
+- **Read-only** means Backrest writes nothing to the repository. Every restic command runs with `--no-lock`. The only exception is a check you start yourself: restic check takes an **exclusive lock**, which blocks other clients (for example their backups) until it finishes, so Backrest asks for confirmation first.
+
+::: warning
+Without a lock, nothing protects a browse or restore on a read-only repository from a concurrent prune by the repository's owner. The operation can then fail with missing-pack errors. Retry it; no data is damaged.
+:::
+
+Backrest refuses forbidden operations wherever they come from: schedules, hooks and API calls, not only the UI. Saving a restricted mode fails while the configuration still asks for something the mode forbids, and the error lists what to remove: plans with a retention policy (append-only), any plan (read-only), enabled prune, forget or check schedules, auto unlock and auto initialize. Selecting a restricted mode in the repo settings turns off the conflicting repo settings for you; plans must be changed separately.

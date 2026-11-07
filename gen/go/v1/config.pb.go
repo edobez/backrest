@@ -22,6 +22,65 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// RepoMode restricts the operations Backrest performs on a repo. restic has no
+// notion of repository ownership, so this is how Backrest is told that a repo
+// is managed elsewhere.
+type RepoMode int32
+
+const (
+	// Backrest fully manages the repo: backup, forget, prune, check, unlock.
+	RepoMode_REPO_MODE_MANAGED RepoMode = 0
+	// Backrest may add data but never remove it: no forget, prune or unlock.
+	// Matches restic rest-server's --append-only mode.
+	RepoMode_REPO_MODE_APPEND_ONLY RepoMode = 1
+	// Backrest writes nothing to the repo: every restic command runs with
+	// --no-lock, and no backup, forget, prune, unlock, auto-initialize or
+	// scheduled check runs. A check started manually by the user is the only
+	// exception; it takes an exclusive lock.
+	RepoMode_REPO_MODE_READ_ONLY RepoMode = 2
+)
+
+// Enum value maps for RepoMode.
+var (
+	RepoMode_name = map[int32]string{
+		0: "REPO_MODE_MANAGED",
+		1: "REPO_MODE_APPEND_ONLY",
+		2: "REPO_MODE_READ_ONLY",
+	}
+	RepoMode_value = map[string]int32{
+		"REPO_MODE_MANAGED":     0,
+		"REPO_MODE_APPEND_ONLY": 1,
+		"REPO_MODE_READ_ONLY":   2,
+	}
+)
+
+func (x RepoMode) Enum() *RepoMode {
+	p := new(RepoMode)
+	*p = x
+	return p
+}
+
+func (x RepoMode) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (RepoMode) Descriptor() protoreflect.EnumDescriptor {
+	return file_v1_config_proto_enumTypes[0].Descriptor()
+}
+
+func (RepoMode) Type() protoreflect.EnumType {
+	return &file_v1_config_proto_enumTypes[0]
+}
+
+func (x RepoMode) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use RepoMode.Descriptor instead.
+func (RepoMode) EnumDescriptor() ([]byte, []int) {
+	return file_v1_config_proto_rawDescGZIP(), []int{0}
+}
+
 type Multihost_Permission_Type int32
 
 const (
@@ -88,11 +147,11 @@ func (x Multihost_Permission_Type) String() string {
 }
 
 func (Multihost_Permission_Type) Descriptor() protoreflect.EnumDescriptor {
-	return file_v1_config_proto_enumTypes[0].Descriptor()
+	return file_v1_config_proto_enumTypes[1].Descriptor()
 }
 
 func (Multihost_Permission_Type) Type() protoreflect.EnumType {
-	return &file_v1_config_proto_enumTypes[0]
+	return &file_v1_config_proto_enumTypes[1]
 }
 
 func (x Multihost_Permission_Type) Number() protoreflect.EnumNumber {
@@ -140,11 +199,11 @@ func (x CommandPrefix_IONiceLevel) String() string {
 }
 
 func (CommandPrefix_IONiceLevel) Descriptor() protoreflect.EnumDescriptor {
-	return file_v1_config_proto_enumTypes[1].Descriptor()
+	return file_v1_config_proto_enumTypes[2].Descriptor()
 }
 
 func (CommandPrefix_IONiceLevel) Type() protoreflect.EnumType {
-	return &file_v1_config_proto_enumTypes[1]
+	return &file_v1_config_proto_enumTypes[2]
 }
 
 func (x CommandPrefix_IONiceLevel) Number() protoreflect.EnumNumber {
@@ -189,11 +248,11 @@ func (x CommandPrefix_CPUNiceLevel) String() string {
 }
 
 func (CommandPrefix_CPUNiceLevel) Descriptor() protoreflect.EnumDescriptor {
-	return file_v1_config_proto_enumTypes[2].Descriptor()
+	return file_v1_config_proto_enumTypes[3].Descriptor()
 }
 
 func (CommandPrefix_CPUNiceLevel) Type() protoreflect.EnumType {
-	return &file_v1_config_proto_enumTypes[2]
+	return &file_v1_config_proto_enumTypes[3]
 }
 
 func (x CommandPrefix_CPUNiceLevel) Number() protoreflect.EnumNumber {
@@ -246,11 +305,11 @@ func (x ForgetPolicy_GroupBy) String() string {
 }
 
 func (ForgetPolicy_GroupBy) Descriptor() protoreflect.EnumDescriptor {
-	return file_v1_config_proto_enumTypes[3].Descriptor()
+	return file_v1_config_proto_enumTypes[4].Descriptor()
 }
 
 func (ForgetPolicy_GroupBy) Type() protoreflect.EnumType {
-	return &file_v1_config_proto_enumTypes[3]
+	return &file_v1_config_proto_enumTypes[4]
 }
 
 func (x ForgetPolicy_GroupBy) Number() protoreflect.EnumNumber {
@@ -298,11 +357,11 @@ func (x Schedule_Clock) String() string {
 }
 
 func (Schedule_Clock) Descriptor() protoreflect.EnumDescriptor {
-	return file_v1_config_proto_enumTypes[4].Descriptor()
+	return file_v1_config_proto_enumTypes[5].Descriptor()
 }
 
 func (Schedule_Clock) Type() protoreflect.EnumType {
-	return &file_v1_config_proto_enumTypes[4]
+	return &file_v1_config_proto_enumTypes[5]
 }
 
 func (x Schedule_Clock) Number() protoreflect.EnumNumber {
@@ -392,11 +451,11 @@ func (x Hook_Condition) String() string {
 }
 
 func (Hook_Condition) Descriptor() protoreflect.EnumDescriptor {
-	return file_v1_config_proto_enumTypes[5].Descriptor()
+	return file_v1_config_proto_enumTypes[6].Descriptor()
 }
 
 func (Hook_Condition) Type() protoreflect.EnumType {
-	return &file_v1_config_proto_enumTypes[5]
+	return &file_v1_config_proto_enumTypes[6]
 }
 
 func (x Hook_Condition) Number() protoreflect.EnumNumber {
@@ -450,11 +509,11 @@ func (x Hook_OnError) String() string {
 }
 
 func (Hook_OnError) Descriptor() protoreflect.EnumDescriptor {
-	return file_v1_config_proto_enumTypes[6].Descriptor()
+	return file_v1_config_proto_enumTypes[7].Descriptor()
 }
 
 func (Hook_OnError) Type() protoreflect.EnumType {
-	return &file_v1_config_proto_enumTypes[6]
+	return &file_v1_config_proto_enumTypes[7]
 }
 
 func (x Hook_OnError) Number() protoreflect.EnumNumber {
@@ -499,11 +558,11 @@ func (x Hook_Webhook_Method) String() string {
 }
 
 func (Hook_Webhook_Method) Descriptor() protoreflect.EnumDescriptor {
-	return file_v1_config_proto_enumTypes[7].Descriptor()
+	return file_v1_config_proto_enumTypes[8].Descriptor()
 }
 
 func (Hook_Webhook_Method) Type() protoreflect.EnumType {
-	return &file_v1_config_proto_enumTypes[7]
+	return &file_v1_config_proto_enumTypes[8]
 }
 
 func (x Hook_Webhook_Method) Number() protoreflect.EnumNumber {
@@ -697,6 +756,7 @@ type Repo struct {
 	OriginInstanceId string                 `protobuf:"bytes,14,opt,name=origin_instance_id,json=originInstanceId,proto3" json:"origin_instance_id,omitempty"` // set when this repo was pushed from a remote instance; marks it as non-editable
 	ForgetPolicy     *ForgetPolicy          `protobuf:"bytes,15,opt,name=forget_policy,json=forgetPolicy,proto3" json:"forget_policy,omitempty"`               // optional repo-level forget policy. If set, overrides per-plan retention policies.
 	IndexPolicy      *IndexPolicy           `protobuf:"bytes,16,opt,name=index_policy,json=indexPolicy,proto3" json:"index_policy,omitempty"`                  // optional schedule for re-indexing the repo's snapshots, e.g. to pick up snapshots created by other clients.
+	Mode             RepoMode               `protobuf:"varint,17,opt,name=mode,proto3,enum=v1.RepoMode" json:"mode,omitempty"`                                 // what Backrest is allowed to do with the repo. Defaults to MANAGED.
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -841,6 +901,13 @@ func (x *Repo) GetIndexPolicy() *IndexPolicy {
 		return x.IndexPolicy
 	}
 	return nil
+}
+
+func (x *Repo) GetMode() RepoMode {
+	if x != nil {
+		return x.Mode
+	}
+	return RepoMode_REPO_MODE_MANAGED
 }
 
 type Plan struct {
@@ -2606,7 +2673,7 @@ const file_v1_config_proto_rawDesc = "" +
 	"\x1aPERMISSION_READ_OPERATIONS\x10\x01\x12\x1a\n" +
 	"\x16PERMISSION_READ_CONFIG\x10\x02\x12 \n" +
 	"\x1cPERMISSION_READ_WRITE_CONFIG\x10\x03\x12#\n" +
-	"\x1fPERMISSION_RECEIVE_SHARED_REPOS\x10\x04\"\xbd\x04\n" +
+	"\x1fPERMISSION_RECEIVE_SHARED_REPOS\x10\x04\"\xdf\x04\n" +
 	"\x04Repo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x10\n" +
 	"\x03uri\x18\x02 \x01(\tR\x03uri\x12\x12\n" +
@@ -2625,7 +2692,8 @@ const file_v1_config_proto_rawDesc = "" +
 	"\x06shared\x18\r \x01(\bR\x06shared\x12,\n" +
 	"\x12origin_instance_id\x18\x0e \x01(\tR\x10originInstanceId\x125\n" +
 	"\rforget_policy\x18\x0f \x01(\v2\x10.v1.ForgetPolicyR\fforgetPolicy\x122\n" +
-	"\findex_policy\x18\x10 \x01(\v2\x0f.v1.IndexPolicyR\vindexPolicy\"\xd9\x02\n" +
+	"\findex_policy\x18\x10 \x01(\v2\x0f.v1.IndexPolicyR\vindexPolicy\x12 \n" +
+	"\x04mode\x18\x11 \x01(\x0e2\f.v1.RepoModeR\x04mode\"\xd9\x02\n" +
 	"\x04Plan\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04repo\x18\x02 \x01(\tR\x04repo\x12\x14\n" +
@@ -2780,7 +2848,11 @@ const file_v1_config_proto_rawDesc = "" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12)\n" +
 	"\x0fpassword_bcrypt\x18\x02 \x01(\tH\x00R\x0epasswordBcryptB\n" +
 	"\n" +
-	"\bpasswordB,Z*github.com/garethgeorge/backrest/gen/go/v1b\x06proto3"
+	"\bpassword*U\n" +
+	"\bRepoMode\x12\x15\n" +
+	"\x11REPO_MODE_MANAGED\x10\x00\x12\x19\n" +
+	"\x15REPO_MODE_APPEND_ONLY\x10\x01\x12\x17\n" +
+	"\x13REPO_MODE_READ_ONLY\x10\x02B,Z*github.com/garethgeorge/backrest/gen/go/v1b\x06proto3"
 
 var (
 	file_v1_config_proto_rawDescOnce sync.Once
@@ -2794,93 +2866,95 @@ func file_v1_config_proto_rawDescGZIP() []byte {
 	return file_v1_config_proto_rawDescData
 }
 
-var file_v1_config_proto_enumTypes = make([]protoimpl.EnumInfo, 8)
+var file_v1_config_proto_enumTypes = make([]protoimpl.EnumInfo, 9)
 var file_v1_config_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_v1_config_proto_goTypes = []any{
-	(Multihost_Permission_Type)(0),             // 0: v1.Multihost.Permission.Type
-	(CommandPrefix_IONiceLevel)(0),             // 1: v1.CommandPrefix.IONiceLevel
-	(CommandPrefix_CPUNiceLevel)(0),            // 2: v1.CommandPrefix.CPUNiceLevel
-	(ForgetPolicy_GroupBy)(0),                  // 3: v1.ForgetPolicy.GroupBy
-	(Schedule_Clock)(0),                        // 4: v1.Schedule.Clock
-	(Hook_Condition)(0),                        // 5: v1.Hook.Condition
-	(Hook_OnError)(0),                          // 6: v1.Hook.OnError
-	(Hook_Webhook_Method)(0),                   // 7: v1.Hook.Webhook.Method
-	(*Config)(nil),                             // 8: v1.Config
-	(*Multihost)(nil),                          // 9: v1.Multihost
-	(*Repo)(nil),                               // 10: v1.Repo
-	(*Plan)(nil),                               // 11: v1.Plan
-	(*CommandPrefix)(nil),                      // 12: v1.CommandPrefix
-	(*RetentionPolicy)(nil),                    // 13: v1.RetentionPolicy
-	(*ForgetPolicy)(nil),                       // 14: v1.ForgetPolicy
-	(*PrunePolicy)(nil),                        // 15: v1.PrunePolicy
-	(*IndexPolicy)(nil),                        // 16: v1.IndexPolicy
-	(*CheckPolicy)(nil),                        // 17: v1.CheckPolicy
-	(*Schedule)(nil),                           // 18: v1.Schedule
-	(*Hook)(nil),                               // 19: v1.Hook
-	(*Auth)(nil),                               // 20: v1.Auth
-	(*User)(nil),                               // 21: v1.User
-	(*Multihost_Peer)(nil),                     // 22: v1.Multihost.Peer
-	(*Multihost_PairingToken)(nil),             // 23: v1.Multihost.PairingToken
-	(*Multihost_Permission)(nil),               // 24: v1.Multihost.Permission
-	(*RetentionPolicy_TimeBucketedCounts)(nil), // 25: v1.RetentionPolicy.TimeBucketedCounts
-	(*Hook_Command)(nil),                       // 26: v1.Hook.Command
-	(*Hook_Webhook)(nil),                       // 27: v1.Hook.Webhook
-	(*Hook_Discord)(nil),                       // 28: v1.Hook.Discord
-	(*Hook_Gotify)(nil),                        // 29: v1.Hook.Gotify
-	(*Hook_Slack)(nil),                         // 30: v1.Hook.Slack
-	(*Hook_Shoutrrr)(nil),                      // 31: v1.Hook.Shoutrrr
-	(*Hook_Healthchecks)(nil),                  // 32: v1.Hook.Healthchecks
-	(*Hook_Telegram)(nil),                      // 33: v1.Hook.Telegram
-	(*PrivateKey)(nil),                         // 34: v1.PrivateKey
+	(RepoMode)(0),                              // 0: v1.RepoMode
+	(Multihost_Permission_Type)(0),             // 1: v1.Multihost.Permission.Type
+	(CommandPrefix_IONiceLevel)(0),             // 2: v1.CommandPrefix.IONiceLevel
+	(CommandPrefix_CPUNiceLevel)(0),            // 3: v1.CommandPrefix.CPUNiceLevel
+	(ForgetPolicy_GroupBy)(0),                  // 4: v1.ForgetPolicy.GroupBy
+	(Schedule_Clock)(0),                        // 5: v1.Schedule.Clock
+	(Hook_Condition)(0),                        // 6: v1.Hook.Condition
+	(Hook_OnError)(0),                          // 7: v1.Hook.OnError
+	(Hook_Webhook_Method)(0),                   // 8: v1.Hook.Webhook.Method
+	(*Config)(nil),                             // 9: v1.Config
+	(*Multihost)(nil),                          // 10: v1.Multihost
+	(*Repo)(nil),                               // 11: v1.Repo
+	(*Plan)(nil),                               // 12: v1.Plan
+	(*CommandPrefix)(nil),                      // 13: v1.CommandPrefix
+	(*RetentionPolicy)(nil),                    // 14: v1.RetentionPolicy
+	(*ForgetPolicy)(nil),                       // 15: v1.ForgetPolicy
+	(*PrunePolicy)(nil),                        // 16: v1.PrunePolicy
+	(*IndexPolicy)(nil),                        // 17: v1.IndexPolicy
+	(*CheckPolicy)(nil),                        // 18: v1.CheckPolicy
+	(*Schedule)(nil),                           // 19: v1.Schedule
+	(*Hook)(nil),                               // 20: v1.Hook
+	(*Auth)(nil),                               // 21: v1.Auth
+	(*User)(nil),                               // 22: v1.User
+	(*Multihost_Peer)(nil),                     // 23: v1.Multihost.Peer
+	(*Multihost_PairingToken)(nil),             // 24: v1.Multihost.PairingToken
+	(*Multihost_Permission)(nil),               // 25: v1.Multihost.Permission
+	(*RetentionPolicy_TimeBucketedCounts)(nil), // 26: v1.RetentionPolicy.TimeBucketedCounts
+	(*Hook_Command)(nil),                       // 27: v1.Hook.Command
+	(*Hook_Webhook)(nil),                       // 28: v1.Hook.Webhook
+	(*Hook_Discord)(nil),                       // 29: v1.Hook.Discord
+	(*Hook_Gotify)(nil),                        // 30: v1.Hook.Gotify
+	(*Hook_Slack)(nil),                         // 31: v1.Hook.Slack
+	(*Hook_Shoutrrr)(nil),                      // 32: v1.Hook.Shoutrrr
+	(*Hook_Healthchecks)(nil),                  // 33: v1.Hook.Healthchecks
+	(*Hook_Telegram)(nil),                      // 34: v1.Hook.Telegram
+	(*PrivateKey)(nil),                         // 35: v1.PrivateKey
 }
 var file_v1_config_proto_depIdxs = []int32{
-	10, // 0: v1.Config.repos:type_name -> v1.Repo
-	11, // 1: v1.Config.plans:type_name -> v1.Plan
-	20, // 2: v1.Config.auth:type_name -> v1.Auth
-	9,  // 3: v1.Config.multihost:type_name -> v1.Multihost
-	34, // 4: v1.Multihost.identity:type_name -> v1.PrivateKey
-	22, // 5: v1.Multihost.known_hosts:type_name -> v1.Multihost.Peer
-	22, // 6: v1.Multihost.authorized_clients:type_name -> v1.Multihost.Peer
-	23, // 7: v1.Multihost.pairing_tokens:type_name -> v1.Multihost.PairingToken
-	15, // 8: v1.Repo.prune_policy:type_name -> v1.PrunePolicy
-	17, // 9: v1.Repo.check_policy:type_name -> v1.CheckPolicy
-	19, // 10: v1.Repo.hooks:type_name -> v1.Hook
-	12, // 11: v1.Repo.command_prefix:type_name -> v1.CommandPrefix
-	14, // 12: v1.Repo.forget_policy:type_name -> v1.ForgetPolicy
-	16, // 13: v1.Repo.index_policy:type_name -> v1.IndexPolicy
-	18, // 14: v1.Plan.schedule:type_name -> v1.Schedule
-	13, // 15: v1.Plan.retention:type_name -> v1.RetentionPolicy
-	19, // 16: v1.Plan.hooks:type_name -> v1.Hook
-	1,  // 17: v1.CommandPrefix.io_nice:type_name -> v1.CommandPrefix.IONiceLevel
-	2,  // 18: v1.CommandPrefix.cpu_nice:type_name -> v1.CommandPrefix.CPUNiceLevel
-	25, // 19: v1.RetentionPolicy.policy_time_bucketed:type_name -> v1.RetentionPolicy.TimeBucketedCounts
-	18, // 20: v1.ForgetPolicy.schedule:type_name -> v1.Schedule
-	13, // 21: v1.ForgetPolicy.retention:type_name -> v1.RetentionPolicy
-	3,  // 22: v1.ForgetPolicy.group_by:type_name -> v1.ForgetPolicy.GroupBy
-	18, // 23: v1.PrunePolicy.schedule:type_name -> v1.Schedule
-	18, // 24: v1.IndexPolicy.schedule:type_name -> v1.Schedule
-	18, // 25: v1.CheckPolicy.schedule:type_name -> v1.Schedule
-	4,  // 26: v1.Schedule.clock:type_name -> v1.Schedule.Clock
-	5,  // 27: v1.Hook.conditions:type_name -> v1.Hook.Condition
-	6,  // 28: v1.Hook.on_error:type_name -> v1.Hook.OnError
-	26, // 29: v1.Hook.action_command:type_name -> v1.Hook.Command
-	27, // 30: v1.Hook.action_webhook:type_name -> v1.Hook.Webhook
-	28, // 31: v1.Hook.action_discord:type_name -> v1.Hook.Discord
-	29, // 32: v1.Hook.action_gotify:type_name -> v1.Hook.Gotify
-	30, // 33: v1.Hook.action_slack:type_name -> v1.Hook.Slack
-	31, // 34: v1.Hook.action_shoutrrr:type_name -> v1.Hook.Shoutrrr
-	32, // 35: v1.Hook.action_healthchecks:type_name -> v1.Hook.Healthchecks
-	33, // 36: v1.Hook.action_telegram:type_name -> v1.Hook.Telegram
-	21, // 37: v1.Auth.users:type_name -> v1.User
-	24, // 38: v1.Multihost.Peer.permissions:type_name -> v1.Multihost.Permission
-	24, // 39: v1.Multihost.PairingToken.permissions:type_name -> v1.Multihost.Permission
-	0,  // 40: v1.Multihost.Permission.type:type_name -> v1.Multihost.Permission.Type
-	7,  // 41: v1.Hook.Webhook.method:type_name -> v1.Hook.Webhook.Method
-	42, // [42:42] is the sub-list for method output_type
-	42, // [42:42] is the sub-list for method input_type
-	42, // [42:42] is the sub-list for extension type_name
-	42, // [42:42] is the sub-list for extension extendee
-	0,  // [0:42] is the sub-list for field type_name
+	11, // 0: v1.Config.repos:type_name -> v1.Repo
+	12, // 1: v1.Config.plans:type_name -> v1.Plan
+	21, // 2: v1.Config.auth:type_name -> v1.Auth
+	10, // 3: v1.Config.multihost:type_name -> v1.Multihost
+	35, // 4: v1.Multihost.identity:type_name -> v1.PrivateKey
+	23, // 5: v1.Multihost.known_hosts:type_name -> v1.Multihost.Peer
+	23, // 6: v1.Multihost.authorized_clients:type_name -> v1.Multihost.Peer
+	24, // 7: v1.Multihost.pairing_tokens:type_name -> v1.Multihost.PairingToken
+	16, // 8: v1.Repo.prune_policy:type_name -> v1.PrunePolicy
+	18, // 9: v1.Repo.check_policy:type_name -> v1.CheckPolicy
+	20, // 10: v1.Repo.hooks:type_name -> v1.Hook
+	13, // 11: v1.Repo.command_prefix:type_name -> v1.CommandPrefix
+	15, // 12: v1.Repo.forget_policy:type_name -> v1.ForgetPolicy
+	17, // 13: v1.Repo.index_policy:type_name -> v1.IndexPolicy
+	0,  // 14: v1.Repo.mode:type_name -> v1.RepoMode
+	19, // 15: v1.Plan.schedule:type_name -> v1.Schedule
+	14, // 16: v1.Plan.retention:type_name -> v1.RetentionPolicy
+	20, // 17: v1.Plan.hooks:type_name -> v1.Hook
+	2,  // 18: v1.CommandPrefix.io_nice:type_name -> v1.CommandPrefix.IONiceLevel
+	3,  // 19: v1.CommandPrefix.cpu_nice:type_name -> v1.CommandPrefix.CPUNiceLevel
+	26, // 20: v1.RetentionPolicy.policy_time_bucketed:type_name -> v1.RetentionPolicy.TimeBucketedCounts
+	19, // 21: v1.ForgetPolicy.schedule:type_name -> v1.Schedule
+	14, // 22: v1.ForgetPolicy.retention:type_name -> v1.RetentionPolicy
+	4,  // 23: v1.ForgetPolicy.group_by:type_name -> v1.ForgetPolicy.GroupBy
+	19, // 24: v1.PrunePolicy.schedule:type_name -> v1.Schedule
+	19, // 25: v1.IndexPolicy.schedule:type_name -> v1.Schedule
+	19, // 26: v1.CheckPolicy.schedule:type_name -> v1.Schedule
+	5,  // 27: v1.Schedule.clock:type_name -> v1.Schedule.Clock
+	6,  // 28: v1.Hook.conditions:type_name -> v1.Hook.Condition
+	7,  // 29: v1.Hook.on_error:type_name -> v1.Hook.OnError
+	27, // 30: v1.Hook.action_command:type_name -> v1.Hook.Command
+	28, // 31: v1.Hook.action_webhook:type_name -> v1.Hook.Webhook
+	29, // 32: v1.Hook.action_discord:type_name -> v1.Hook.Discord
+	30, // 33: v1.Hook.action_gotify:type_name -> v1.Hook.Gotify
+	31, // 34: v1.Hook.action_slack:type_name -> v1.Hook.Slack
+	32, // 35: v1.Hook.action_shoutrrr:type_name -> v1.Hook.Shoutrrr
+	33, // 36: v1.Hook.action_healthchecks:type_name -> v1.Hook.Healthchecks
+	34, // 37: v1.Hook.action_telegram:type_name -> v1.Hook.Telegram
+	22, // 38: v1.Auth.users:type_name -> v1.User
+	25, // 39: v1.Multihost.Peer.permissions:type_name -> v1.Multihost.Permission
+	25, // 40: v1.Multihost.PairingToken.permissions:type_name -> v1.Multihost.Permission
+	1,  // 41: v1.Multihost.Permission.type:type_name -> v1.Multihost.Permission.Type
+	8,  // 42: v1.Hook.Webhook.method:type_name -> v1.Hook.Webhook.Method
+	43, // [43:43] is the sub-list for method output_type
+	43, // [43:43] is the sub-list for method input_type
+	43, // [43:43] is the sub-list for extension type_name
+	43, // [43:43] is the sub-list for extension extendee
+	0,  // [0:43] is the sub-list for field type_name
 }
 
 func init() { file_v1_config_proto_init() }
@@ -2922,7 +2996,7 @@ func file_v1_config_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_config_proto_rawDesc), len(file_v1_config_proto_rawDesc)),
-			NumEnums:      8,
+			NumEnums:      9,
 			NumMessages:   26,
 			NumExtensions: 0,
 			NumServices:   0,

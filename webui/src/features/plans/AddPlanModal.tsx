@@ -22,6 +22,7 @@ import { useShowModal } from "../../components/common/ModalManager";
 import {
   ConfigSchema,
   PlanSchema,
+  RepoMode,
   RetentionPolicySchema,
   Schedule_Clock,
   type Plan,
@@ -240,7 +241,10 @@ export const AddPlanModal = ({
     }
   };
 
-  const allRepos = config?.repos || [];
+  // Backrest never backs up into a READ_ONLY repo, so it cannot be a plan target.
+  const allRepos = (config?.repos || []).filter(
+    (r) => r.mode !== RepoMode.READ_ONLY || r.id === template?.repo,
+  );
   const localRepos = allRepos.filter((r) => !r.originInstanceId);
   const remoteRepos = allRepos.filter((r) => !!r.originInstanceId);
   const repoOptions = createListCollection({

@@ -11,6 +11,7 @@ import (
 	"github.com/garethgeorge/backrest/internal/oplog"
 	"github.com/garethgeorge/backrest/internal/orchestrator/repo"
 	"github.com/garethgeorge/backrest/internal/protoutil"
+	"github.com/garethgeorge/backrest/internal/repomode"
 	"github.com/garethgeorge/backrest/pkg/restic"
 	"github.com/hashicorp/go-multierror"
 	"go.uber.org/zap"
@@ -103,7 +104,7 @@ func (t *ScheduledForgetTask) Next(now time.Time, runner TaskRunner) (ScheduledT
 		return ScheduledTask{}, fmt.Errorf("get repo %v: %w", t.RepoID(), err)
 	}
 
-	if repoProto.GetForgetPolicy().GetSchedule() == nil {
+	if repoProto.GetForgetPolicy().GetSchedule() == nil || !repomode.Allows(repoProto.GetMode(), repomode.ActionForget) {
 		return NeverScheduledTask, nil
 	}
 
@@ -189,6 +190,10 @@ func forgetHelper(ctx context.Context, st ScheduledTask, runner TaskRunner, poli
 
 	notifyError := func(err error) error {
 		return NotifyError(ctx, runner, t.Name(), err, v1.Hook_CONDITION_FORGET_ERROR)
+	}
+
+	if err := checkRepoMode(runner, t.RepoID(), repomode.ActionForget); err != nil {
+		return notifyError(err)
 	}
 
 	r, err := runner.GetRepoOrchestrator(t.RepoID())

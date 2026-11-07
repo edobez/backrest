@@ -115,6 +115,23 @@ message Repo {
   string origin_instance_id = 14 [json_name="originInstanceId"]; // set when this repo was pushed from a remote instance; marks it as non-editable
   ForgetPolicy forget_policy = 15 [json_name="forgetPolicy"]; // optional repo-level forget policy. If set, overrides per-plan retention policies.
   IndexPolicy index_policy = 16 [json_name="indexPolicy"]; // optional schedule for re-indexing the repo's snapshots, e.g. to pick up snapshots created by other clients.
+  RepoMode mode = 17 [json_name="mode"]; // what Backrest is allowed to do with the repo. Defaults to MANAGED.
+}
+
+// RepoMode restricts the operations Backrest performs on a repo. restic has no
+// notion of repository ownership, so this is how Backrest is told that a repo
+// is managed elsewhere.
+enum RepoMode {
+  // Backrest fully manages the repo: backup, forget, prune, check, unlock.
+  REPO_MODE_MANAGED = 0;
+  // Backrest may add data but never remove it: no forget, prune or unlock.
+  // Matches restic rest-server's --append-only mode.
+  REPO_MODE_APPEND_ONLY = 1;
+  // Backrest writes nothing to the repo: every restic command runs with
+  // --no-lock, and no backup, forget, prune, unlock, auto-initialize or
+  // scheduled check runs. A check started manually by the user is the only
+  // exception; it takes an exclusive lock.
+  REPO_MODE_READ_ONLY = 2;
 }
 
 message Plan {

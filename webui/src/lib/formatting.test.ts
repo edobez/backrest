@@ -304,4 +304,13 @@ describe("date format preference", () => {
       hourCycle: "auto",
     });
   });
+
+  it("formats with an explicit preference without applying it", () => {
+    setDateFormatPreference({ style: "browser", hourCycle: "auto" });
+    const d = new Date(2026, 10, 6, 14, 30);
+    expect(formatTime(d, { style: "iso", hourCycle: "auto" })).toBe(
+      "2026-11-06 14:30",
+    );
+    expect(getDateFormatPreference().style).toBe("browser");
+  });
 });

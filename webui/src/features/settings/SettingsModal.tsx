@@ -47,7 +47,13 @@ import {
 } from "../../components/ui/select";
 import { useConfig } from "../../app/provider";
 import { useUserPreferences } from "../../lib/userPreferences";
-import { formatTime, useDateFormat } from "../../lib/formatting";
+import {
+  DateFormatPreference,
+  formatTime,
+  getDateFormatPreference,
+  setDateFormatPreference,
+  useDateFormat,
+} from "../../lib/formatting";
 import {
   TwoPaneModal,
   TwoPaneSection,
@@ -104,7 +110,18 @@ export const SettingsModal = () => {
   const [initialFormData, setInitialFormData] = useState(() =>
     JSON.stringify(formData),
   );
-  const dirty = JSON.stringify(formData) !== initialFormData;
+  const configDirty = JSON.stringify(formData) !== initialFormData;
+
+  // The date format is a browser-local preference, but it follows the form's
+  // save/discard flow: edits stay in a draft until Save is pressed.
+  const [savedDateFormat, setSavedDateFormat] = useState<DateFormatPreference>(
+    getDateFormatPreference,
+  );
+  const [dateFormatDraft, setDateFormatDraft] =
+    useState<DateFormatPreference>(savedDateFormat);
+  const dateFormatDirty =
+    JSON.stringify(dateFormatDraft) !== JSON.stringify(savedDateFormat);
+  const dirty = configDirty || dateFormatDirty;
 
   const ttlOptions = createListCollection({
     items: [
@@ -194,9 +211,23 @@ export const SettingsModal = () => {
     return curr;
   };
 
+  const applyDateFormat = () => {
+    setDateFormatPreference(dateFormatDraft);
+    const applied = getDateFormatPreference();
+    setSavedDateFormat(applied);
+    setDateFormatDraft(applied);
+  };
+
   const handleOk = async () => {
     setConfirmLoading(true);
     try {
+      if (!configDirty) {
+        // Only local preferences changed: nothing to send to the server.
+        applyDateFormat();
+        alerts.success(m.settings_success_updated());
+        return;
+      }
+
       const workingData = JSON.parse(JSON.stringify(formData));
 
       if (workingData.auth?.users) {
@@ -229,6 +260,7 @@ export const SettingsModal = () => {
 
       setConfig(await backrestService.setConfig(newConfig));
       setInitialFormData(JSON.stringify(formData));
+      applyDateFormat();
       setReloadOnCancel(true);
       alerts.success(m.settings_success_updated());
     } catch (e: any) {
@@ -277,10 +309,11 @@ export const SettingsModal = () => {
       headerIcon={<FiSettings size={14} />}
       sections={sections}
       dirty={dirty}
-      dirtyCount={1}
+      dirtyCount={(configDirty ? 1 : 0) + (dateFormatDirty ? 1 : 0)}
       onSave={handleOk}
       onDiscard={() => {
         setFormData(JSON.parse(initialFormData));
+        setDateFormatDraft(savedDateFormat);
       }}
       saving={confirmLoading}
       saveTestId="settings-submit"
@@ -321,7 +354,12 @@ export const SettingsModal = () => {
               />
             </Field>
 
-            <UserSettingsForm />
+            <UserSettingsForm
+              dateFormat={dateFormatDraft}
+              onDateFormatChange={(update) =>
+                setDateFormatDraft((prev) => ({ ...prev, ...update }))
+              }
+            />
           </Stack>
         </SectionCard>
       </TwoPaneSection>
@@ -1213,14 +1251,15 @@ const dateStyleLocales = [
   "zh-CN",
 ];
 
-const UserSettingsForm = () => {
-  const {
-    preferences,
-    updatePreference,
-    availableLanguages,
-    dateFormat,
-    updateDateFormat,
-  } = useUserPreferences();
+const UserSettingsForm = ({
+  dateFormat,
+  onDateFormatChange: updateDateFormat,
+}: {
+  dateFormat: DateFormatPreference;
+  onDateFormatChange: (update: Partial<DateFormatPreference>) => void;
+}) => {
+  const { preferences, updatePreference, availableLanguages } =
+    useUserPreferences();
 
   const languageOptions = createListCollection({
     items: availableLanguages.map((tag: string) => ({
@@ -1365,7 +1404,9 @@ const UserSettingsForm = () => {
       )}
 
       <Text fontSize="sm" color="fg.muted">
-        {m.settings_date_format_preview({ time: formatTime(Date.now()) })}
+        {m.settings_date_format_preview({
+          time: formatTime(Date.now(), dateFormat),
+        })}
       </Text>
     </Stack>
   );

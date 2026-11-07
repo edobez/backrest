@@ -1,10 +1,5 @@
 import { useState, useEffect } from "react";
 import {
-  DateFormatPreference,
-  setDateFormatPreference,
-  useDateFormatPreference,
-} from "./formatting";
-import {
   getLocale,
   setLocale,
   locales,
@@ -51,14 +46,9 @@ export const useUserPreferences = () => {
     }
   }, []);
 
-  const dateFormat = useDateFormatPreference();
-
   return {
     preferences,
     updatePreference,
-    dateFormat,
-    updateDateFormat: (update: Partial<DateFormatPreference>) =>
-      setDateFormatPreference({ ...dateFormat, ...update }),
     availableLanguages: locales,
   };
 };

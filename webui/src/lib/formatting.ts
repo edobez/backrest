@@ -142,8 +142,11 @@ const buildFormatter = (
   }
 };
 
-const getFormatter = (kind: FormatKind): Intl.DateTimeFormat => {
-  const { style, locale, hourCycle } = currentDateFormat;
+const getFormatter = (
+  kind: FormatKind,
+  pref: DateFormatPreference,
+): Intl.DateTimeFormat => {
+  const { style, locale, hourCycle } = pref;
   const loc = style === "locale" ? locale : undefined;
   const key = `${kind}|${loc ?? ""}|${hourCycle}`;
   let f = formatterCache.get(key);
@@ -168,13 +171,18 @@ const isoDate = (d: Date) =>
   `${pad(d.getFullYear(), 4)}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
 const timezoneOffsetMs = new Date().getTimezoneOffset() * 60 * 1000;
-// formatTime formats a date and time according to the user's date format preference.
-export const formatTime = (time: number | string | Date) => {
+// formatTime formats a date and time according to the user's date format
+// preference. Pass pref to format with a preference that is not applied yet
+// (e.g. a preview of unsaved settings).
+export const formatTime = (
+  time: number | string | Date,
+  pref: DateFormatPreference = currentDateFormat,
+) => {
   const d = toDate(time);
-  if (currentDateFormat.style === "iso") {
+  if (pref.style === "iso") {
     return `${isoDate(d)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
-  return getFormatter("time").format(d);
+  return getFormatter("time", pref).format(d);
 };
 
 export const localISOTime = (time: number | string | Date) => {
@@ -192,13 +200,13 @@ export const localISOTime = (time: number | string | Date) => {
 export const formatDate = (time: number | string | Date) => {
   const d = toDate(time);
   if (currentDateFormat.style === "iso") return isoDate(d);
-  return getFormatter("date").format(d);
+  return getFormatter("date", currentDateFormat).format(d);
 };
 
 export const formatMonth = (time: number | string | Date) => {
   const d = toDate(time);
   if (currentDateFormat.style === "iso") return isoDate(d).slice(0, 7);
-  return getFormatter("month").format(d);
+  return getFormatter("month", currentDateFormat).format(d);
 };
 
 const durationSteps = [1000, 60, 60, 24, Number.MAX_VALUE];
